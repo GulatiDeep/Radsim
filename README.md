@@ -1,2 +1,0 @@
-# Radsim
-Radar Vectoring Simulator
