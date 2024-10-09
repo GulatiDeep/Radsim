@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="container">
+
+
+        <div id="radarContainer">
+
+            <div id="radarScope">
+                <div id="panContainer">
+                    <div class="range-rings" id="rangeRingsContainer"></div>
+                    <div id="runway" class="runway"></div>
+                    <div id="directionLine" class="direction-line"></div>
+                </div>
+                <button id="pauseButton" class="control-button"
+                    style="position: absolute; top: 10px; right: 10px;">Pause</button>
+            </div>
+
+            <div class="menu-bar">
+                <button class="control-button" id="home">Home</button>
+                <button class="control-button" id="zoomOut"> - </button>
+                <input type="range" class="zoom-slider" id="zoomSlider" min="1" max="80" step="1" value="1">
+                <button class="control-button" id="zoomIn"> + </button>
+                <div class="dropdown">
+                    <select id="runwaySelector">
+                        <!-- Options from 01 to 36 -->
+                        <option value="19">01/19</option>
+                        <option value="20">02/20</option>
+                        <option value="21">03/21</option>
+                        <option value="22">04/22</option>
+                        <option value="23">05/23</option>
+                        <option value="24">06/24</option>
+                        <option value="25">07/25</option>
+                        <option value="26">08/26</option>
+                        <option value="27">09/27</option>
+                        <option value="28">10/28</option>
+                        <option value="29">11/29</option>
+                        <option value="30">12/30</option>
+                        <option value="31">13/31</option>
+                        <option value="32">14/32</option>
+                        <option value="33">15/33</option>
+                        <option value="34">16/34</option>
+                        <option value="35">17/35</option>
+                        <option value="36">18/36</option>
+                    </select>
+                </div>
+                <button id="changeRunway" class="control-button">Runway</button>
+                <button id="SRAdistanceMarkers" class="control-button">SRA</button>
+                <button id="historyDots" class="control-button">History</button>
+                <button id="label" class="control-button">Label</button>
+                <div id="statusBar" class="status-bar"></div> <!-- Status bar element -->
+            </div>
+
+
+
+
+        </div>
+
+        <div id="controlPanel">
+            <div>
+                <center><b><u>Aircraft Control Panel</u></b></center>
+            </div>
+
+        </div>
+
+
+
+        <!-- Aircraft Creation Dialog -->
+        <div id="aircraftDialog" class="dialog" style="display:none;">
+            <div class="dialog-content">
+
+                <!-- Aircraft Information Fieldset -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Aircraft Creation</legend>
+
+                    <!-- Callsign input -->
+                    <label for="callsignInput">Callsign:</label>
+                    <input type="text" id="callsignInput" required>
+                    <!-- Validate callsign when focus is lost -->
+
+                    <!-- Heading input -->
+                    <label for="headingInput">Heading (001-360):</label>
+                    <input type="number" id="headingInput" min="001" max="360" value="001" required>
+
+                    <!-- Altitude input -->
+                    <label for="altitudeInput">Altitude (in 100s of feet):</label>
+                    <input type="number" id="altitudeInput" value="100" required>
+
+                    <!-- Speed input -->
+                    <label for="speedInput">Speed (knots):</label>
+                    <input type="number" id="speedInput" value="300" required>
+
+                    <!-- SSR Input Field for Single Aircraft -->
+                    <div id="singleSSRInput" style="display: block;">
+                        <label for="ssrInput">Squawk (Single Aircraft):</label>
+                        <input type="number" id="ssrInput" min="0000" max="7777" value="0000" required>
+                    </div>
+
+                    <!-- SSR Input Fields for Formations -->
+                    <div id="formationSSRInputs" style="display: none;">
+                        <label for="formationSSRInput">Squawk Codes (Formation):</label>
+                        <div id="ssrFormationContainer">
+                            <!-- SSR input fields will be generated here dynamically -->
+                        </div>
+                    </div>
+
+                </fieldset>
+
+                <!-- Formation Fieldset -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Formation Size</legend>
+
+                    <!-- Radio buttons for formation size -->
+                    <div id="formationSizeContainer">
+                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="1" checked>
+                            1</label>
+                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="2"> 2</label>
+                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="3"> 3</label>
+                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="4"> 4</label>
+                    </div>
+                </fieldset>
+
+
+                <!-- Create and Cancel buttons -->
+                <div>
+                    <button id="createAircraftButton" class="control-button">Create</button>
+                    <button id="cancelAircraftButton" class="control-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+    <!-- Custom Context Menu -->
+    <ul id="radarContextMenu" class="context-menu" style="display: none;">
+        <li id="createAircraftContextMenu">Create Aircraft</li>
+    </ul>
+
+
+    <script src="radar.js"></script>
+    <script src="functions.js"></script>
+    <script src="aircraftBlipClass.js"></script>
+    <script src="aircraft.js"></script>
+    <script src="eventListeners.js"></script>
+    <script src="commands.js"></script>
+</body>
+
+</html>
