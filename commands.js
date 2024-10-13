@@ -9,18 +9,18 @@ function processCommand(formationSize, blip) {
     const ssrMatch = command.match(/^SSR([0-7]{4})$/);
 
     const isFirstInFormation = formationSize > 1 && blip.callsign.endsWith("1");
-    
+
     let shouldPropagateCommands = true;
-    
+
     // Check if the checkbox is unchecked, meaning commands should be propagated
-    
+
     if (isFirstInFormation) {
         const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
         if (checkbox) {
             shouldPropagateCommands = !checkbox.checked;
         }
     }
-    
+
     // Handle heading command
     if (headingMatch) {
         const direction = headingMatch[1];
@@ -53,7 +53,7 @@ function processCommand(formationSize, blip) {
 
         const speedElement = document.getElementById(`speed_${blip.callsign}`);
         //if (speedElement) {
-           // speedElement.textContent = `N${blip.speed}`;  // Update speed in control box
+        // speedElement.textContent = `N${blip.speed}`;  // Update speed in control box
         //}
 
         //blip.updateLabelInfo();  // Update label with new speed
@@ -67,7 +67,7 @@ function processCommand(formationSize, blip) {
 
         const altitudeElement = document.getElementById(`altitude_${blip.callsign}`);
         //if (altitudeElement) {
-           // altitudeElement.textContent = `${blip.targetAltitude / 100}`;  // Update altitude in control box
+        // altitudeElement.textContent = `${blip.targetAltitude / 100}`;  // Update altitude in control box
         //}
     }
 
@@ -134,7 +134,9 @@ function processCommand(formationSize, blip) {
 
     // Update last command display
     const lastCommandDisplay = document.getElementById(`lastCommand_${blip.callsign}`);
-    lastCommandDisplay.textContent = `${command}`;
+    if (lastCommandDisplay) {
+        lastCommandDisplay.textContent = `${command}`;
+    }
 
     // Command propagation to other aircraft in the formation
     if (isFirstInFormation && shouldPropagateCommands) {
@@ -146,7 +148,7 @@ function processCommand(formationSize, blip) {
 
 function propagateCommandToFormation(firstBlip, command) {
     const baseCallsign = getBaseCallsign(firstBlip.callsign);
-    
+
     // Loop through all aircraft in the formation except the first
     for (let i = 2; i <= formationSize; i++) {
         const currentCallsign = `${baseCallsign}${i}`;
@@ -155,7 +157,7 @@ function propagateCommandToFormation(firstBlip, command) {
         if (currentBlip) {
             // Update each blip with the same command as the first
             processCommandForBlip(currentBlip, command);
-        } 
+        }
     }
 }
 
@@ -200,7 +202,7 @@ function processCommandForBlip(blip, command) {
 
         const speedElement = document.getElementById(`speed_${blip.callsign}`);
         //if (speedElement) {
-           // speedElement.textContent = `N${blip.speed}`;  // Update speed in control box
+        // speedElement.textContent = `N${blip.speed}`;  // Update speed in control box
         //}
 
         //blip.updateLabelInfo();  // Update label with new speed
@@ -214,7 +216,7 @@ function processCommandForBlip(blip, command) {
 
         const altitudeElement = document.getElementById(`altitude_${blip.callsign}`);
         //if (altitudeElement) {
-           // altitudeElement.textContent = `${blip.targetAltitude / 100}`;  // Update altitude in control box
+        // altitudeElement.textContent = `${blip.targetAltitude / 100}`;  // Update altitude in control box
         //}
     }
 
@@ -281,5 +283,7 @@ function processCommandForBlip(blip, command) {
 
     // Update last command display
     const lastCommandDisplay = document.getElementById(`lastCommand_${blip.callsign}`);
-    lastCommandDisplay.textContent = `${command}`;
+    if (lastCommandDisplay) {
+        lastCommandDisplay.textContent = `${command}`;
+    }
 }
