@@ -384,7 +384,6 @@ function smoothZoom(targetZoomLevel) {
 }
 
 
-//Calculate distance and bearing of the mouse pointer from center of the radar scope
 // Calculate distance and bearing of the mouse pointer from center of the radar scope
 function getDistanceAndBearing(x, y) {
     // Center of the radar scope (before panning)
@@ -460,6 +459,71 @@ createDisplayElement();
 
 
 
+//******************Functions related to radar scope******************//
+// Update the radar center on pan or zoom
+function updateRadarCenter() {
+    radarCenter.x = radarScope.offsetWidth / 2;
+    radarCenter.y = radarScope.offsetHeight / 2;
+}
+
+// Handle radar panning
+function panRadar(dx, dy) {
+    // Code to pan the radar
+    panContainer.style.transform = `translate(${dx}px, ${dy}px)`;
+    updateRadarCenter(); // Update center after panning
+}
+
+// Function to pause or resume the exercise
+function togglePause() {
+    const pauseButton = document.getElementById('pauseButton');
+    const rangeRingsContainer = document.querySelector('.range-rings');
+    isPaused = !isPaused;
+
+    if (isPaused) {
+        pauseButton.textContent = 'Resume';
+        updateStatusBar('Exercise paused.');
+        disableControlPanel();
+
+        rangeRingsContainer.style.animationPlayState = 'paused'; // Stop radar rings rotation
+    } else {
+        pauseButton.textContent = 'Pause';
+        updateStatusBar('Exercise resumed.');
+        enableControlPanel();
+
+        rangeRingsContainer.style.animationPlayState = 'running'; // Resume radar rings rotation
+
+        moveAircraftBlips(); // Resume aircraft movements
+    }
+}
+
+// Function to disable the control panel inputs while paused
+function disableControlPanel() {
+    const controlPanel = document.getElementById('controlPanel');
+    controlPanel.classList.add('disabled-panel');  // Disable interactions
+}
+
+// Function to enable the control panel inputs while resumed
+function enableControlPanel() {
+    const controlPanel = document.getElementById('controlPanel');
+    controlPanel.classList.remove('disabled-panel');  // Enable interactions
+}
+
+
+// Calculate mouse position based on radar's original center and panned position
+function calculatePosition(clientX, clientY) {
+    const rect = radarScope.getBoundingClientRect();
+
+    // Get current pan offsets (dx, dy) from the panContainer
+    const panMatrix = new WebKitCSSMatrix(window.getComputedStyle(panContainer).transform);
+    const panX = panMatrix.m41;
+    const panY = panMatrix.m42;
+
+    // Calculate relative positions considering the panning
+    const relativeX = (clientX - rect.left - radarCenter.x - panX) / zoomLevel;
+    const relativeY = (radarCenter.y - (clientY - rect.top - panY)) / zoomLevel;
+
+    return { x: relativeX, y: relativeY };
+}
 
 
 //radar.js script file ends here

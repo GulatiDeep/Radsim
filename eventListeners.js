@@ -73,7 +73,7 @@ document.querySelectorAll('input[name="formationSize"]').forEach(radio => {
         //Check whether the entered callsign is string or a number
         if (!isValidFormationCallsign) {
             callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
-            alert("Please enter a Formation callsign before selecting the formation size.");
+            alert("Formation callsign can't contain numbers or special characters.");
             document.querySelector('input[name="formationSize"][value="1"]').checked = true;  // Reset to single aircraft
             return;
         } else {

@@ -1,74 +1,6 @@
 //File containing all the functions
 
 
-//Functions related to radar scope
-// Update the radar center on pan or zoom
-function updateRadarCenter() {
-    radarCenter.x = radarScope.offsetWidth / 2;
-    radarCenter.y = radarScope.offsetHeight / 2;
-}
-
-// Handle radar panning
-function panRadar(dx, dy) {
-    // Code to pan the radar
-    panContainer.style.transform = `translate(${dx}px, ${dy}px)`;
-    updateRadarCenter(); // Update center after panning
-}
-
-// Function to pause or resume the exercise
-function togglePause() {
-    const pauseButton = document.getElementById('pauseButton');
-    const rangeRingsContainer = document.querySelector('.range-rings');
-    isPaused = !isPaused;
-
-    if (isPaused) {
-        pauseButton.textContent = 'Resume';
-        updateStatusBar('Exercise paused.');
-        disableControlPanel();
-
-        rangeRingsContainer.style.animationPlayState = 'paused'; // Stop radar rings rotation
-    } else {
-        pauseButton.textContent = 'Pause';
-        updateStatusBar('Exercise resumed.');
-        enableControlPanel();
-
-        rangeRingsContainer.style.animationPlayState = 'running'; // Resume radar rings rotation
-
-        moveAircraftBlips(); // Resume aircraft movements
-    }
-}
-
-// Function to disable the control panel inputs while paused
-function disableControlPanel() {
-    const controlPanel = document.getElementById('controlPanel');
-    controlPanel.classList.add('disabled-panel');  // Disable interactions
-}
-
-// Function to enable the control panel inputs while resumed
-function enableControlPanel() {
-    const controlPanel = document.getElementById('controlPanel');
-    controlPanel.classList.remove('disabled-panel');  // Enable interactions
-}
-
-
-// Calculate mouse position based on radar's original center and panned position
-function calculatePosition(clientX, clientY) {
-    const rect = radarScope.getBoundingClientRect();
-
-    // Get current pan offsets (dx, dy) from the panContainer
-    const panMatrix = new WebKitCSSMatrix(window.getComputedStyle(panContainer).transform);
-    const panX = panMatrix.m41;
-    const panY = panMatrix.m42;
-
-    // Calculate relative positions considering the panning
-    const relativeX = (clientX - rect.left - radarCenter.x - panX) / zoomLevel;
-    const relativeY = (radarCenter.y - (clientY - rect.top - panY)) / zoomLevel;
-
-    return { x: relativeX, y: relativeY };
-}
-
-
-
 //***********Functions related to aircraft**************//
 
 // Open create aircraft dialog box
@@ -98,7 +30,7 @@ function resetDialogFields() {
     const singleSSRInput = document.getElementById('singleSSRInput');
     const formationSSRInputs = document.getElementById('formationSSRInputs');
     const ssrFormationContainer = document.getElementById('ssrFormationContainer');
-    
+
     // Reset callsign input
     callsignInput.value = '';
     callsignInput.style.backgroundColor = '';
@@ -122,10 +54,11 @@ function resetDialogFields() {
 }
 
 //Functions to validate various inputs
-// Function to remove trailing numbers from a callsign
+// Function to remove trailing numbers from a callsign to get formation callsign
 function getBaseCallsign(callsign) {
-    return callsign.replace(/\d+$/, ''); // Remove trailing digits
+    return callsign.replace(/-\d+$/, ''); // Remove trailing '-' followed by digits
 }
+
 
 // Validate the callsign based on whether it's an individual or formation
 function validateCallsign(formationSize) {
@@ -135,8 +68,8 @@ function validateCallsign(formationSize) {
     // Check if the callsign is valid based on formation size
     if (formationSize == 1) {
         // For single aircraft, the callsign should be a 3-digit number, excluding 000
-        const isValidNumber = /^[0-9]{3}$/.test(callsign) && callsign !== '000';
-        if (!isValidNumber) {
+        const isValidIndividualCallsign = /^[A-Za-z0-9]+$/.test(callsign) && callsign !== '000';
+        if (!isValidIndividualCallsign) {
             callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
             return false;
         }
@@ -174,6 +107,7 @@ function validateCallsign(formationSize) {
     callsignInput.style.backgroundColor = '';  // Reset to default
     return true;
 }
+
 // Validate SSR code(s) for single or formation aircraft
 function validateSsrCode(formationSize) {
     if (formationSize == 1) {
@@ -276,7 +210,7 @@ function validateAltitude() {
 // Function to Create Aircraft blip(s) after validating inputs from Dialog Box
 function createAircraftBlip() {
     const formationSize = parseInt(document.querySelector('input[name="formationSize"]:checked').value, 10);
-    
+
     // Validate all input fields including SSR codes
     const isCallsignValid = validateCallsign(formationSize);
     const isSsrCodeValid = validateSsrCode(formationSize);
@@ -294,21 +228,43 @@ function createAircraftBlip() {
     const speedInput = parseInt(document.getElementById('speedInput').value, 10);
     const altitudeInput = parseInt(document.getElementById('altitudeInput').value * 100, 10);  // Convert to feet
 
-    // Create aircraft based on the formation size
-    for (let i = 1; i <= formationSize; i++) {
-        let callsign = formationSize === 1 ? callsignInput : `${callsignInput}${i}`;
-        let ssrCode = formationSize === 1 ? document.getElementById('ssrInput').value.trim() :
-            document.getElementById(`formationSSRInput_${i}`).value.trim();  // Get SSR code for each formation aircraft
+    if (formationSize === 1) {
+        // Handle individual aircraft creation
+        const callsign = callsignInput;
+        const ssrCode = document.getElementById('ssrInput').value.trim();
 
         const blip = new AircraftBlip(callsign, headingInput, speedInput, altitudeInput, selectedPosition.x, selectedPosition.y, ssrCode);
+        blip.role = 'Individual';  // Assign individual role
+        console.log(`C/S ${callsign} created as individual aircraft.`);  // Log message
+
         aircraftBlips.push(blip);
-        this.formationSize = formationSize; 
-        // Pass formation size and the current index (i) to control box creation
-        createControlBox(blip, this.formationSize, i);
+        createControlBox(blip, formationSize, 1);  // Create control box
+    } else {
+        console.log("Formation: C/S "+getBaseCallsign(callsignInput) + " (" +formationSize+" aircraft) created.");
+        // Handle formation aircraft creation
+        for (let i = 1; i <= formationSize; i++) {
+            const callsign = `${callsignInput}-${i}`;
+            const ssrCode = document.getElementById(`formationSSRInput_${i}`).value.trim();
+
+            const blip = new AircraftBlip(callsign, headingInput, speedInput, altitudeInput, selectedPosition.x, selectedPosition.y, ssrCode);
+
+            if (i === 1) {
+                blip.role = 'Leader';  // Assign leader role
+                blip.formationSize = formationSize;
+                console.log(`C/S ${callsign} created as formation leader.`);
+            } else {
+                blip.role = 'Member';  // Assign member role
+                console.log(`C/S ${callsign} created as formation member.`);
+            }
+
+            aircraftBlips.push(blip);
+            createControlBox(blip, formationSize, i);  // Create control box for each blip
+        }
     }
 
     return true;  // Return true to indicate successful creation
 }
+
 
 
 
@@ -358,7 +314,7 @@ function createControlBox(blip, formationSize, aircraftIndex) {
         const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
         checkbox.addEventListener('change', function () {
             toggleFormationControlBoxes(checkbox.checked, formationSize, blip.callsign);
-            
+
             if (checkbox.checked) {
                 //checkbox.style.display = 'none';  // Hide the checkbox once it's checked
             }
@@ -432,9 +388,8 @@ function updateHeadingPeriodically() {
 
 
 
-// To delete the aircraft
+// Function to delete a single aircraft
 function deleteAircraft(blip) {
-    // Remove the aircraft blip from the aircraftBlips array
     aircraftBlips = aircraftBlips.filter(b => b !== blip);
 
     // Remove the blip element from the DOM
@@ -454,4 +409,7 @@ function deleteAircraft(blip) {
     if (controlBox) {
         document.getElementById('controlPanel').removeChild(controlBox);
     }
+
+    updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
 }
+
