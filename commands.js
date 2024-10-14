@@ -8,10 +8,9 @@ function processCommand(formationSize, blip) {
         const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
 
         if (checkbox && checkbox.checked) {  // Propagate if checked
-            console.log(`Command received by C/S ${getBaseCallsign(blip.callsign)} for formation. Propagating "${command}" to members.`);
+            console.log(`Command received by C/S ${blip.callsign} for formation. Propagating "${command}" to formation members.`);
             propagateCommandToFormation(blip, command);
         } else {
-            console.log(`Command "${command}" executed by leader ${blip.callsign}.`);
             processCommandForBlip(blip, command);  // Execute only for the leader
         }
     }
@@ -29,10 +28,10 @@ function propagateCommandToFormation(leaderBlip, command) {
     const baseCallsign = getBaseCallsign(leaderBlip.callsign);
     const formationSize = leaderBlip.formationSize;  // Get the formation size from the leader
 
-    console.log(`Base Callsign: ${baseCallsign}, Formation Size: ${formationSize}`);
+    //console.log(`Base Callsign: ${baseCallsign}, Formation Size: ${formationSize}`);
 
     // Loop backwards from the last aircraft in the formation to the first (including the leader)
-    for (let i = formationSize; i >= 1; i--) {
+    for (let i = 4; i >= 1; i--) {
         const currentCallsign = `${baseCallsign}-${i}`;
         const currentBlip = aircraftBlips.find(blip => blip.callsign === currentCallsign);
 
