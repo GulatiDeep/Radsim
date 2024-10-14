@@ -135,7 +135,7 @@ class AircraftBlip {
 
     // Create history dot elements and append to the radar
     createHistoryDots() {
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < 12; i++) {
             const dot = document.createElement('div');
             dot.className = 'history-dot';
             dot.style.opacity = 0; // Initially set opacity to 0
@@ -168,7 +168,7 @@ class AircraftBlip {
 
         this.history.push({ x: this.position.x, y: this.position.y });
 
-        if (this.history.length > 30) {
+        if (this.history.length > 12) {
             this.history.shift();
         }
 
