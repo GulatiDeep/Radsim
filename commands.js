@@ -3,15 +3,16 @@ function processCommand(formationSize, blip) {
     const input = document.getElementById(`commandInput_${blip.callsign}`);
     const command = input.value.trim().toUpperCase();
 
-    // Check if the aircraft is a leader and whether the checkbox is unchecked
+    // Check if the aircraft is a leader and whether the checkbox is checked
     if (blip.role === "Leader") {
         const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
-        if (checkbox && !checkbox.checked) {  // Proceed only if unchecked
+
+        if (checkbox && checkbox.checked) {  // Propagate if checked
             console.log(`Command received by C/S ${getBaseCallsign(blip.callsign)} for formation. Propagating "${command}" to members.`);
             propagateCommandToFormation(blip, command);
-        }
-        else{
-            processCommandForBlip(blip, command);
+        } else {
+            console.log(`Command "${command}" executed by leader ${blip.callsign}.`);
+            processCommandForBlip(blip, command);  // Execute only for the leader
         }
     }
     else {

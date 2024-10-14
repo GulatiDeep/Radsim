@@ -298,7 +298,8 @@ function createControlBox(blip, formationSize, aircraftIndex) {
         <div class="command-input-container">
             <input type="text" id="commandInput_${blip.callsign}">
             <span id="lastCommand_${blip.callsign}" class="last-command"></span>
-            ${formationSize > 1 && aircraftIndex === 1 ? `<input type="checkbox" id="formationCheckbox_${blip.callsign}"> ` : ''}
+            ${formationSize > 1 && aircraftIndex === 1 ? 
+                `<input type="checkbox" id="formationCheckbox_${blip.callsign}" checked> ` : ''}
         </div>
     `;
 
@@ -313,11 +314,7 @@ function createControlBox(blip, formationSize, aircraftIndex) {
     if (formationSize > 1 && aircraftIndex === 1) {
         const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
         checkbox.addEventListener('change', function () {
-            toggleFormationControlBoxes(checkbox.checked, formationSize, blip.callsign);
-
-            if (checkbox.checked) {
-                //checkbox.style.display = 'none';  // Hide the checkbox once it's checked
-            }
+            toggleFormationControlBoxes(!checkbox.checked, formationSize, blip.callsign); // Reversed logic
         });
     }
 
