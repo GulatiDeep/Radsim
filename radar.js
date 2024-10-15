@@ -347,13 +347,15 @@ runwaySelector.addEventListener('change', drawRunway);
 
 // Mouse drag to pan
 radarScope.addEventListener('mousedown', (event) => {
+    if (isLabelDragging) return;  // Prevent panning if a label is being dragged
+
     isDragging = true;
     startX = event.clientX - panX;
     startY = event.clientY - panY;
 });
 
 document.addEventListener('mousemove', (event) => {
-    if (isDragging) {
+    if (isDragging && !isLabelDragging) {  // Allow panning only if a label is not being dragged
         panX = event.clientX - startX;
         panY = event.clientY - startY;
         updateTransform();
@@ -363,6 +365,7 @@ document.addEventListener('mousemove', (event) => {
 document.addEventListener('mouseup', () => {
     isDragging = false;
 });
+
 
 
 function smoothZoom(targetZoomLevel) {

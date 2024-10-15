@@ -54,6 +54,7 @@ class AircraftBlip {
         // Create elements (blip, label, line)
         this.element = this.createBlipElement();
         this.label = this.createLabelElement();
+        this.labelOffset = { x: 10, y: -10 }; // Initial offset from blip
         this.line = this.createLineElement();
         this.history = [];
         this.historyDots = [];
@@ -109,6 +110,9 @@ class AircraftBlip {
 
         this.label = label;  // Store the label element
 
+        // Make the label draggable
+    dragElement(label, this);
+
         // Update the label info based on the initial SSR code
         this.updateLabelInfo(this);
 
@@ -159,9 +163,9 @@ class AircraftBlip {
         this.element.style.left = `${scopeCenterX + this.position.x * zoomLevel - blipSize / 2}px`;
         this.element.style.top = `${scopeCenterY - this.position.y * zoomLevel - blipSize / 2}px`;
 
-        // Position the label slightly offset from the blip
-        this.label.style.left = `${scopeCenterX + this.position.x * zoomLevel + 10}px`; // Adjust the label position
-        this.label.style.top = `${scopeCenterY - this.position.y * zoomLevel - 10}px`; // Adjust the label position
+        // Apply the updated offset to the label
+    this.label.style.left = `${this.element.offsetLeft + this.labelOffset.x}px`;
+    this.label.style.top = `${this.element.offsetTop + this.labelOffset.y}px`;
 
         // Update the line to connect the blip and the label
         this.updateLinePosition();
@@ -248,6 +252,43 @@ class AircraftBlip {
 
     // Update the line position and draw it between the blip and the label
     updateLinePosition() {
+        const blipRect = this.element.getBoundingClientRect();
+        const labelRect = this.label.getBoundingClientRect();
+    
+        // Calculate the center of the blip
+        const blipCenterX = blipRect.left + blipRect.width / 2;
+        const blipCenterY = blipRect.top + blipRect.height / 2;
+    
+        // Calculate the top-left corner of the label
+        const labelX = labelRect.left;
+        const labelY = labelRect.top;
+    
+        // Get pan offsets (in case the radar is panned)
+        const panMatrix = new WebKitCSSMatrix(window.getComputedStyle(panContainer).transform);
+        const panX = panMatrix.m41;
+        const panY = panMatrix.m42;
+    
+        // Adjust positions based on pan offsets
+        const adjustedBlipCenterX = blipCenterX - panX;
+        const adjustedBlipCenterY = blipCenterY - panY;
+        const adjustedLabelX = labelX - panX;
+        const adjustedLabelY = labelY - panY;
+    
+        // Calculate the line's new position and dimensions
+        const lineWidth = adjustedLabelX - adjustedBlipCenterX;
+        const lineHeight = adjustedLabelY - adjustedBlipCenterY;
+    
+        // Update the line's position and size
+        this.line.style.left = `${adjustedBlipCenterX}px`;
+        this.line.style.top = `${adjustedBlipCenterY}px`;
+        this.line.style.width = `${Math.sqrt(lineWidth * lineWidth + lineHeight * lineHeight)}px`;
+    
+        // Calculate the angle of the line and apply rotation
+        const angle = Math.atan2(lineHeight, lineWidth) * (180 / Math.PI);
+        this.line.style.transform = `rotate(${angle}deg)`;
+    }
+    
+    updateLinePosition1() {
         const blipRect = this.element.getBoundingClientRect();
         const blipCenterX = blipRect.left + blipRect.width / 2;
         const blipCenterY = blipRect.top + blipRect.height / 2;
@@ -433,4 +474,58 @@ class AircraftBlip {
         this.targetSpeed = newSpeed;
     }
 }
+
+
+
+//To add the dragging functionality to labels
+let isLabelDragging = false; // Global flag to track label dragging
+
+function dragElement(elmnt, blip) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    elmnt.onmousedown = (e) => {
+        e.stopPropagation();  // Prevent panning on label click
+        isLabelDragging = true;  // Set the flag to indicate label dragging
+        dragMouseDown(e);
+    };
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+        isLabelDragging = false;  // Reset the flag when dragging ends
+
+        // Update the label offset relative to the blip
+        const blipRect = blip.element.getBoundingClientRect();
+        const labelRect = elmnt.getBoundingClientRect();
+        blip.labelOffset = {
+            x: labelRect.left - blipRect.left,
+            y: labelRect.top - blipRect.top
+        };
+
+        // Update the line to reflect the new label position
+        blip.updateLinePosition();
+    }
+}
+
+
 

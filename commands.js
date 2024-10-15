@@ -31,7 +31,7 @@ function propagateCommandToFormation(leaderBlip, command) {
     //console.log(`Base Callsign: ${baseCallsign}, Formation Size: ${formationSize}`);
 
     // Loop backwards from the last aircraft in the formation to the first (including the leader)
-    for (let i = 4; i >= 1; i--) {
+    for (let i = 1; i <= 4; i++) {
         const currentCallsign = `${baseCallsign}-${i}`;
         const currentBlip = aircraftBlips.find(blip => blip.callsign === currentCallsign);
 
