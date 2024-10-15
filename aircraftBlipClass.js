@@ -259,6 +259,66 @@ class AircraftBlip {
         const blipCenterX = blipRect.left + blipRect.width / 2;
         const blipCenterY = blipRect.top + blipRect.height / 2;
     
+        // Calculate corners of the label
+        const labelCorners = [
+            { x: labelRect.left, y: labelRect.top },                // Top left
+            { x: labelRect.right, y: labelRect.top },               // Top right
+            { x: labelRect.left, y: labelRect.bottom },             // Bottom left
+            { x: labelRect.right, y: labelRect.bottom }             // Bottom right
+        ];
+    
+        // Calculate the midpoints of each edge of the label
+        const labelEdges = [
+            { x: (labelRect.left + labelRect.right) / 2, y: labelRect.top },       // Top edge
+            { x: (labelRect.left + labelRect.right) / 2, y: labelRect.bottom },    // Bottom edge
+            { x: labelRect.left, y: (labelRect.top + labelRect.bottom) / 2 },      // Left edge
+            { x: labelRect.right, y: (labelRect.top + labelRect.bottom) / 2 }      // Right edge
+        ];
+    
+        // Combine corners and edges into one array
+        const labelPoints = [...labelCorners, ...labelEdges];
+    
+        // Find the nearest point (corner or edge)
+        let nearestPoint = labelPoints[0];
+        let minDistance = Infinity;
+    
+        for (const point of labelPoints) {
+            const distance = Math.sqrt(
+                Math.pow(point.x - blipCenterX, 2) +
+                Math.pow(point.y - blipCenterY, 2)
+            );
+    
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestPoint = point;
+            }
+        }
+    
+        // Calculate the line's length and angle to the nearest point
+        const deltaX = nearestPoint.x - blipCenterX;
+        const deltaY = nearestPoint.y - blipCenterY;
+        const lineLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+    
+        // Update the line's position, length, and rotation
+        this.line.style.width = `${lineLength}px`;
+        this.line.style.left = `${blipCenterX}px`;
+        this.line.style.top = `${blipCenterY}px`;
+        this.line.style.transform = `rotate(${angle}deg)`;
+    
+        // Ensure the line stays behind the label
+        this.line.style.zIndex = '1';  // Lower z-index than the label
+        this.label.style.zIndex = '3';  // Ensure the label stays above the line
+    }
+    
+    updateLinePosition2() {
+        const blipRect = this.element.getBoundingClientRect();
+        const labelRect = this.label.getBoundingClientRect();
+    
+        // Calculate the center of the blip
+        const blipCenterX = blipRect.left + blipRect.width / 2;
+        const blipCenterY = blipRect.top + blipRect.height / 2;
+    
         // Calculate the top-left corner of the label
         const labelX = labelRect.left;
         const labelY = labelRect.top;
