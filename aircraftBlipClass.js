@@ -54,7 +54,7 @@ class AircraftBlip {
         // Create elements (blip, label, line)
         this.element = this.createBlipElement();
         this.label = this.createLabelElement();
-        this.labelOffset = { x: 10, y: -10 }; // Initial offset from blip
+        this.labelOffset = { x: 40, y: -40 }; // Initial offset from blip
         this.line = this.createLineElement();
         this.history = [];
         this.historyDots = [];
