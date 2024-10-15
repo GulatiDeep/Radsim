@@ -255,24 +255,29 @@ class AircraftBlip {
         const blipRect = this.element.getBoundingClientRect();
         const labelRect = this.label.getBoundingClientRect();
     
-        // Calculate the center of the blip
-        const blipCenterX = blipRect.left + blipRect.width / 2;
-        const blipCenterY = blipRect.top + blipRect.height / 2;
+        // Get current pan offsets (dx, dy) from the panContainer
+        const panMatrix = new WebKitCSSMatrix(window.getComputedStyle(panContainer).transform);
+        const panX = panMatrix.m41;
+        const panY = panMatrix.m42;
+    
+        // Calculate the center of the blip relative to the pan offsets
+        const blipCenterX = blipRect.left + blipRect.width / 2 - panX;
+        const blipCenterY = blipRect.top + blipRect.height / 2 - panY;
     
         // Calculate corners of the label
         const labelCorners = [
-            { x: labelRect.left, y: labelRect.top },                // Top left
-            { x: labelRect.right, y: labelRect.top },               // Top right
-            { x: labelRect.left, y: labelRect.bottom },             // Bottom left
-            { x: labelRect.right, y: labelRect.bottom }             // Bottom right
+            { x: labelRect.left - panX, y: labelRect.top - panY },                // Top left
+            { x: labelRect.right - panX, y: labelRect.top - panY },               // Top right
+            { x: labelRect.left - panX, y: labelRect.bottom - panY },             // Bottom left
+            { x: labelRect.right - panX, y: labelRect.bottom - panY }             // Bottom right
         ];
     
         // Calculate the midpoints of each edge of the label
         const labelEdges = [
-            { x: (labelRect.left + labelRect.right) / 2, y: labelRect.top },       // Top edge
-            { x: (labelRect.left + labelRect.right) / 2, y: labelRect.bottom },    // Bottom edge
-            { x: labelRect.left, y: (labelRect.top + labelRect.bottom) / 2 },      // Left edge
-            { x: labelRect.right, y: (labelRect.top + labelRect.bottom) / 2 }      // Right edge
+            { x: (labelRect.left + labelRect.right) / 2 - panX, y: labelRect.top - panY },       // Top edge
+            { x: (labelRect.left + labelRect.right) / 2 - panX, y: labelRect.bottom - panY },    // Bottom edge
+            { x: labelRect.left - panX, y: (labelRect.top + labelRect.bottom) / 2 - panY },      // Left edge
+            { x: labelRect.right - panX, y: (labelRect.top + labelRect.bottom) / 2 - panY }      // Right edge
         ];
     
         // Combine corners and edges into one array
@@ -310,6 +315,7 @@ class AircraftBlip {
         this.line.style.zIndex = '1';  // Lower z-index than the label
         this.label.style.zIndex = '3';  // Ensure the label stays above the line
     }
+    
 
     // Update the history dots' positions based on the aircraft's history
     updateHistoryDots() {
