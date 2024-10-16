@@ -41,7 +41,6 @@ function propagateCommandToFormation(leaderBlip, command) {
     }
 }
 
-
 // Function to process a specific command for an individual aircraft or formation member
 function processCommandForBlip(blip, command) {
     const headingMatch = command.match(/^([LR])(\d{3})$/);

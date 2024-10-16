@@ -1,36 +1,5 @@
-const updateInterval = 4000; // Update interval in milliseconds
-const headingUpdateInterval = 1000;  // Heading update interval set to 1 second (1000 milliseconds)
-const radarContextMenu = document.getElementById('radarContextMenu');
 
-let selectedPosition = { x: 0, y: 0 }; // Initialize selectedPosition
-let aircraftBlips = []; // To store all created aircraft blips
-let radarCenter = { x: radarScope.offsetWidth / 2, y: radarScope.offsetHeight / 2 }; // Track radar center
-let isPaused = false; // to initialise the exercise pause and resume button
-let clickedPosition = { x: 0, y: 0 };
-let historyDotsVisible = true; // Initialize the flag to track the visibility state of the history dots
-let labelsVisible = true; // //Initialize the flag to track the visibility state of the labels
-
-
-// Set the initial state of the History button
-document.getElementById('historyDots').classList.add(historyDotsVisible ? 'active' : 'inactive');
-
-// Set the initial state of the Label button
-document.getElementById('label').classList.add(labelsVisible ? 'active' : 'inactive');
-
-// Start the heading update loop
-updateHeadingPeriodically();
-
-// Start the movement update loop
-moveAircraftBlips();
-
-
-
-
-
-
-
-
-// AircraftBlip class with all attributes
+// AircraftBlip class with all attributes regarding aircraft blip, label and leading line
 class AircraftBlip {
     constructor(callsign, heading, speed, altitude, x, y, ssrCode) {
         this.callsign = callsign;
@@ -475,55 +444,7 @@ class AircraftBlip {
 
 
 
-//To add the dragging functionality to labels
-let isLabelDragging = false; // Global flag to track label dragging
 
-function dragElement(elmnt, blip) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-    elmnt.onmousedown = (e) => {
-        e.stopPropagation();  // Prevent panning on label click
-        isLabelDragging = true;  // Set the flag to indicate label dragging
-        dragMouseDown(e);
-    };
-
-    function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-    }
-
-    function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-    }
-
-    function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-        isLabelDragging = false;  // Reset the flag when dragging ends
-
-        // Update the label offset relative to the blip
-        const blipRect = blip.element.getBoundingClientRect();
-        const labelRect = elmnt.getBoundingClientRect();
-        blip.labelOffset = {
-            x: labelRect.left - blipRect.left,
-            y: labelRect.top - blipRect.top
-        };
-
-        // Update the line to reflect the new label position
-        blip.updateLinePosition();
-    }
-}
 
 
 
