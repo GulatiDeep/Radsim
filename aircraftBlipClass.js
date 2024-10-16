@@ -1,4 +1,6 @@
 
+
+
 // AircraftBlip class with all attributes regarding aircraft blip, label and leading line
 class AircraftBlip {
     constructor(callsign, heading, speed, altitude, x, y, ssrCode) {
@@ -139,6 +141,10 @@ class AircraftBlip {
         // Update the line to connect the blip and the label
         this.updateLinePosition();
 
+        // Calculate and log bearing and distance
+        const { bearing, distanceNM } = this.getBearingAndDistanceFromRadarCenter();
+        //console.log(`C/S ${this.callsign}: Bearing: ${bearing}°, Distance: ${distanceNM} NM`);
+
         this.history.push({ x: this.position.x, y: this.position.y });
 
         if (this.history.length > 12) {
@@ -146,6 +152,23 @@ class AircraftBlip {
         }
 
         this.updateHistoryDots();
+    }
+
+    getBearingAndDistanceFromRadarCenter() {
+        const deltaX = this.position.x * zoomLevel;
+        const deltaY = this.position.y * zoomLevel;
+        
+        const distancePixels = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const distanceNM = distancePixels / (zoomLevel * 1.0); // 1.0 as conversion placeholder
+
+        // Corrected bearing calculation (same logic as mouse pointer calculation)
+        let bearing = Math.atan2(deltaX, deltaY) * (180 / Math.PI);
+        bearing = (bearing + 360) % 360; // Normalize bearing to 0-360 degrees
+
+        return {
+            bearing: bearing.toFixed(0).padStart(3, '0'), // Ensure 3-digit format
+            distanceNM: distanceNM.toFixed(1)
+        };
     }
 
     // Update label to show callsign and speed with a 90-degree perpendicular offset to the heading

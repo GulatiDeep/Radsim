@@ -387,14 +387,14 @@ body, html {
     padding: 2px 5px;
     border-radius: 4px;
     margin: 1px;
-    font-size: 12px;
+    font-size: 11px;
     color: black; /* Text color */
 }
 
 /* Different background colors for each type of info */
 .callsign-box {
     background-color: #007bff; /* Blue for callsign */
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     color: white; /* Text color */
 }

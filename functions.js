@@ -294,6 +294,15 @@ function toggleFormationControlBoxes(enable, formationSize, firstAircraftCallsig
     }
 }
 
+// Function to update the heading and control box every 1 second
+function updateHeadingPeriodically() {
+    aircraftBlips.forEach(blip => {
+        blip.move(true);  // Only update the heading, not the position on the radar
+    });
+
+    setTimeout(updateHeadingPeriodically, headingUpdateInterval);  // Schedule next update
+}
+
 // Function to delete a single aircraft
 function deleteAircraft(blip) {
     const baseCallsign = getBaseCallsign(blip.callsign);
@@ -391,6 +400,9 @@ function createControlBox(blip, formationSize, aircraftIndex) {
     // Format heading to always be 3 digits
     const formattedHeading = String(blip.heading).padStart(3, '0');
 
+    // Calculate bearing and distance at the time of creation
+    const { bearing, distanceNM } = blip.getBearingAndDistanceFromRadarCenter();
+
     // Create the HTML for the control box
     controlBox.innerHTML = `
         <div>
@@ -399,6 +411,7 @@ function createControlBox(blip, formationSize, aircraftIndex) {
             <span class="info-box heading-box"><span id="heading_${blip.callsign}">${formattedHeading}°</span></span>
             <span class="info-box altitude-box">A<span id="altitude_${blip.callsign}">${Math.round(blip.altitude / 100)}</span></span>
             <span class="info-box speed-box">N<span id="speed_${blip.callsign}">${blip.speed}</span></span>
+            <span class="info-box bearing-distance-box"><span id="bearing_${blip.callsign}">${bearing}</span>° / <span id="distance_${blip.callsign}">${distanceNM}</span> NM</span>
         </div>
         <div class="command-input-container">
             <input type="text" id="commandInput_${blip.callsign}">
@@ -438,6 +451,8 @@ function updateControlBox(blip) {
     const altitudeElement = document.getElementById(`altitude_${blip.callsign}`);
     const callsignElement = document.querySelector(`#controlBox_${blip.callsign} .callsign-box`);
     const ssrElement = document.querySelector(`#controlBox_${blip.callsign} .ssr-box`);
+    const bearingElement = document.getElementById(`bearing_${blip.callsign}`);
+    const distanceElement = document.getElementById(`distance_${blip.callsign}`);
 
     // Format heading to always be 3 digits
     const formattedHeading = String(blip.heading).padStart(3, '0');
@@ -450,6 +465,11 @@ function updateControlBox(blip) {
     // Update callsign and SSR code
     if (callsignElement) callsignElement.innerHTML = blip.callsign;
     if (ssrElement) ssrElement.innerHTML = `3-${blip.ssrCode}`;
+
+    // Update bearing and distance
+    const { bearing, distanceNM } = blip.getBearingAndDistanceFromRadarCenter();
+    if (bearingElement) bearingElement.innerHTML = bearing;
+    if (distanceElement) distanceElement.innerHTML = distanceNM;
 }
 
 // Helper functions to enable or disable control boxes
@@ -462,15 +482,6 @@ function enableControlBox(callsign) {
 function disableControlBox(callsign) {
     const commandInput = document.getElementById(`commandInput_${callsign}`);
     if (commandInput) commandInput.disabled = true;
-}
-
-// Function to update the heading and control box every 1 second
-function updateHeadingPeriodically() {
-    aircraftBlips.forEach(blip => {
-        blip.move(true);  // Only update the heading, not the position on the radar
-    });
-
-    setTimeout(updateHeadingPeriodically, headingUpdateInterval);  // Schedule next update
 }
 
 //*******Function to enable dragging of labels
