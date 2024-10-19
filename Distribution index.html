@@ -1,0 +1,2757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Simulator</title>
+
+</head>
+
+<body>
+    <div id="container">
+
+
+        <div id="radarContainer">
+
+            <div id="radarScope">
+                <div id="panContainer">
+                    <div class="range-rings" id="rangeRingsContainer"></div>
+                    <div id="runway" class="runway"></div>
+                    <div id="directionLine" class="direction-line"></div>
+                </div>
+                <button id="pauseButton" class="control-button"
+                    style="position: absolute; top: 10px; right: 10px;">Pause</button>
+            </div>
+
+            <div class="menu-bar">
+                <button class="control-button" id="home">Home</button>
+                <button class="control-button" id="zoomOut"> - </button>
+                <input type="range" class="zoom-slider" id="zoomSlider" min="1" max="80" step="1" value="1">
+                <button class="control-button" id="zoomIn"> + </button>
+                <div class="dropdown">
+                    <select id="runwaySelector">
+                        <!-- Options from 01 to 36 -->
+                        <option value="19">01/19</option>
+                        <option value="20">02/20</option>
+                        <option value="21">03/21</option>
+                        <option value="22">04/22</option>
+                        <option value="23">05/23</option>
+                        <option value="24">06/24</option>
+                        <option value="25">07/25</option>
+                        <option value="26">08/26</option>
+                        <option value="27">09/27</option>
+                        <option value="28">10/28</option>
+                        <option value="29">11/29</option>
+                        <option value="30">12/30</option>
+                        <option value="31">13/31</option>
+                        <option value="32">14/32</option>
+                        <option value="33">15/33</option>
+                        <option value="34">16/34</option>
+                        <option value="35">17/35</option>
+                        <option value="36">18/36</option>
+                    </select>
+                </div>
+                <button id="changeRunway" class="control-button">Runway</button>
+                <button id="SRAdistanceMarkers" class="control-button">SRA</button>
+                <button id="historyDots" class="control-button">History</button>
+                <button id="label" class="control-button">Label</button>
+                <div id="statusBar" class="status-bar"></div> <!-- Status bar element -->
+            </div>
+
+
+
+
+        </div>
+
+        <div id="controlPanel">
+            <div>
+                <center><b><u>Aircraft Control Panel</u></b></center>
+            </div>
+
+            <!-- Control Boxes will be dynamically added here -->
+
+
+
+        </div>
+
+
+
+        <!-- Aircraft Creation Dialog -->
+        <div id="aircraftDialog" class="dialog" style="display:none;">
+            <div class="dialog-content">
+
+                <!-- Aircraft Information Fieldset -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Aircraft Creation</legend>
+
+                    <!-- Callsign input -->
+                    <label for="callsignInput">Callsign:</label>
+                    <input type="text" id="callsignInput" required>
+                    <!-- Validate callsign when focus is lost -->
+
+                    <!-- Heading input -->
+                    <label for="headingInput">Heading (001-360):</label>
+                    <input type="number" id="headingInput" min="001" max="360" value="001" required>
+
+                    <!-- Altitude input -->
+                    <label for="altitudeInput">Altitude (in 100s of feet):</label>
+                    <input type="number" id="altitudeInput" value="100" required>
+
+                    <!-- Speed input -->
+                    <label for="speedInput">Speed (knots):</label>
+                    <input type="number" id="speedInput" value="300" required>
+
+                    <!-- SSR Input Field for Single Aircraft -->
+                    <div id="singleSSRInput" style="display: block;">
+                        <label for="ssrInput">Squawk (Single Aircraft):</label>
+                        <input type="number" id="ssrInput" min="0000" max="7777" value="0000" required>
+                    </div>
+
+                    <!-- SSR Input Fields for Formations -->
+                    <div id="formationSSRInputs" style="display: none;">
+                        <label for="formationSSRInput">Squawk Codes (Formation):</label>
+                        <div id="ssrFormationContainer">
+                            <!-- SSR input fields will be generated here dynamically -->
+                        </div>
+                    </div>
+
+                </fieldset>
+
+                <!-- Formation Fieldset -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Formation Size</legend>
+
+                    <!-- Radio buttons for formation size -->
+                    <div id="formationSizeContainer">
+                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="1" checked>
+                            1</label>
+                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="2"> 2</label>
+                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="3"> 3</label>
+                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="4"> 4</label>
+                    </div>
+                </fieldset>
+
+
+                <!-- Create and Cancel buttons -->
+                <div>
+                    <button id="createAircraftButton" class="control-button">Create</button>
+                    <button id="cancelAircraftButton" class="control-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </div>
+    <div id="controlStatusBar">
+        © For Feedback, please contact Deep Gulati.
+    </div>
+    <!-- Custom Context Menu -->
+    <ul id="radarContextMenu" class="context-menu" style="display: none;">
+        <li id="createAircraftContextMenu">Create Aircraft</li>
+    </ul>
+
+
+
+</body>
+
+
+<style>
+    /* --------Style.css starts here ---------*/
+
+
+    /* ---------- Global Styles ---------- */
+
+    /* Keyframe animation for rotating the range rings */
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+
+    /* Body and HTML global styles for layout */
+    body,
+    html {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        background-color: black;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
+
+
+    /* ---------- Control Buttons ---------- */
+
+    /* Common button styles */
+    .control-button {
+        color: black;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        /* Set the same font for control buttons */
+        font-size: 14px;
+        /* Set the same font size */
+    }
+
+    /* Active state for buttons */
+    .control-button.active {
+        background-color: #4CAF50;
+        /* Red for inactive state */
+        color: black;
+    }
+
+    /* In-Active state for buttons */
+    .control-button.inactive {
+        background-color: #f44336;
+        /* Red for inactive state */
+        color: black;
+    }
+
+
+
+    /* Distance label */
+    .distance-label {
+        color: white;
+        font-size: 10px;
+        /* Adjust as needed */
+        pointer-events: none;
+        /* Ensure labels do not interfere with interactions */
+        position: absolute;
+        transform-origin: center;
+    }
+
+
+    /* ---------- Distance & Permanent Markers ---------- */
+
+    /* Distance marker (hidden initially) */
+    .distance-marker {
+        background-color: white;
+        display: none;
+        /* Hide markers initially */
+        height: 6px;
+        /* Adjust as needed */
+        position: absolute;
+        transform-origin: center;
+        /* Ensure proper rotation */
+        width: 1px;
+        /* Adjust as needed */
+    }
+
+    /* Visible state for distance markers */
+    .distance-marker.visible {
+        display: block;
+        /* Show markers when toggled */
+    }
+
+
+
+    /* Permanent marker always visible */
+    .permanent-marker {
+        background-color: White;
+        /* Change this color to fit your design */
+        display: block;
+        /* Always visible */
+        height: 12px;
+        /* Same height as specific markers */
+        position: absolute;
+        transform-origin: center;
+        width: 2px;
+        /* Same width as specific markers */
+    }
+
+
+    /* ---------- Menu Bar & Dropdowns ---------- */
+
+    /* Menu bar at the bottom of the screen */
+    .menu-bar {
+        align-items: center;
+        bottom: 0;
+        box-sizing: border-box;
+        display: flex;
+        gap: 5px;
+        /* Added gap for increased spacing between buttons */
+        height: 20px;
+        justify-content: space-around;
+        left: 0;
+        padding: 0 10px;
+        position: absolute;
+        width: 75%;
+        padding-bottom: 35px;
+    }
+
+
+    /* Zoom slider in the menu bar */
+    .zoom-slider {
+        flex-grow: 1;
+        margin: 0 5px;
+    }
+
+    /* Dropdowns styling */
+    .dropdown {
+        border-radius: 10px;
+        color: black;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        /* Set the same font for control buttons */
+        font-size: 14px;
+        /* Set the same font size */
+
+    }
+
+
+
+
+
+
+    /* ---------- Radar Display ---------- */
+
+    /* Container for the radar display */
+    #radarScope {
+        height: calc(100% - 20px);
+        /* Adjusted to leave space for the menu bar */
+        overflow: visible;
+        position: relative;
+        transform-origin: center center;
+        transition: transform 0.1s ease;
+        width: 100%;
+    }
+
+
+    /* Range rings in radar, with rotation animation */
+    .range-rings {
+        animation: rotate 4s linear infinite;
+        animation-play-state: running;
+        /* Ensure animation starts running */
+        border-radius: 100%;
+        height: 100%;
+        position: absolute;
+        width: 100%;
+    }
+
+    /* Individual rings on the radar */
+    .ring {
+        border: 0.2px dotted White;
+        border-radius: 100%;
+        position: absolute;
+    }
+
+
+    /* Direction line in radar */
+    .direction-line {
+        background-color: white;
+        opacity: 0.5;
+    }
+
+
+    /* Runway styling in radar */
+    .runway {
+        background-color: white;
+        height: 4px;
+        position: absolute;
+        transform-origin: center center;
+    }
+
+    /* Container for panning radar */
+    #panContainer {
+        height: 100%;
+        position: absolute;
+        width: 100%;
+    }
+
+
+
+    /* ---------- Aircraft Blips & Labels ---------- */
+
+    /* Default aircraft blip style */
+    .aircraft-blip {
+        width: 6px;
+        height: 6px;
+        background-color: yellow;
+        position: absolute;
+        z-index: 2;
+    }
+
+    /* Plus sign for SSR code 0000 */
+    /* Style for the plus sign */
+    .plus-sign {
+        width: 8px;
+        height: 8px;
+        background: transparent !important;
+        z-index: 3;
+        position: relative;
+    }
+
+    /* Vertical and horizontal lines for plus sign */
+    .plus-sign::before,
+    .plus-sign::after {
+        content: '';
+        position: absolute;
+        background-color: yellow;
+    }
+
+    .plus-sign::before {
+        width: 2px;
+        /* Thickness of the vertical line */
+        height: 100%;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+    }
+
+    .plus-sign::after {
+        height: 2px;
+        /* Thickness of the horizontal line */
+        width: 100%;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+    }
+
+    /* Aircraft label */
+    .aircraft-label {
+        padding: 2px 4px;
+        border-radius: 3px;
+        white-space: nowrap;
+        font-size: 12px;
+        color: yellow;
+        /* Default label color */
+    }
+
+    /* Aircraft label leading line */
+    /* Line connecting aircraft and label */
+    .aircraft-line {
+        position: absolute;
+        background-color: grey;
+        z-index: 1;
+        transform-origin: 0 0;
+        /* Ensure the line grows from the start point */
+    }
+
+
+    /* ---------- History Dots ---------- */
+
+    /* History dot style */
+    .history-dot {
+        width: 2px;
+        height: 2px;
+        background-color: yellow;
+        border-radius: 50%;
+        /* Makes the dots circular */
+        position: absolute;
+        z-index: 1;
+    }
+
+    /* Container for history dots */
+    .history-container {
+        position: absolute;
+        pointer-events: none;
+        /* Prevent interaction */
+    }
+
+
+    /* Optional: Style for the history dots toggle button */
+    #historyDots.active {
+        background-color: #4CAF50;
+        /* Green for active state */
+    }
+
+    #historyDots.inactive {
+        background-color: #f44336;
+        /* Red for inactive state */
+    }
+
+
+    /* Container for splitting the screen */
+    #container {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+    }
+
+    /* Radar and menu bar on the left */
+    #radarContainer {
+        flex: 3;
+        /* 3/4 of the width */
+        display: flex;
+        flex-direction: column;
+
+    }
+
+
+    /* ---------- Control Panel ---------- */
+
+    /* Container for the control panel on the right */
+    #controlPanel {
+        flex: 1;
+        background-color: #f0f0f0;
+        padding: 5px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        z-index: 5;
+        position: relative;
+        right: 0;
+        /* Align to the right */
+        width: 25%;
+        /* Take 25% width of the screen */
+        height: calc(100% - 20px);
+        ;
+        /* Reduce height by 20px to make space for status bar */
+        overflow-y: auto;
+        /* Enables vertical scrolling */
+        max-height: calc(100% - 20px);
+        ;
+        /* Ensure the panel respects height limits */
+    }
+
+    #controlStatusBar {
+        height: 20px;
+        background-color: rgb(60, 60, 60);
+        color: white;
+        font-size: 12px;
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        /* Align text vertically */
+        justify-content: right;
+        /* Align text to the right */
+        text-align: right;
+        /* Ensure text is aligned to the right */
+        padding: 5px;
+        box-sizing: border-box;
+        position: fixed;
+        /* Fix it to the screen */
+        bottom: 0;
+        /* Align to the bottom */
+        right: 0;
+        /* Align to the right */
+        width: 25%;
+        /* Take 25% width of the screen */
+        z-index: 100;
+        /* Ensure it stays on top */
+    }
+
+
+
+
+    .disabled-panel {
+        pointer-events: none;
+        /* Disables interactions with all child elements */
+    }
+
+    /* Control box for each aircraft */
+    .control-box {
+        border: 1px solid #ccc;
+        padding: 2px;
+        background-color: #e0e0e0;
+        box-sizing: border-box;
+        border-radius: 4px;
+        margin-bottom: 1px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        user-select: none;
+        /* Prevents text selection when clicking */
+        overflow: visible;
+        /* Ensure no overflow issues */
+    }
+
+    /* Common style for each info box */
+    .info-box {
+        display: inline-block;
+        padding: 2px 5px;
+        border-radius: 4px;
+        margin: 1px;
+        font-size: 11px;
+        color: black;
+        /* Text color */
+    }
+
+    /* Different background colors for each type of info */
+    .callsign-box {
+        background-color: #007bff;
+        /* Blue for callsign */
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        /* Text color */
+    }
+
+    .ssr-box {
+        background-color: lightblue;
+        /* Green for SSR code */
+    }
+
+    .heading-box {
+        background-color: lightblue;
+        /* Yellow for heading */
+    }
+
+    .altitude-box {
+        background-color: lightblue;
+        /* Red for altitude */
+    }
+
+    .speed-box {
+        background-color: lightblue;
+        /* Cyan for speed */
+    }
+
+    /* Command input and last command container */
+    .command-input-container {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        /* Space between the input and the last command */
+    }
+
+    /* Input field in control box */
+    .control-box input {
+        width: 40%;
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 12px;
+        box-sizing: border-box;
+        /* Include padding in width calculation */
+    }
+
+    /* Last command display */
+    .last-command {
+        font-size: 12px;
+        color: #333;
+        background-color: #f0f0f0;
+        padding: 5px;
+        border-radius: 4px;
+        box-sizing: border-box;
+        /* Include padding in width calculation */
+    }
+
+
+    /* ---------- Dialog Styles ---------- */
+
+    /* Dialog box styling */
+    .dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        width: 250px;
+        z-index: 1000;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+
+    /* Dialog content layout */
+    .dialog-content {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 5px;
+    }
+
+    /* Dialog input fields */
+    .dialog input {
+        padding: 5px;
+        margin-top: 1px;
+        margin-bottom: 10px;
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    /* Dialog buttons */
+    .dialog button {
+        padding: 5px;
+        border: none;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        width: 100%;
+        margin-top: 5px;
+
+    }
+
+    .dialog label {
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .dialog button:hover {
+        background-color: #0056b3;
+    }
+
+
+    /* Container for radio buttons to display in a grid */
+    #ssrFormationContainer {
+        display: grid;
+        grid-template-columns: repeat(2, 50%);
+        /* Creates a grid with 4 columns */
+        gap: 5px;
+        /* Adjust spacing between radio buttons */
+        margin-top: 5px;
+        /* Optional: margin to add space above the container */
+    }
+
+    /* Style for labels to ensure proper alignment */
+    #ssrFormationContainer label {
+        display: flex;
+        align-items: center;
+        /* Center the radio buttons and labels vertically */
+        margin: 0;
+        /* Remove default margin */
+        padding: 0;
+        /* Remove default padding */
+    }
+
+
+
+    /* Container for radio buttons to display in a grid */
+    #formationSizeContainer {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        /* Creates a grid with 4 columns */
+        gap: 2px;
+        /* Adjust spacing between radio buttons */
+        margin-top: 5px;
+        /* Optional: margin to add space above the container */
+    }
+
+    /* Style for labels to ensure proper alignment */
+    #formationSizeContainer label {
+        display: flex;
+        align-items: center;
+        /* Center the radio buttons and labels vertically */
+        margin: 0;
+        /* Remove default margin */
+        padding: 0;
+        /* Remove default padding */
+    }
+
+    /* Reset margin and padding on radio buttons for better alignment */
+    #formationSizeContainer input[type="radio"] {
+        margin: 0;
+        padding: 0;
+    }
+
+
+
+
+
+    /* ---------- Context Menu ---------- */
+
+    /* Custom context menu */
+    .context-menu {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        list-style: none;
+        padding: 2px 0;
+        border-radius: 10px;
+        margin: 0;
+        z-index: 1000;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .context-menu li {
+        padding: 8px 12px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .context-menu li:hover {
+        background-color: #007bff;
+        color: white;
+        border-radius: 10px;
+
+    }
+
+
+    /* ---------- Status Bar ---------- */
+
+    /* Status bar at the bottom */
+    .status-bar {
+        align-items: center;
+        background-color: rgb(60, 60, 60);
+        bottom: 0;
+        box-sizing: border-box;
+        color: rgb(255, 255, 255);
+        display: flex;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        font-style: italic;
+        height: 20px;
+        padding-left: 10px;
+        padding-right: 10px;
+        position: absolute;
+        text-align: left;
+        white-space: pre-wrap;
+        width: 100%;
+    }
+</style>
+
+<script>
+
+
+    //********radar.js script file starts here**********/
+
+
+
+
+    // Update status bar
+    function updateStatusBar(message) {
+        document.getElementById('statusBar').innerText = message;
+    }
+
+    //defining constructors
+    const radarScope = document.getElementById('radarScope');
+    const rangeRingsContainer = document.getElementById('rangeRingsContainer');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const zoomInButton = document.getElementById('zoomIn');
+    const zoomOutButton = document.getElementById('zoomOut');
+    const homeButton = document.getElementById('home');
+    const runwaySelector = document.getElementById('runwaySelector');
+    const changeRunwayButton = document.getElementById('changeRunway');
+    const SRAdistanceMarkersButton = document.getElementById('SRAdistanceMarkers');
+    const directionLine = document.getElementById('directionLine');
+    const panContainer = document.getElementById('panContainer');
+
+
+    let zoomLevel = parseFloat(zoomSlider.value);
+    let panX = 0;
+    let panY = 0;
+    let startX, startY, isDragging = false;
+    let isDirectionReversed = false; // Tracks if the direction is reversed
+    let areMarkersVisible = false; // Tracks the visibility of the distance markers
+
+    // Define global variable for runway designation
+    let runwayDesignation = '';
+
+    // Store initial values
+    const initialZoomLevel = 6;
+    const initialPanX = 0;
+    const initialPanY = 0;
+    let distanceBetweenRings = 10; // nautical miles
+    const numRings = 20;
+
+
+
+    function createRangeRings() {
+        rangeRingsContainer.innerHTML = ''; // Clear old rings
+
+        const rect = radarScope.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const initialRadius = 10; // Starting radius in NM
+
+        for (let i = 0; i < numRings; i++) {
+            const ring = document.createElement('div');
+            ring.className = 'ring';
+
+            const ringRadius = (initialRadius + distanceBetweenRings * i) * zoomLevel;
+            const diameter = ringRadius * 2;
+
+            ring.style.width = `${diameter}px`;
+            ring.style.height = `${diameter}px`;
+            ring.style.left = `${centerX - ringRadius}px`;
+            ring.style.top = `${centerY - ringRadius}px`;
+
+            rangeRingsContainer.appendChild(ring);
+        }
+        // Create and position the runway and direction line
+        drawRunway();
+    }
+
+
+
+
+    function drawRunway() {
+
+        const runway = document.getElementById('runway');
+        const initialRadius = 10; // nautical miles for the innermost ring
+        const radiusOfInnermostRing = initialRadius * zoomLevel;
+        const runwayLength = radiusOfInnermostRing * 0.15; // 15% of the radius
+
+        runway.style.width = `${runwayLength}px`;
+        runway.style.height = `4px`; // Thickness of the runway
+
+        // Set position to center of radar scope
+        runway.style.position = 'absolute';
+        runway.style.left = `${(radarScope.offsetWidth / 2) - (runwayLength / 2)}px`;
+        runway.style.top = `${(radarScope.offsetHeight / 2) - 2}px`; // Adjust for thickness
+
+        // Calculate rotation angle based on dropdown selection
+        let selectedValue = parseInt(runwaySelector.value.substring(0, 2)); // Get the runway value as a number
+        let angle = (selectedValue * 10) - 90; // Adjusting for correct alignment
+
+        if (isDirectionReversed) {
+            // Reverse the direction by 180 degrees
+            angle = (angle + 180) % 360;
+            selectedValue = (selectedValue + 18) % 36;
+            if (selectedValue === 0) {
+                selectedValue = 36; // Special case for runway 18 reversed to runway 36
+            }
+        }
+
+        // Log the updated runway
+        const oppositeRunway = (selectedValue + 18) % 36 || 36;
+        runwayDesignation = oppositeRunway.toString().padStart(2, '0');
+        //console.log(`Runway selected: Runway ${runwayDesignation}`);
+        updateStatusBar('Runway: ' + runwayDesignation);
+
+        // Update the button text with the current runway designation
+        changeRunwayButton.textContent = `Runway ${runwayDesignation}`;
+
+
+        runway.style.transform = `rotate(${angle}deg)`;
+        runway.style.transformOrigin = 'center center';
+
+        // Calculate the end position of the runway
+        const runwayEndX = (radarScope.offsetWidth / 2) + (runwayLength / 2) * Math.cos(angle * Math.PI / 180);
+        const runwayEndY = (radarScope.offsetHeight / 2) + (runwayLength / 2) * Math.sin(angle * Math.PI / 180);
+
+        // Set the white direction line properties
+        const directionLineLength = radiusOfInnermostRing * 2.5; // 250% of the radius
+        directionLine.style.width = `${directionLineLength}px`;
+        directionLine.style.height = `1px`; // Thickness of the white line
+
+        // Position the white direction line
+        directionLine.style.position = 'absolute';
+        directionLine.style.left = `${runwayEndX}px`;
+        directionLine.style.top = `${runwayEndY - 1}px`; // Adjust for thickness
+        directionLine.style.transform = `rotate(${angle}deg)`;
+        directionLine.style.transformOrigin = '0 50%'; // Start from the end of the runway
+
+        // Append the direction line to the panContainer
+        panContainer.appendChild(directionLine);
+
+        // Create and position permanent markers
+        createPermanentMarkers(runwayEndX, runwayEndY, angle);
+
+        // Create distance markers
+        createDistanceMarkers(runwayEndX, runwayEndY, angle);
+    }
+
+
+
+    function createPermanentMarkers(startX, startY, angle) {
+        const initialRadius = 10; // nautical miles for the innermost ring
+        const radiusOfInnermostRing = initialRadius * zoomLevel;
+        const markerDistance = radiusOfInnermostRing * 0.50; // 50% of the radius
+        const numMarkers = 5;
+
+        // Remove existing markers
+        const existingMarkers = document.querySelectorAll('.permanent-marker');
+        existingMarkers.forEach(marker => marker.remove());
+
+        for (let i = 0; i < numMarkers; i++) {
+            const marker = document.createElement('div');
+            marker.className = 'permanent-marker';
+
+            marker.style.height = '10px'; // Height of the permanent markers
+            marker.style.width = '1px';  // Width of the permanent markers
+
+
+            // Calculate marker position
+            const markerPosition = markerDistance * (i + 1); // Increment by 50% of radius
+            const x = startX + (markerPosition * Math.cos(angle * Math.PI / 180));
+            const y = startY + (markerPosition * Math.sin(angle * Math.PI / 180));
+
+            // Center align by adjusting left and top positions
+            const markerOffsetX = (parseFloat(marker.style.width) / 2);
+            const markerOffsetY = (parseFloat(marker.style.height) / 2);
+
+            marker.style.left = `${x - markerOffsetX}px`;
+            marker.style.top = `${y - markerOffsetY}px`;
+
+
+            // Rotate to be perpendicular to the direction line
+            marker.style.transform = `rotate(${angle}deg)`;
+
+            panContainer.appendChild(marker);
+        }
+    }
+
+
+    function createDistanceMarkers(startX, startY, angle) {
+        const initialRadius = 10; // nautical miles for the innermost ring
+        const radiusOfInnermostRing = initialRadius * zoomLevel;
+        const markerDistance = radiusOfInnermostRing * 0.10; // 10% of the radius
+        const numMarkers = 15;
+
+        // Remove existing markers and labels
+        const existingMarkers = document.querySelectorAll('.distance-marker, .distance-label');
+        existingMarkers.forEach(marker => marker.remove());
+
+        for (let i = 0; i < numMarkers; i++) {
+            // Create the marker
+            const marker = document.createElement('div');
+            marker.className = 'distance-marker';
+
+            if (i === 4 || i === 9 || i === 14) { // 0-based index for 5th, 10th, and 15th markers
+                marker.style.height = '12px'; // Double the height for these specific markers
+                marker.style.width = '2px';  // Increase the width to 2px for these specific markers
+            } else {
+                marker.style.height = '6px'; // Normal height for other markers
+                marker.style.width = '1px';  // Normal width for other markers
+            }
+
+            // Calculate marker position
+            const markerPosition = markerDistance * (i + 1); // Increment by 10% of radius
+            const x = startX + (markerPosition * Math.cos(angle * Math.PI / 180));
+            const y = startY + (markerPosition * Math.sin(angle * Math.PI / 180));
+
+            // Center align by adjusting left and top positions
+            const markerOffsetX = (parseFloat(marker.style.width) / 2);
+            const markerOffsetY = (parseFloat(marker.style.height) / 2);
+
+            marker.style.left = `${x - markerOffsetX}px`;
+            marker.style.top = `${y - markerOffsetY}px`;
+
+            // Rotate to be perpendicular to the direction line
+            marker.style.transform = `rotate(${angle}deg)`;
+
+            // Set visibility based on the current toggle state
+            marker.style.display = areMarkersVisible ? 'block' : 'none';
+
+            panContainer.appendChild(marker);
+
+            // Create the label
+            const label = document.createElement('div');
+            label.className = 'distance-label';
+            label.textContent = `${i + 1}`; // Numbering starts from 1
+
+            // Offset the label slightly to avoid overlapping with the marker
+            const labelOffset = 20; // Adjust this value as needed
+            const labelX = x + labelOffset * Math.cos((angle - 90) * Math.PI / 180);
+            const labelY = y + labelOffset * Math.sin((angle - 90) * Math.PI / 180);
+
+            label.style.left = `${labelX}px`;
+            label.style.top = `${labelY}px`;
+
+            // Ensure the label is displayed consistently with the markers
+            label.style.display = areMarkersVisible ? 'block' : 'none';
+
+            panContainer.appendChild(label);
+        }
+    }
+
+
+
+    function updateTransform() {
+        panContainer.style.transform = `translate(${panX}px, ${panY}px) `;
+    }
+
+
+    function resetToInitial() {
+        zoomLevel = initialZoomLevel;
+        panX = initialPanX;
+        panY = initialPanY;
+
+        updateRadarCenter(); // Ensure radar center is recalculated
+        createRangeRings();
+        updateTransform();
+
+        aircraftBlips.forEach(blip => blip.updateBlipPosition()); // Correct blip positions
+        updateStatusBar('Reset to Center of Screen');
+    }
+
+
+    // Toggle the direction of the line
+    changeRunwayButton.addEventListener('click', () => {
+        isDirectionReversed = !isDirectionReversed; // Toggle the direction
+        drawRunway();
+        //updateStatusBar('Runway changed to Runway: ' + runwayDesignation);
+    });
+
+    // Set the initial state of the button (optional)
+    document.getElementById('SRAdistanceMarkers').classList.add(areMarkersVisible ? 'active' : 'inactive');
+
+    // Toggle the visibility of distance markers and their labels
+    SRAdistanceMarkersButton.addEventListener('click', () => {
+        areMarkersVisible = !areMarkersVisible;
+
+        // Update the button's appearance based on the state
+        const SRAdistanceMarkersButton = document.getElementById('SRAdistanceMarkers');
+        if (areMarkersVisible) {
+            SRAdistanceMarkersButton.classList.add('active');
+            SRAdistanceMarkersButton.classList.remove('inactive');
+            updateStatusBar('SRA Distance Markers On');
+        } else {
+            SRAdistanceMarkersButton.classList.add('inactive');
+            SRAdistanceMarkersButton.classList.remove('active');
+            updateStatusBar('SRA Distance Markers Off');
+        }
+
+        const markers = document.querySelectorAll('.distance-marker');
+        const labels = document.querySelectorAll('.distance-label'); // Add this line to select labels
+        markers.forEach(marker => {
+            marker.style.display = areMarkersVisible ? 'block' : 'none';
+        });
+        labels.forEach(label => {  // Add this block to handle label visibility
+            label.style.display = areMarkersVisible ? 'block' : 'none';
+        });
+    });
+
+
+
+    // Set initial zoom level and create range rings
+    zoomSlider.value = initialZoomLevel; // Default zoom value
+    zoomLevel = initialZoomLevel;
+    createRangeRings();
+    updateTransform();
+
+
+    // Zoom functionality
+    zoomSlider.addEventListener('input', () => {
+        zoomLevel = parseFloat(zoomSlider.value);
+        createRangeRings();
+        drawRunway();
+        aircraftBlips.forEach(blip => blip.updateBlipPosition()); // Update blip positions after zooming
+
+        if (areMarkersVisible) {
+            const markers = document.querySelectorAll('.distance-marker');
+            const labels = document.querySelectorAll('.distance-label');
+            markers.forEach(marker => marker.style.display = 'block');
+            labels.forEach(label => label.style.display = 'block');
+        }
+    });
+
+    zoomInButton.addEventListener('click', () => {
+        zoomLevel = Math.min(zoomLevel + 1, 80);
+        zoomSlider.value = zoomLevel;
+        createRangeRings();
+        drawRunway();
+        aircraftBlips.forEach(blip => blip.updateBlipPosition()); // Update blip positions after zooming
+
+        if (areMarkersVisible) {
+            const markers = document.querySelectorAll('.distance-marker');
+            const labels = document.querySelectorAll('.distance-label');
+            markers.forEach(marker => marker.style.display = 'block');
+            labels.forEach(label => label.style.display = 'block');
+        }
+    });
+
+    zoomOutButton.addEventListener('click', () => {
+        zoomLevel = Math.max(zoomLevel - 1, 1);
+        zoomSlider.value = zoomLevel;
+        createRangeRings();
+        drawRunway();
+        aircraftBlips.forEach(blip => blip.updateBlipPosition()); // Update blip positions after zooming
+
+        if (areMarkersVisible) {
+            const markers = document.querySelectorAll('.distance-marker');
+            const labels = document.querySelectorAll('.distance-label');
+            markers.forEach(marker => marker.style.display = 'block');
+            labels.forEach(label => label.style.display = 'block');
+        }
+    });
+
+
+
+    homeButton.addEventListener('click', resetToInitial);
+
+    // Update runway direction based on dropdown selection
+    runwaySelector.addEventListener('change', drawRunway);
+
+    // Mouse drag to pan
+    radarScope.addEventListener('mousedown', (event) => {
+        if (isLabelDragging) return;  // Prevent panning if a label is being dragged
+
+        isDragging = true;
+        startX = event.clientX - panX;
+        startY = event.clientY - panY;
+    });
+
+    document.addEventListener('mousemove', (event) => {
+        if (isDragging && !isLabelDragging) {  // Allow panning only if a label is not being dragged
+            panX = event.clientX - startX;
+            panY = event.clientY - startY;
+            updateTransform();
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+
+
+    function smoothZoom(targetZoomLevel) {
+        const step = (targetZoomLevel - zoomLevel) / 10; // Adjust for smoothness
+
+        function animateZoom() {
+            zoomLevel += step;
+            //updateZoomLevel(zoomLevel);
+            //updateBlipPosition(); // Update the blip's position
+            createRangeRings(); // Recreate elements based on new zoom
+            drawRunway(); // Recalculate and redraw the runway
+
+            if (Math.abs(targetZoomLevel - zoomLevel) > Math.abs(step)) {
+                requestAnimationFrame(animateZoom);
+            }
+        }
+
+        animateZoom();
+    }
+
+
+    // Calculate distance and bearing of the mouse pointer from center of the radar scope
+    function getDistanceAndBearing(x, y) {
+        // Center of the radar scope (before panning)
+        const centerX = radarScope.offsetWidth / 2;
+        const centerY = radarScope.offsetHeight / 2;
+
+        // Convert to radar scope coordinates (account for panning)
+        const deltaX = x - (centerX + panX);
+        const deltaY = y - (centerY + panY);
+
+        // Calculate the distance in pixels
+        const distancePixels = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        // Calculate the distance in nautical miles (adjust for zoom level)
+        const distanceNM = distancePixels / (zoomLevel * 1.0); // 1.0 is a placeholder for the conversion factor for NM
+
+        // Calculate the bearing in degrees (adjusted for the offset)
+        let bearing = Math.atan2(deltaX, deltaY) * 180 / Math.PI; // Convert radians to degrees
+        bearing = Math.abs((bearing - 180) % 360); // Normalize to 0-360 degrees
+
+        return {
+            distanceNM: distanceNM.toFixed(1), // Round to 1 decimal place
+            bearing: bearing.toFixed(0).padStart(3, '0') // Ensure bearing is always 3 digits
+        };
+    }
+
+
+    let displayElement = null;
+
+    // Function to create the display element if it doesn't exist
+    function createDisplayElement() {
+        if (!displayElement) {
+            displayElement = document.createElement('div');
+            displayElement.style.position = 'fixed'; // Fixed position to stay at the top left corner
+            displayElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            displayElement.style.color = 'white';
+            displayElement.style.padding = '5px';
+            displayElement.style.borderRadius = '3px';
+            displayElement.style.fontSize = '12px';
+            displayElement.style.zIndex = '1000'; // Ensure it's above other elements
+            document.body.appendChild(displayElement);
+        }
+    }
+
+    // Function to update the display element with distance and bearing
+    function updateDisplay(x, y) {
+        createDisplayElement(); // Ensure the display element is created
+
+        const rect = radarScope.getBoundingClientRect();
+        const result = getDistanceAndBearing(x - rect.left, y - rect.top);
+
+        displayElement.style.left = '10px'; // Position at top left corner
+        displayElement.style.top = '10px';
+        displayElement.textContent = `${result.bearing}° / ${result.distanceNM} NM`;
+    }
+
+    // Event listener for mouse move to update the display
+    radarScope.addEventListener('mousemove', (event) => {
+        const rect = radarScope.getBoundingClientRect();
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+
+        updateDisplay(mouseX, mouseY);
+    });
+
+    // Initialize the display element on page load
+    createDisplayElement();
+
+
+
+    //******************Functions related to radar scope******************//
+    // Update the radar center on pan or zoom
+    function updateRadarCenter() {
+        const rect = radarScope.getBoundingClientRect();
+        radarCenter = {
+            x: rect.width / 2,
+            y: rect.height / 2
+        };
+    }
+
+
+    // Handle radar panning
+    function panRadar(dx, dy) {
+        // Code to pan the radar
+        panContainer.style.transform = `translate(${dx}px, ${dy}px)`;
+        updateRadarCenter(); // Update center after panning
+    }
+
+    // Function to pause or resume the exercise
+    function togglePause() {
+        const pauseButton = document.getElementById('pauseButton');
+        const rangeRingsContainer = document.querySelector('.range-rings');
+        isPaused = !isPaused;
+
+        if (isPaused) {
+            pauseButton.textContent = 'Resume';
+            updateStatusBar('Exercise paused.');
+            disableControlPanel();
+
+            rangeRingsContainer.style.animationPlayState = 'paused'; // Stop radar rings rotation
+        } else {
+            pauseButton.textContent = 'Pause';
+            updateStatusBar('Exercise resumed.');
+            enableControlPanel();
+
+            rangeRingsContainer.style.animationPlayState = 'running'; // Resume radar rings rotation
+
+            moveAircraftBlips(); // Resume aircraft movements
+        }
+    }
+
+    // Function to disable the control panel inputs while paused
+    function disableControlPanel() {
+        const controlPanel = document.getElementById('controlPanel');
+        controlPanel.classList.add('disabled-panel');  // Disable interactions
+    }
+
+    // Function to enable the control panel inputs while resumed
+    function enableControlPanel() {
+        const controlPanel = document.getElementById('controlPanel');
+        controlPanel.classList.remove('disabled-panel');  // Enable interactions
+    }
+
+
+    // Calculate mouse position based on radar's original center and panned position
+    function calculatePosition(clientX, clientY) {
+        const rect = radarScope.getBoundingClientRect();
+
+        // Get current pan offsets (dx, dy) from the panContainer
+        const panMatrix = new WebKitCSSMatrix(window.getComputedStyle(panContainer).transform);
+        const panX = panMatrix.m41;
+        const panY = panMatrix.m42;
+
+        // Calculate relative positions considering the panning
+        const relativeX = (clientX - rect.left - radarCenter.x - panX) / zoomLevel;
+        const relativeY = (radarCenter.y - (clientY - rect.top - panY)) / zoomLevel;
+
+        return { x: relativeX, y: relativeY };
+    }
+
+
+    //radar.js script file ends here
+
+
+    //********functions.js script file starts here**********/
+
+    //File containing all the functions
+
+    //************Functions related to aircraft blip, leading line and associated labels ***********/
+
+    // Open create aircraft dialog box
+    function openAircraftDialog() {
+        const dialog = document.getElementById('aircraftDialog');
+        dialog.style.display = 'block';
+        dialog.style.top = `50%`;  // Center the dialog
+        dialog.style.left = `50%`;
+        dialog.style.transform = `translate(-50%, -50%)`;
+        document.getElementById('callsignInput').focus();
+    }
+
+    // Close create aircraft dialog box
+    function closeAircraftDialog() {
+        const dialog = document.getElementById('aircraftDialog');
+        dialog.style.display = 'none';
+        resetDialogFields();
+    }
+
+    // Reset form fields to their default values
+    function resetDialogFields() {
+        const callsignInput = document.getElementById('callsignInput');
+        const ssrInput = document.getElementById('ssrInput');
+        const headingInput = document.getElementById('headingInput');
+        const speedInput = document.getElementById('speedInput');
+        const altitudeInput = document.getElementById('altitudeInput');
+        const singleSSRInput = document.getElementById('singleSSRInput');
+        const formationSSRInputs = document.getElementById('formationSSRInputs');
+        const ssrFormationContainer = document.getElementById('ssrFormationContainer');
+
+        // Reset callsign input
+        callsignInput.value = '';
+        callsignInput.style.backgroundColor = '';
+
+        // Reset single SSR input
+        ssrInput.value = '0000';
+        ssrInput.style.backgroundColor = '';
+
+        // Reset heading, speed, and altitude inputs
+        headingInput.value = '001';
+        speedInput.value = '300';
+        altitudeInput.value = '100';
+
+        // Hide formation SSR inputs and clear container
+        singleSSRInput.style.display = 'block';
+        formationSSRInputs.style.display = 'none';
+        ssrFormationContainer.innerHTML = '';
+
+        // Reset formation size to default
+        document.querySelector('input[name="formationSize"][value="1"]').checked = true;
+    }
+
+    //Functions to validate various inputs
+    // Validate the callsign based on whether it's an individual or formation
+    function validateCallsign(formationSize) {
+        const callsignInput = document.getElementById('callsignInput');
+        const callsign = callsignInput.value.trim();
+
+        // Check if the callsign is valid based on formation size
+        if (formationSize == 1) {
+            // For single aircraft, the callsign should be a 3-digit number, excluding 000
+            const isValidIndividualCallsign = /^[A-Za-z0-9]+$/.test(callsign) && callsign !== '000';
+            if (!isValidIndividualCallsign) {
+                callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
+                return false;
+            }
+        } else {
+            // For formations, callsign should contain only alphabetic characters
+            const isValidFormationCallsign = /^[A-Za-z]+$/.test(callsign);
+            if (!isValidFormationCallsign) {
+                callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
+                return false;
+            }
+        }
+
+        // Get the base callsign by removing any trailing numbers
+        const baseCallsign = getBaseCallsign(callsign);
+
+        // Check for existing blips to avoid duplicate callsigns
+        const existingBlips = aircraftBlips.filter(blip => getBaseCallsign(blip.callsign) === baseCallsign);
+
+        if (formationSize == 1) {
+            // For single aircraft, ensure the exact callsign does not exist
+            const existingBlip = existingBlips.find(blip => blip.callsign === callsign);
+            if (existingBlip) {
+                callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
+                return false;
+            }
+        } else {
+            // For formations, ensure the base callsign is not already in use
+            const baseCallsignExists = existingBlips.some(blip => blip.callsign !== callsign);
+            if (baseCallsignExists) {
+                callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
+                return false;
+            }
+        }
+
+        callsignInput.style.backgroundColor = '';  // Reset to default
+        return true;
+    }
+
+    // Validate SSR code(s) for single or formation aircraft
+    function validateSsrCode(formationSize) {
+        if (formationSize == 1) {
+            const ssrInput = document.getElementById('ssrInput');
+            let ssrCode = ssrInput.value.trim();
+
+            // Set default SSR code if none is entered
+            if (ssrCode === '') {
+                ssrCode = '0000';
+                ssrInput.value = ssrCode;  // Update the input field with the default value
+            }
+
+            if (validateSingleSsrCode(ssrCode)) {
+                ssrInput.style.backgroundColor = ''; // Reset to default
+                return true;
+            }
+            ssrInput.style.backgroundColor = '#f8d7da'; // Light red color for invalid SSR
+            return false;
+        } else {
+            const ssrInputs = document.querySelectorAll('.formation-ssr-input');
+            const ssrCodes = new Set();  // To track unique SSR codes except '0000'
+            let isValid = true;
+
+            ssrInputs.forEach(input => {
+                let ssrCode = input.value.trim();
+
+                // Set default SSR code if none is entered
+                if (ssrCode === '') {
+                    ssrCode = '0000';
+                    input.value = ssrCode;  // Update the input field with the default value
+                }
+
+                if (!validateSingleSsrCode(ssrCode) || (ssrCode !== '0000' && ssrCodes.has(ssrCode))) {
+                    input.style.backgroundColor = '#f8d7da';  // Highlight invalid field
+                    isValid = false;
+                } else {
+                    input.style.backgroundColor = '';  // Reset to default
+                    if (ssrCode !== '0000') {
+                        ssrCodes.add(ssrCode);  // Add to the set if not '0000'
+                    }
+                }
+            });
+
+            return isValid;
+        }
+    }
+
+    // Helper function to validate a single SSR code
+    function validateSingleSsrCode(ssrCode) {
+        // Skip duplication check for emergency SSR codes (7500, 7600, 7700)
+        if (ssrCode === '7500' || ssrCode === '7600' || ssrCode === '7700') {
+            return true;  // Valid emergency codes
+        }
+
+        // Validate SSR code format (octal) and allow '0000' to be duplicate
+        const existingSSR = aircraftBlips.find(blip => blip.ssrCode === ssrCode && ssrCode !== '0000');
+        return /^[0-7]{4}$/.test(ssrCode) && !existingSSR;
+    }
+
+    function validateHeading() {
+        const headingInput = document.getElementById('headingInput');
+        const heading = parseInt(headingInput.value, 10);
+
+        if (isNaN(heading) || heading < 1 || heading > 360) {
+            headingInput.style.backgroundColor = '#f8d7da'; // Light red color
+            return false;
+        }
+
+        headingInput.style.backgroundColor = ''; // Reset to default
+        return true;
+    }
+
+    function validateSpeed() {
+        const speedInput = document.getElementById('speedInput');
+        const speed = parseInt(speedInput.value, 10);
+
+        if (isNaN(speed)) {
+            speedInput.style.backgroundColor = '#f8d7da'; // Light red color
+            return false;
+        }
+
+        speedInput.style.backgroundColor = ''; // Reset to default
+        return true;
+    }
+
+    function validateAltitude() {
+        const altitudeInput = document.getElementById('altitudeInput');
+        const altitude = parseInt(altitudeInput.value * 100, 10); // Convert to feet
+
+        if (isNaN(altitude)) {
+            altitudeInput.style.backgroundColor = '#f8d7da'; // Light red color
+            return false;
+        }
+
+        altitudeInput.style.backgroundColor = ''; // Reset to default
+        return true;
+    }
+
+    // Function to remove trailing numbers from a callsign to get formation callsign
+    function getBaseCallsign(callsign) {
+        return callsign.replace(/-\d+$/, ''); // Remove trailing '-' followed by digits
+    }
+
+
+    //*******Function related to aircraft blip */
+    // Function to Create Aircraft blip(s) after validating inputs from Dialog Box
+    function createAircraftBlip() {
+        const formationSize = parseInt(document.querySelector('input[name="formationSize"]:checked').value, 10);
+
+        // Validate all input fields including SSR codes
+        const isCallsignValid = validateCallsign(formationSize);
+        const isSsrCodeValid = validateSsrCode(formationSize);
+        const isHeadingValid = validateHeading();
+        const isSpeedValid = validateSpeed();
+        const isAltitudeValid = validateAltitude();
+
+        if (!isCallsignValid || !isSsrCodeValid || !isHeadingValid || !isSpeedValid || !isAltitudeValid) {
+            return false;
+        }
+
+        // Get the input values
+        const callsignInput = document.getElementById('callsignInput').value.trim();
+        const headingInput = parseInt(document.getElementById('headingInput').value, 10);
+        const speedInput = parseInt(document.getElementById('speedInput').value, 10);
+        const altitudeInput = parseInt(document.getElementById('altitudeInput').value * 100, 10);  // Convert to feet
+
+        if (formationSize === 1) {
+            // Handle individual aircraft creation
+            const callsign = callsignInput;
+            const ssrCode = document.getElementById('ssrInput').value.trim();
+
+            const blip = new AircraftBlip(callsign, headingInput, speedInput, altitudeInput, selectedPosition.x, selectedPosition.y, ssrCode);
+            blip.role = 'Individual';  // Assign individual role
+            console.log(`C/S ${callsign} created as individual aircraft.`);  // Log message
+
+            aircraftBlips.push(blip);
+            createControlBox(blip, formationSize, 1);  // Create control box
+        } else {
+            console.log("Formation: C/S " + getBaseCallsign(callsignInput) + " (" + formationSize + " aircraft) created.");
+            // Handle formation aircraft creation
+            for (let i = 1; i <= formationSize; i++) {
+                const callsign = `${callsignInput}-${i}`;
+                const ssrCode = document.getElementById(`formationSSRInput_${i}`).value.trim();
+
+                const blip = new AircraftBlip(callsign, headingInput, speedInput, altitudeInput, selectedPosition.x, selectedPosition.y, ssrCode);
+
+                if (i === 1) {
+                    blip.role = 'Leader';  // Assign leader role
+                    blip.formationSize = formationSize;
+                    console.log(`C/S ${callsign} created as formation leader.`);
+                } else {
+                    blip.role = 'Member';  // Assign member role
+                    console.log(`C/S ${callsign} created as formation member.`);
+                }
+
+                aircraftBlips.push(blip);
+                createControlBox(blip, formationSize, i);  // Create control box for each blip
+            }
+        }
+
+        return true;  // Return true to indicate successful creation
+    }
+
+    // Function to update aircraft blips' positions every 4 seconds
+    function moveAircraftBlips() {
+        if (!isPaused) {
+            aircraftBlips.forEach(blip => blip.move(false));  // Update both heading and position
+            setTimeout(moveAircraftBlips, updateInterval);  // Schedule next movement update
+        }
+    }
+
+    //Formation Handling
+    // Function to toggle the control boxes for formation aircraft based on checkbox status
+    function toggleFormationControlBoxes(enable, formationSize, firstAircraftCallsign) {
+        // Extract the number from the first aircraft's callsign
+        const leaderNumberMatch = firstAircraftCallsign.match(/-(\d+)$/);
+        let startFrom = 1; // Default to 1 if there is no numeric suffix
+
+        if (leaderNumberMatch) {
+            startFrom = parseInt(leaderNumberMatch[1], 10) + 1;  // Get the number and increment by 1
+        }
+
+        // Loop through the formation starting from the next number
+        for (let i = startFrom; i <= 4; i++) {
+            const currentCallsign = `${getBaseCallsign(firstAircraftCallsign)}-${i}`;  // Construct the callsign for the rest of the formation
+            if (enable) {
+                enableControlBox(currentCallsign);
+            } else {
+                disableControlBox(currentCallsign);
+            }
+        }
+    }
+
+    // Function to update the heading and control box every 1 second
+    function updateHeadingPeriodically() {
+        aircraftBlips.forEach(blip => {
+            blip.move(true);  // Only update the heading, not the position on the radar
+        });
+
+        setTimeout(updateHeadingPeriodically, headingUpdateInterval);  // Schedule next update
+    }
+
+
+    // Function to delete a single aircraft
+    function deleteAircraft(blip) {
+        const baseCallsign = getBaseCallsign(blip.callsign);
+
+        // Check if the aircraft being deleted is the leader
+        if (blip.role === "Leader") {
+            const nextInLine = findNextAircraftInFormation(blip);
+
+            if (nextInLine) {
+                // Promote the next aircraft to leader with reduced formation size
+                promoteToLeader(nextInLine, blip.formationSize);
+            }
+        }
+
+        // Remove the blip from the aircraftBlips array
+        aircraftBlips = aircraftBlips.filter(b => b !== blip);
+
+        // Remove the elements from the DOM
+        removeAircraftElements(blip);
+
+        updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
+    }
+
+    // Helper function to find the next aircraft in the formation (after the leader)
+    function findNextAircraftInFormation(leaderBlip) {
+        const baseCallsign = getBaseCallsign(leaderBlip.callsign);
+
+        // Extract the number from the leader's callsign
+        const leaderNumberMatch = leaderBlip.callsign.match(/-(\d+)$/);
+        let startFrom = 1; // Default to 1 if there is no numeric suffix
+
+        if (leaderNumberMatch) {
+            startFrom = parseInt(leaderNumberMatch[1], 10) + 1;  // Get the number and increment by 1
+        }
+
+        // Find the next aircraft in sequence based on the leader's numeric suffix
+        for (let i = startFrom; i <= leaderBlip.formationSize; i++) {
+            const nextCallsign = `${baseCallsign}-${i}`;
+            const nextBlip = aircraftBlips.find(blip => blip.callsign === nextCallsign);
+            //console.log(`Next Callsign in sequence is: ${nextCallsign}`);
+            if (nextBlip) return nextBlip;  // Return the next aircraft found
+        }
+
+        return null;  // No aircraft found in the sequence
+    }
+
+    // Helper function to promote the next aircraft to leader
+    function promoteToLeader(newLeaderBlip, newFormationSize) {
+        newLeaderBlip.role = "Leader";  // Assign leader role
+        newLeaderBlip.formationSize = newFormationSize - 1;  // Update formation size
+
+        // Update the control box: Add the checkbox to the new leader (unchecked by default)
+        const controlBox = document.getElementById(`controlBox_${newLeaderBlip.callsign}`);
+        if (controlBox) {
+            controlBox.querySelector('.command-input-container').innerHTML += `
+            <input type="checkbox" id="formationCheckbox_${newLeaderBlip.callsign}">
+        `;
+
+
+            // Add event listener for the checkbox in the first aircraft's control box
+            if (newFormationSize >= 1) {
+                const checkbox = document.getElementById(`formationCheckbox_${newLeaderBlip.callsign}`);
+                checkbox.addEventListener('change', function () {
+                    toggleFormationControlBoxes(!checkbox.checked, newFormationSize, newLeaderBlip.callsign); // Reversed logic
+                });
+            }
+            console.log(`${newLeaderBlip.callsign} is now new Formation leader. Remaining Formation size is ${newLeaderBlip.formationSize}.`)
+
+        }
+
+    }
+
+    // Helper function to remove aircraft elements from the DOM
+    function removeAircraftElements(blip) {
+        const elementsToRemove = [
+            blip.element, blip.label, blip.line, ...blip.historyDots
+        ];
+
+        elementsToRemove.forEach(element => {
+            if (element && element.parentNode) element.parentNode.removeChild(element);
+        });
+
+        const controlBox = document.getElementById(`controlBox_${blip.callsign}`);
+        if (controlBox) controlBox.parentNode.removeChild(controlBox);
+    }
+
+    //***********Functions related to Control Boxes
+    // Function to Create control box for aircraft
+    function createControlBox(blip, formationSize, aircraftIndex) {
+        const controlPanel = document.getElementById('controlPanel');
+        const controlBox = document.createElement('div');
+        controlBox.className = 'control-box';
+        controlBox.id = `controlBox_${blip.callsign}`;  // Unique ID based on callsign
+
+        // Format heading to always be 3 digits
+        const formattedHeading = String(blip.heading).padStart(3, '0');
+
+        // Calculate bearing and distance at the time of creation
+        const { bearing, distanceNM } = blip.getBearingAndDistanceFromRadarCenter();
+
+        // Create the HTML for the control box
+        controlBox.innerHTML = `
+        <div>
+            <span class="info-box callsign-box">${blip.callsign}</span>
+            <span class="info-box ssr-box">3-${blip.ssrCode}</span>
+            <span class="info-box heading-box"><span id="heading_${blip.callsign}">${formattedHeading}°</span></span>
+            <span class="info-box altitude-box">A<span id="altitude_${blip.callsign}">${Math.round(blip.altitude / 100)}</span></span>
+            <span class="info-box speed-box">N<span id="speed_${blip.callsign}">${blip.speed}</span></span>
+            <span class="info-box bearing-distance-box"><span id="bearing_${blip.callsign}">${bearing}</span>° / <span id="distance_${blip.callsign}">${distanceNM}</span> NM</span>
+        </div>
+        <div class="command-input-container">
+            <input type="text" id="commandInput_${blip.callsign}">
+            <span id="lastCommand_${blip.callsign}" class="last-command"></span>
+            ${formationSize > 1 && aircraftIndex === 1 ?
+                `<input type="checkbox" id="formationCheckbox_${blip.callsign}" checked> ` : ''}
+        </div>
+    `;
+
+        controlPanel.appendChild(controlBox);
+
+        // Disable the control box if it's not the first aircraft in the formation
+        if (formationSize > 1 && aircraftIndex > 1) {
+            disableControlBox(blip.callsign);
+        }
+
+        // Add event listener for the checkbox in the first aircraft's control box
+        if (formationSize > 1 && aircraftIndex === 1) {
+            const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
+            checkbox.addEventListener('change', function () {
+                toggleFormationControlBoxes(!checkbox.checked, formationSize, blip.callsign); // Reversed logic
+            });
+        }
+
+        // Event listener for Enter key to handle commands for each aircraft
+        controlBox.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                processCommand(this.formationSize, blip);
+            }
+        });
+    }
+
+    // Function to update the speed and heading in the control box
+    function updateControlBox(blip) {
+        const headingElement = document.getElementById(`heading_${blip.callsign}`);
+        const speedElement = document.getElementById(`speed_${blip.callsign}`);
+        const altitudeElement = document.getElementById(`altitude_${blip.callsign}`);
+        const callsignElement = document.querySelector(`#controlBox_${blip.callsign} .callsign-box`);
+        const ssrElement = document.querySelector(`#controlBox_${blip.callsign} .ssr-box`);
+        const bearingElement = document.getElementById(`bearing_${blip.callsign}`);
+        const distanceElement = document.getElementById(`distance_${blip.callsign}`);
+
+        // Format heading to always be 3 digits
+        const formattedHeading = String(blip.heading).padStart(3, '0');
+
+        // Update heading, speed, and altitude
+        if (headingElement) headingElement.innerHTML = `${formattedHeading}°`;
+        if (speedElement) speedElement.innerHTML = `${blip.speed}`;
+        if (altitudeElement) altitudeElement.innerHTML = `${Math.round(blip.altitude / 100)}`;
+
+        // Update callsign and SSR code
+        if (callsignElement) callsignElement.innerHTML = blip.callsign;
+        if (ssrElement) ssrElement.innerHTML = `3-${blip.ssrCode}`;
+
+        // Update bearing and distance
+        const { bearing, distanceNM } = blip.getBearingAndDistanceFromRadarCenter();
+        if (bearingElement) bearingElement.innerHTML = bearing;
+        if (distanceElement) distanceElement.innerHTML = distanceNM;
+    }
+
+    // Helper functions to enable or disable control boxes
+    function enableControlBox(callsign) {
+        const commandInput = document.getElementById(`commandInput_${callsign}`);
+        if (commandInput) commandInput.disabled = false;
+    }
+
+    // Function to disable the control box
+    function disableControlBox(callsign) {
+        const commandInput = document.getElementById(`commandInput_${callsign}`);
+        if (commandInput) commandInput.disabled = true;
+    }
+
+    //*******Function to enable dragging of labels
+    function dragElement(elmnt, blip) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+        elmnt.onmousedown = (e) => {
+            e.stopPropagation();  // Prevent panning on label click
+            isLabelDragging = true;  // Set the flag to indicate label dragging
+            dragMouseDown(e);
+        };
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+            isLabelDragging = false;  // Reset the flag when dragging ends
+
+            // Update the label offset relative to the blip
+            const blipRect = blip.element.getBoundingClientRect();
+            const labelRect = elmnt.getBoundingClientRect();
+            blip.labelOffset = {
+                x: labelRect.left - blipRect.left,
+                y: labelRect.top - blipRect.top
+            };
+
+            // Update the line to reflect the new label position
+            blip.updateLinePosition();
+        }
+    }
+
+
+
+
+    //********functions.js script file ends here**********/
+
+
+    //********aircraftBlipClass.js script file starts here**********/
+
+
+
+
+    // AircraftBlip class with all attributes regarding aircraft blip, label and leading line
+    class AircraftBlip {
+        constructor(callsign, heading, speed, altitude, x, y, ssrCode) {
+            this.callsign = callsign;
+            this.ssrCode = ssrCode;
+            this.heading = heading;
+            this.speed = speed;
+            this.targetSpeed = speed;
+            this.altitude = altitude || 10000;
+            this.targetAltitude = this.altitude;
+            this.verticalClimbDescendRate = 3000;
+            this.speedChangeRate = 10;
+            this.position = { x, y };
+            this.targetHeading = heading;
+            this.headingChangeRate = 2;
+            this.turning = false;
+            this.orbitLeft = false;  // New property for orbiting left
+            this.orbitRight = false; // New property for orbiting right
+            this.formationSize = 1;
+            this.role = 'Individual';
+
+            // Create elements (blip, label, line)
+            this.element = this.createBlipElement();
+            this.label = this.createLabelElement();
+            this.labelOffset = { x: 40, y: -40 }; // Initial offset from blip
+            this.line = this.createLineElement();
+            this.history = [];
+            this.historyDots = [];
+
+            // Create history dots
+            this.createHistoryDots();
+
+            // Update positions
+            this.updateBlipPosition();
+
+            // Ensure the color is updated based on SSR
+            this.updateColorBasedOnSSR(); // Call after elements are created
+        }
+
+        // Create the blip element for the aircraft
+        createBlipElement() {
+            const blip = document.createElement('div');
+            blip.className = 'aircraft-blip';
+
+            // Apply additional class for plus sign if SSR code is '0000'
+            if (this.ssrCode === '0000') {
+                blip.classList.remove('aircraft-blip'); // Remove the default box class
+                blip.classList.add('plus-sign'); // Add the plus sign class
+
+            } else {
+                blip.classList.remove('plus-sign'); // Remove the plus sign class if it was previously added
+                blip.classList.add('aircraft-blip'); // Ensure the default box style is applied
+
+            }
+
+            blip.style.position = 'absolute';
+            blip.style.zIndex = '2';
+
+            panContainer.appendChild(blip);
+            return blip;
+        }
+
+        // Update label to show callsign, speed, and altitude in the desired format
+        createLabelElement() {
+            const label = document.createElement('div');
+            label.className = 'aircraft-label';
+            label.innerHTML = `${this.callsign}<br>3-${this.ssrCode}<br>A${Math.round(this.altitude / 100)}<br>N${this.speed}`;
+            label.style.position = 'absolute';
+            label.style.color = 'yellow';
+            label.style.zIndex = '3';
+
+            // Check the global labelsVisible flag and hide the label if it's false
+            if (!labelsVisible) {
+                label.style.display = 'none';
+            }
+
+            panContainer.appendChild(label);
+
+            this.label = label;  // Store the label element
+
+            // Make the label draggable
+            dragElement(label, this);
+
+            // Update the label info based on the initial SSR code
+            this.updateLabelInfo(this);
+
+            return label;
+        }
+
+        // Create the line element connecting the blip and the label
+        createLineElement() {
+            const line = document.createElement('div');
+            line.className = 'aircraft-line';
+            line.style.position = 'absolute';
+            line.style.height = '1px';
+            line.style.backgroundColor = 'grey';
+            line.style.zIndex = '1';
+
+            // Check the global labelsVisible flag and hide the line if it's false
+            if (!labelsVisible) {
+                line.style.display = 'none';
+            }
+
+            panContainer.appendChild(line);
+            return line;
+        }
+
+        // Create history dot elements and append to the radar
+        createHistoryDots() {
+            for (let i = 0; i < 12; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'history-dot';
+                dot.style.opacity = 0; // Initially set opacity to 0
+                dot.style.position = 'absolute';
+                dot.style.width = '1px';
+                dot.style.height = '1px';
+                dot.style.backgroundColor = 'yellow';
+                dot.style.zIndex = '1';
+                panContainer.appendChild(dot);
+                this.historyDots.push(dot);
+            }
+        }
+
+        // Update the blip's position and label position
+        updateBlipPosition() {
+            const blipSize = 6;
+            const scopeCenterX = radarCenter.x;
+            const scopeCenterY = radarCenter.y;
+
+            // Update the blip's position
+            this.element.style.left = `${scopeCenterX + this.position.x * zoomLevel - blipSize / 2}px`;
+            this.element.style.top = `${scopeCenterY - this.position.y * zoomLevel - blipSize / 2}px`;
+
+            // Apply the updated offset to the label
+            this.label.style.left = `${this.element.offsetLeft + this.labelOffset.x}px`;
+            this.label.style.top = `${this.element.offsetTop + this.labelOffset.y}px`;
+
+            // Update the line to connect the blip and the label
+            this.updateLinePosition();
+
+            // Calculate and log bearing and distance
+            const { bearing, distanceNM } = this.getBearingAndDistanceFromRadarCenter();
+            //console.log(`C/S ${this.callsign}: Bearing: ${bearing}°, Distance: ${distanceNM} NM`);
+
+            this.history.push({ x: this.position.x, y: this.position.y });
+
+            if (this.history.length > 12) {
+                this.history.shift();
+            }
+
+            this.updateHistoryDots();
+        }
+
+        getBearingAndDistanceFromRadarCenter() {
+            const deltaX = this.position.x * zoomLevel;
+            const deltaY = this.position.y * zoomLevel;
+
+            const distancePixels = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const distanceNM = distancePixels / (zoomLevel * 1.0); // 1.0 as conversion placeholder
+
+            // Corrected bearing calculation (same logic as mouse pointer calculation)
+            let bearing = Math.atan2(deltaX, deltaY) * (180 / Math.PI);
+            bearing = (bearing + 360) % 360; // Normalize bearing to 0-360 degrees
+
+            return {
+                bearing: bearing.toFixed(0).padStart(3, '0'), // Ensure 3-digit format
+                distanceNM: distanceNM.toFixed(0)
+            };
+        }
+
+        // Update label to show callsign and speed with a 90-degree perpendicular offset to the heading
+        updateLabelPosition(blip) {
+
+            // Calculate the offset angle to be perpendicular to the heading
+            const angleRad = (this.heading - 180) * Math.PI / 180;
+            const labelXOffset = 90 * Math.cos(angleRad); // Distance from the blip to the label in x-direction
+            const labelYOffset = 90 * Math.sin(angleRad); // Distance from the blip to the label in y-direction
+
+            // Calculate label position with the perpendicular offset applied
+            const labelX = radarCenter.x + this.position.x * zoomLevel + labelXOffset;
+            const labelY = radarCenter.y - this.position.y * zoomLevel - labelYOffset;
+
+            // Set label position
+            this.label.style.left = `${labelX}px`;
+            this.label.style.top = `${labelY}px`;
+
+            //Update Label Info
+            this.updateLabelInfo(this);
+
+        }
+
+        //To update the informatioin on label based on primary or secondary pickup
+        updateLabelInfo(blip) {
+            // Only display label info if SSR code is not 0000
+            if (this.ssrCode !== '0000') {
+                this.label.innerHTML = `${this.callsign}<br>3-${this.ssrCode}<br>A${Math.round(this.altitude / 100)}<br>N${this.speed}`;
+            } else {
+                this.label.innerHTML = `N${this.speed}`; // Display only speed if SSR code is 0000
+            }
+        }
+
+        //Set the SSR code based on input
+        setSSRCode(newSSRCode) {
+            this.ssrCode = newSSRCode;
+            // Remove the existing blip
+            this.element.remove();
+            // Create a new blip based on the new SSR code
+            this.element = this.createBlipElement();
+            this.updateBlipPosition();  // Ensure the new blip is positioned correctly
+            this.updateLabelInfo();  // Update label info as well
+            this.updateColorBasedOnSSR(); // Apply the color change
+            updateControlBox(this);  // Update the control box to reflect the SSR code change
+
+        }
+
+        //Update the colour of label and blip based on SSR code like emergency codes
+        updateColorBasedOnSSR() {
+            // Check for emergency codes and set colors
+            if (this.ssrCode === '7500' || this.ssrCode === '7600' || this.ssrCode === '7700') {
+                // Change to red for emergencies
+                this.label.style.color = 'red';
+                this.line.style.backgroundColor = 'red';
+                this.element.style.backgroundColor = 'red';
+
+                // Change history dots to red
+                this.historyDots.forEach(dot => {
+                    dot.style.backgroundColor = 'red';
+                });
+            } else {
+                // Revert back to default colors
+                this.label.style.color = 'yellow';
+                this.line.style.backgroundColor = 'grey';
+                this.element.style.backgroundColor = 'yellow';
+
+                // Revert history dots to yellow
+                this.historyDots.forEach(dot => {
+                    dot.style.backgroundColor = 'yellow';
+                });
+            }
+        }
+
+        // Update the line position and draw it between the blip and the label
+        updateLinePosition() {
+            const blipRect = this.element.getBoundingClientRect();
+            const labelRect = this.label.getBoundingClientRect();
+
+            // Get current pan offsets (dx, dy) from the panContainer
+            const panMatrix = new WebKitCSSMatrix(window.getComputedStyle(panContainer).transform);
+            const panX = panMatrix.m41;
+            const panY = panMatrix.m42;
+
+            // Calculate the center of the blip relative to the pan offsets
+            const blipCenterX = blipRect.left + blipRect.width / 2 - panX;
+            const blipCenterY = blipRect.top + blipRect.height / 2 - panY;
+
+            // Calculate corners of the label
+            const labelCorners = [
+                { x: labelRect.left - panX, y: labelRect.top - panY },                // Top left
+                { x: labelRect.right - panX, y: labelRect.top - panY },               // Top right
+                { x: labelRect.left - panX, y: labelRect.bottom - panY },             // Bottom left
+                { x: labelRect.right - panX, y: labelRect.bottom - panY }             // Bottom right
+            ];
+
+            // Calculate the midpoints of each edge of the label
+            const labelEdges = [
+                { x: (labelRect.left + labelRect.right) / 2 - panX, y: labelRect.top - panY },       // Top edge
+                { x: (labelRect.left + labelRect.right) / 2 - panX, y: labelRect.bottom - panY },    // Bottom edge
+                { x: labelRect.left - panX, y: (labelRect.top + labelRect.bottom) / 2 - panY },      // Left edge
+                { x: labelRect.right - panX, y: (labelRect.top + labelRect.bottom) / 2 - panY }      // Right edge
+            ];
+
+            // Combine corners and edges into one array
+            const labelPoints = [...labelCorners, ...labelEdges];
+
+            // Find the nearest point (corner or edge)
+            let nearestPoint = labelPoints[0];
+            let minDistance = Infinity;
+
+            for (const point of labelPoints) {
+                const distance = Math.sqrt(
+                    Math.pow(point.x - blipCenterX, 2) +
+                    Math.pow(point.y - blipCenterY, 2)
+                );
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestPoint = point;
+                }
+            }
+
+            // Calculate the line's length and angle to the nearest point
+            const deltaX = nearestPoint.x - blipCenterX;
+            const deltaY = nearestPoint.y - blipCenterY;
+            const lineLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+            // Update the line's position, length, and rotation
+            this.line.style.width = `${lineLength}px`;
+            this.line.style.left = `${blipCenterX}px`;
+            this.line.style.top = `${blipCenterY}px`;
+            this.line.style.transform = `rotate(${angle}deg)`;
+
+            // Ensure the line stays behind the label
+            this.line.style.zIndex = '1';  // Lower z-index than the label
+            this.label.style.zIndex = '3';  // Ensure the label stays above the line
+        }
+
+
+        // Update the history dots' positions based on the aircraft's history
+        updateHistoryDots() {
+            // Respect the historyDotsVisible flag
+            if (!historyDotsVisible) {
+                this.historyDots.forEach(dot => {
+                    dot.style.opacity = 0;
+                });
+                return;
+            }
+
+            const scopeCenterX = radarCenter.x;
+            const scopeCenterY = radarCenter.y;
+
+            // Reverse the opacity calculation: oldest dot fades the most
+            for (let i = 0; i < this.historyDots.length; i++) {
+                const historyPos = this.history[this.history.length - this.historyDots.length + i];
+                const dot = this.historyDots[i];
+
+                if (dot && historyPos) {
+                    const dotSize = 1;
+                    dot.style.left = `${scopeCenterX + historyPos.x * zoomLevel - dotSize / 2}px`;
+                    dot.style.top = `${scopeCenterY - historyPos.y * zoomLevel - dotSize / 2}px`;
+
+                    // Oldest dot gets the lowest opacity, newest the highest
+                    dot.style.opacity = (i + 1) / this.historyDots.length;
+                }
+            }
+        }
+
+        // Update the blip's position and handle turning gradually
+        move(headingOnly = false) {
+            const speedMetersPerSecond = (this.speed / zoomLevel) * 0.514444;
+            const distancePerUpdateMeters = speedMetersPerSecond * (updateInterval / 1000);
+            const distancePerUpdateNauticalMiles = distancePerUpdateMeters / 1852;
+
+            if (isPaused) return;  // Stop any movement or state updates if paused
+
+            // Handle orbit left
+            if (this.orbitLeft) {
+                this.heading = (this.heading - this.headingChangeRate * (headingUpdateInterval / 1000) + 360) % 360;
+            }
+
+            // Handle orbit right
+            if (this.orbitRight) {
+                this.heading = (this.heading + this.headingChangeRate * (headingUpdateInterval / 1000)) % 360;
+            }
+
+            // Handle gradual heading change if not orbiting
+            if (!this.orbitLeft && !this.orbitRight && this.heading !== this.targetHeading) {
+                let headingDiff = (this.targetHeading - this.heading + 360) % 360;
+                const turnRate = this.headingChangeRate * (headingUpdateInterval / 1000);
+
+                if (this.turnRight === true) {
+                    if (headingDiff > 180) {
+                        headingDiff = 360 - headingDiff;
+                        this.heading = (this.heading + turnRate) % 360;
+                    } else {
+                        this.heading = (this.heading + turnRate) % 360;
+                    }
+                } else if (this.turnRight === false) {
+                    if (headingDiff <= 180) {
+                        headingDiff = 360 - headingDiff;
+                        this.heading = (this.heading - turnRate + 360) % 360;
+                    } else {
+                        this.heading = (this.heading - turnRate + 360) % 360;
+                    }
+                }
+
+                this.heading = (this.heading + 360) % 360;
+
+                if (Math.abs(this.heading - this.targetHeading) <= turnRate) {
+                    this.heading = this.targetHeading;  // Snap to the target heading
+                }
+            }
+
+            // Update heading in control box every 1 second
+            updateControlBox(this);
+
+            // If headingOnly is true, don't update the position on the radar
+            if (headingOnly) {
+                return;
+            }
+
+            // Update position based on the current heading (every 4 seconds)
+            const angleRad = (this.heading - 90) * Math.PI / 180;
+            const deltaX = distancePerUpdateNauticalMiles * Math.cos(angleRad);
+            const deltaY = distancePerUpdateNauticalMiles * Math.sin(angleRad);
+
+            this.position.x += deltaX * zoomLevel;
+            this.position.y -= deltaY * zoomLevel;
+
+            // Adjust altitude gradually towards the targetAltitude
+            const verticalChangePerSecond = this.verticalClimbDescendRate / 60;  // Feet per second
+            const verticalChangePerUpdate = verticalChangePerSecond * (updateInterval / 1000);  // Change per update
+
+            if (this.altitude !== this.targetAltitude) {
+                const altitudeDiff = this.targetAltitude - this.altitude;
+                if (Math.abs(altitudeDiff) <= verticalChangePerUpdate) {
+                    this.altitude = this.targetAltitude;  // Snap to target altitude if close enough
+                } else {
+                    this.altitude += Math.sign(altitudeDiff) * verticalChangePerUpdate;  // Gradual altitude change
+                }
+
+                // Update control box and label
+                updateControlBox(this);
+                this.updateLabelPosition();
+            }
+
+            // Adjust speed gradually towards the targetSpeed
+            const speedChangePerUpdate = this.speedChangeRate * (updateInterval / 1000);  // Change per update
+
+            if (this.speed !== this.targetSpeed) {
+                const speedDiff = this.targetSpeed - this.speed;
+                if (Math.abs(speedDiff) <= speedChangePerUpdate) {
+                    this.speed = this.targetSpeed;  // Snap to target speed if close enough
+                } else {
+                    this.speed += Math.sign(speedDiff) * speedChangePerUpdate;  // Gradual speed change
+                }
+
+                // Update control box and label
+                updateControlBox(this);
+                this.updateLabelPosition();
+            }
+
+            // Update the blip's position on the radar
+            this.updateBlipPosition();
+        }
+
+        // Function to start orbiting left
+        startOrbitLeft() {
+            this.orbitLeft = true;
+            this.orbitRight = false; // Stop orbiting right if already orbiting right
+            this.turnRight = null; // Disable turning logic
+        }
+
+        // Function to start orbiting right
+        startOrbitRight() {
+            this.orbitLeft = false;
+            this.orbitRight = true; // Stop orbiting left if already orbiting left
+            this.turnRight = null; // Disable turning logic
+        }
+
+        // Function to stop turning (stopping the orbit)
+        stopTurn() {
+            this.orbitLeft = false;
+            this.orbitRight = false;
+            this.turnRight = null; // Also stop any heading change logic
+        }
+
+        setTargetHeading(newHeading) {
+            this.targetHeading = newHeading;
+        }
+
+        setTargetSpeed(newSpeed) {
+            this.targetSpeed = newSpeed;
+        }
+    }
+
+
+
+
+
+
+
+
+
+    //********aircraftBlipClass.js script file ends here**********/
+
+    //********aircraft.js script file starts here**********/
+
+    //*****All variables and constants regarding aircraft handling and movmement of aircraft */
+
+
+    const updateInterval = 4000; // Update interval in milliseconds
+    const headingUpdateInterval = 1000;  // Heading update interval set to 1 second (1000 milliseconds)
+    const radarContextMenu = document.getElementById('radarContextMenu');
+
+    let selectedPosition = { x: 0, y: 0 }; // Initialize selectedPosition
+    let aircraftBlips = []; // To store all created aircraft blips
+    let radarCenter = { x: radarScope.offsetWidth / 2, y: radarScope.offsetHeight / 2 }; // Track radar center
+    let isPaused = false; // to initialise the exercise pause and resume button
+    let clickedPosition = { x: 0, y: 0 };
+    let historyDotsVisible = true; // Initialize the flag to track the visibility state of the history dots
+    let labelsVisible = true; // //Initialize the flag to track the visibility state of the labels
+
+    //To add the dragging functionality to labels
+    let isLabelDragging = false; // Global flag to track label dragging
+
+    // Set the initial state of the History button
+    document.getElementById('historyDots').classList.add(historyDotsVisible ? 'active' : 'inactive');
+
+    // Set the initial state of the Label button
+    document.getElementById('label').classList.add(labelsVisible ? 'active' : 'inactive');
+
+    // Start the heading update loop
+    updateHeadingPeriodically();
+
+    // Start the movement update loop
+    moveAircraftBlips();
+
+
+
+    //********aircraft.js script file ends here**********/
+
+    //********eventListeners.js script file starts here**********/
+
+    //All event listeners placed here
+
+
+    // Context menu for creating aircraft
+
+    // Attach event listener to the pause button
+    document.getElementById('pauseButton').addEventListener('click', togglePause);
+
+    // Event listener to Show the custom context menu on right-click
+    radarScope.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        clickedPosition = calculatePosition(event.clientX, event.clientY);
+        radarContextMenu.style.top = `${event.clientY}px`;
+        radarContextMenu.style.left = `${event.clientX}px`;
+        radarContextMenu.style.display = 'block';
+    });
+
+    // Hide context menu when clicking elsewhere
+    document.addEventListener('click', () => {
+        radarContextMenu.style.display = 'none';
+    });
+
+    // Handle "Create Aircraft" from context menu
+    document.getElementById('createAircraftContextMenu').addEventListener('click', () => {
+        selectedPosition = { ...clickedPosition };
+        openAircraftDialog();
+        radarContextMenu.style.display = 'none';
+    });
+
+    // Event listener for creating aircraft from enter key on dialog box
+    document.getElementById('aircraftDialog').addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            if (createAircraftBlip()) {
+                closeAircraftDialog();
+            }
+        }
+    });
+
+    // Event listener for creating aircraft from click on Create Button
+    document.getElementById('createAircraftButton').addEventListener('click', () => {
+        if (createAircraftBlip()) {  // Attempt to create aircraft blip
+            closeAircraftDialog();   // Close dialog if creation was successful
+        }
+    });
+
+    // Event listener for Cancel button for closing aircraft dialog box without making any changes
+    document.getElementById('cancelAircraftButton').addEventListener('click', closeAircraftDialog);
+
+    // Event listener for closing aircraft dialog through escape key without making any changes
+    document.getElementById('aircraftDialog').addEventListener('keypress', (event) => {
+        if (event.key === 'Escape') {
+            closeAircraftDialog(); // Close the dialog when "Esc" is pressed
+        }
+    });
+
+    // Event listener to update SSR input fields based on formation size
+    document.querySelectorAll('input[name="formationSize"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const formationSize = document.querySelector('input[name="formationSize"]:checked').value;
+            const callsign = document.getElementById('callsignInput').value.trim();  // Get callsign input
+            const ssrFormationContainer = document.getElementById('ssrFormationContainer');
+            const singleSSRInput = document.getElementById('singleSSRInput');
+            const formationSSRInputs = document.getElementById('formationSSRInputs');
+            const isValidFormationCallsign = /^[A-Za-z]+$/.test(callsign);
+
+            // Check if callsign is entered before proceeding
+            if (!callsign) {
+                alert("Please enter a valid callsign before selecting the formation size.");
+                document.querySelector('input[name="formationSize"][value="1"]').checked = true;  // Reset to single aircraft
+                return;
+            }
+
+            //Check whether the entered callsign is string or a number
+            if (!isValidFormationCallsign) {
+                callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
+                alert("Formation callsign can't contain numbers or special characters.");
+                document.querySelector('input[name="formationSize"][value="1"]').checked = true;  // Reset to single aircraft
+                return;
+            } else {
+                callsignInput.style.backgroundColor = '';  // Reset to default
+
+            }
+
+            if (formationSize == 1) {
+                // Show the single SSR input for individual aircraft
+                singleSSRInput.style.display = 'block';
+                formationSSRInputs.style.display = 'none';
+            } else {
+                // Hide the single SSR input and generate multiple SSR input fields with callsign-formation format
+                singleSSRInput.style.display = 'none';
+                formationSSRInputs.style.display = 'block';
+                ssrFormationContainer.innerHTML = '';  // Clear previous inputs
+
+                for (let i = 1; i <= formationSize; i++) {
+                    ssrFormationContainer.innerHTML += `
+                    <div class="ssr-input-container">
+                        <input type="number" class="formation-ssr-input" style="margin-bottom:1px" id="formationSSRInput_${i}" min="0000" max="7777" placeholder="${callsign}-${i} " required>
+                    </div>
+                `;
+                }
+            }
+        });
+    });
+
+
+
+    //Event listener to Toggle the visibility of labels and update the button's appearance
+    document.getElementById('label').addEventListener('click', () => {
+        labelsVisible = !labelsVisible;
+
+        // Get the label button element
+        const labelButton = document.getElementById('label');
+
+        // Update the button's appearance based on the current state
+        if (labelsVisible) {
+            labelButton.classList.add('active');
+            labelButton.classList.remove('inactive');
+            updateStatusBar('Labels Visible');
+        } else {
+            labelButton.classList.add('inactive');
+            labelButton.classList.remove('active');
+            updateStatusBar('Labels Hidden');
+        }
+
+        // Update visibility for all aircraft labels and lines
+        aircraftBlips.forEach(blip => {
+            if (blip.label) {
+                blip.label.style.display = labelsVisible ? 'block' : 'none';
+            }
+            if (blip.line) {
+                blip.line.style.display = labelsVisible ? 'block' : 'none';
+            }
+        });
+    });
+
+    //Event listener to Toggle the visibility of history dots and update the button's appearance
+    document.getElementById('historyDots').addEventListener('click', () => {
+        // Toggle the visibility state
+        historyDotsVisible = !historyDotsVisible;
+
+        // Get the history button element
+        const historyButton = document.getElementById('historyDots');
+
+        // Update the button's appearance based on the current state
+        if (historyDotsVisible) {
+            historyButton.classList.add('active');
+            historyButton.classList.remove('inactive');
+            updateStatusBar('History Dots Visible');
+        } else {
+            historyButton.classList.add('inactive');
+            historyButton.classList.remove('active');
+            updateStatusBar('History Dots Hidden');
+        }
+
+        // Immediately apply the visibility change by updating all blips
+        aircraftBlips.forEach(blip => blip.updateHistoryDots());
+    });
+
+
+    // Attach event listeners to track window resizing or zooming
+    window.addEventListener('resize', () => {
+        updateRadarCenter();
+        createRangeRings();  // Reposition range rings correctly
+        aircraftBlips.forEach(blip => blip.updateBlipPosition());
+    });
+
+
+
+
+
+    //********eventListeners.js script file ends here**********/
+
+    //********commands.js script file starts here**********/
+
+    // Aircraft Commands
+    function processCommand(formationSize, blip) {
+        const input = document.getElementById(`commandInput_${blip.callsign}`);
+        const command = input.value.trim().toUpperCase();
+
+        // Check if the aircraft is a leader and whether the checkbox is checked
+        if (blip.role === "Leader") {
+            const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
+
+            if (checkbox && checkbox.checked) {  // Propagate if checked
+                console.log(`Command received by C/S ${blip.callsign} for formation. Propagating "${command}" to formation members.`);
+                propagateCommandToFormation(blip, command);
+            } else {
+                processCommandForBlip(blip, command);  // Execute only for the leader
+            }
+        }
+        else {
+            // Execute the command for the current aircraft (individual, leader, or member)
+            //console.log(`Command "${command}" received by C/S ${blip.callsign}.`);
+            processCommandForBlip(blip, command);
+        }
+
+        input.value = ''; // Clear input after processing
+    }
+
+    // Function to propagate commands to formation members in reverse order (last to first)
+    function propagateCommandToFormation(leaderBlip, command) {
+        const baseCallsign = getBaseCallsign(leaderBlip.callsign);
+        const formationSize = leaderBlip.formationSize;  // Get the formation size from the leader
+
+        //console.log(`Base Callsign: ${baseCallsign}, Formation Size: ${formationSize}`);
+
+        // Loop backwards from the last aircraft in the formation to the first (including the leader)
+        for (let i = 1; i <= 4; i++) {
+            const currentCallsign = `${baseCallsign}-${i}`;
+            const currentBlip = aircraftBlips.find(blip => blip.callsign === currentCallsign);
+
+            if (currentBlip) {
+                processCommandForBlip(currentBlip, command); // Execute the command for each aircraft
+            }
+        }
+    }
+
+    // Function to process a specific command for an individual aircraft or formation member
+    function processCommandForBlip(blip, command) {
+        const headingMatch = command.match(/^([LR])(\d{3})$/);
+        const speedMatch = command.match(/^S(\d+)$/);
+        const altitudeMatch = command.match(/^H(\d{1,2})$/);
+        const verticalRateMatch = command.match(/^V(\d+)$/);
+        const ssrMatch = command.match(/^SSR([0-7]{4})$/);
+
+        console.log(`Command "${command}" received by C/S ${blip.callsign}.`);
+
+        // Handle heading command
+        if (headingMatch) {
+            const direction = headingMatch[1];
+            const targetHeading = parseInt(headingMatch[2], 10);
+
+            blip.orbitLeft = false;
+            blip.orbitRight = false;
+
+            blip.turnRight = direction === 'R'; // Set turning direction
+            blip.setTargetHeading(targetHeading);
+
+            const turnDirection = direction === 'L' ? 'Left' : 'Right';
+            updateStatusBar(`Aircraft ${blip.callsign} turning ${turnDirection} heading ${blip.targetHeading}°`);
+        }
+
+        // Handle speed command
+        else if (speedMatch) {
+            const speed = parseInt(speedMatch[1], 10);
+            blip.setTargetSpeed(speed);
+            updateStatusBar(`Aircraft ${blip.callsign} speed set to ${speed} knots.`);
+        }
+
+        // Handle altitude command
+        else if (altitudeMatch) {
+            const altitude = parseInt(altitudeMatch[1], 10) * 100;
+            blip.targetAltitude = altitude;
+            updateStatusBar(`Aircraft ${blip.callsign} target altitude set to ${altitude} feet.`);
+        }
+
+        // Handle vertical rate command
+        else if (verticalRateMatch) {
+            const rate = parseInt(verticalRateMatch[1], 10);
+            blip.verticalClimbDescendRate = rate;
+            updateStatusBar(`Aircraft ${blip.callsign} vertical rate set to ${rate} feet per minute.`);
+        }
+
+        // Handle SSR code command
+        else if (ssrMatch) {
+            const newSSRCode = ssrMatch[1];
+
+            if (!['7500', '7600', '7700'].includes(newSSRCode)) {
+                const existingSSR = aircraftBlips.find(b => b.ssrCode === newSSRCode);
+                if (existingSSR && newSSRCode !== '0000') {
+                    updateStatusBar(`Duplicate SSR code. Aircraft ${existingSSR.callsign} already squawking ${existingSSR.ssrCode}`);
+                    return;
+                }
+            }
+
+            blip.setSSRCode(newSSRCode);
+            updateStatusBar(`Aircraft ${blip.callsign} SSR code set to 3-${newSSRCode}`);
+        }
+
+        // Handle report heading command
+        else if (command === "RH") {
+            updateStatusBar(`Aircraft ${blip.callsign} heading: ${blip.heading}°`);
+        }
+
+        // Handle delete command
+        else if (command === "DEL") {
+            deleteAircraft(blip);
+            updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
+        }
+
+        // Handle orbit left command
+        else if (command === "OL") {
+            blip.startOrbitLeft();
+            updateStatusBar(`Aircraft ${blip.callsign} orbiting left.`);
+        }
+
+        // Handle orbit right command
+        else if (command === "OR") {
+            blip.startOrbitRight();
+            updateStatusBar(`Aircraft ${blip.callsign} orbiting right.`);
+        }
+
+        // Handle stop turn command
+        else if (command === "ST") {
+            blip.stopTurn();
+            updateStatusBar(`Aircraft ${blip.callsign} stopping turn.`);
+        }
+
+        // Handle invalid command
+        else {
+            updateStatusBar(`Invalid command: ${command}.`);
+        }
+
+        // Update the last command display
+        const lastCommandDisplay = document.getElementById(`lastCommand_${blip.callsign}`);
+        if (lastCommandDisplay) {
+            lastCommandDisplay.textContent = `${command}`;
+        }
+    }
+
+
+    //********commands.js script file ends here**********/
+
+</script>
+
+</html>
