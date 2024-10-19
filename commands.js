@@ -1,3 +1,5 @@
+//********commands.js script file starts here**********/
+
 // Aircraft Commands
 function processCommand(formationSize, blip) {
     const input = document.getElementById(`commandInput_${blip.callsign}`);
@@ -17,7 +19,7 @@ function processCommand(formationSize, blip) {
     else {
         // Execute the command for the current aircraft (individual, leader, or member)
         //console.log(`Command "${command}" received by C/S ${blip.callsign}.`);
-            processCommandForBlip(blip, command);
+        processCommandForBlip(blip, command);
     }
 
     input.value = ''; // Clear input after processing
@@ -143,3 +145,6 @@ function processCommandForBlip(blip, command) {
         lastCommandDisplay.textContent = `${command}`;
     }
 }
+
+
+//********commands.js script file ends here**********/
