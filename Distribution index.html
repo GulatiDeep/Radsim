@@ -1331,6 +1331,7 @@
             rangeRingsContainer.style.animationPlayState = 'running'; // Resume radar rings rotation
 
             moveAircraftBlips(); // Resume aircraft movements
+            
         }
     }
 
@@ -1637,11 +1638,10 @@
 
     // Function to update aircraft blips' positions every 4 seconds
     function moveAircraftBlips() {
-        if (!isPaused) {
-            aircraftBlips.forEach(blip => blip.move(false));  // Update both heading and position
-            setTimeout(moveAircraftBlips, updateInterval);  // Schedule next movement update
-        }
-    }
+    const currentTime = Date.now();
+    aircraftBlips.forEach(blip => blip.move(currentTime));
+    requestAnimationFrame(moveAircraftBlips); // Or setTimeout, depending on your loop mechanism
+}
 
     //Formation Handling
     // Function to toggle the control boxes for formation aircraft based on checkbox status
@@ -2252,104 +2252,102 @@
             }
         }
 
-        // Update the blip's position and handle turning gradually
-        move(headingOnly = false) {
-            const speedMetersPerSecond = (this.speed / zoomLevel) * 0.514444;
-            const distancePerUpdateMeters = speedMetersPerSecond * (updateInterval / 1000);
-            const distancePerUpdateNauticalMiles = distancePerUpdateMeters / 1852;
+        
+        
+        
+// Update the blip's position and handle turning gradually
+move(currentTime) {
+    const speedMetersPerSecond = (this.speed / zoomLevel) * 0.514444;
+    const distancePerUpdateMeters = speedMetersPerSecond * (updateInterval / 1000);
+    const distancePerUpdateNauticalMiles = distancePerUpdateMeters / 1852;
 
-            if (isPaused) return;  // Stop any movement or state updates if paused
+    if (isPaused) return;  // Stop any movement or state updates if paused
 
-            // Handle orbit left
-            if (this.orbitLeft) {
-                this.heading = (this.heading - this.headingChangeRate * (headingUpdateInterval / 1000) + 360) % 360;
-            }
+    // Update heading every second
+    if (currentTime - lastHeadingUpdateTime >= headingUpdateInterval) {
+        lastHeadingUpdateTime = currentTime;
 
-            // Handle orbit right
-            if (this.orbitRight) {
-                this.heading = (this.heading + this.headingChangeRate * (headingUpdateInterval / 1000)) % 360;
-            }
-
-            // Handle gradual heading change if not orbiting
-            if (!this.orbitLeft && !this.orbitRight && this.heading !== this.targetHeading) {
-                let headingDiff = (this.targetHeading - this.heading + 360) % 360;
-                const turnRate = this.headingChangeRate * (headingUpdateInterval / 1000);
-
-                if (this.turnRight === true) {
-                    if (headingDiff > 180) {
-                        headingDiff = 360 - headingDiff;
-                        this.heading = (this.heading + turnRate) % 360;
-                    } else {
-                        this.heading = (this.heading + turnRate) % 360;
-                    }
-                } else if (this.turnRight === false) {
-                    if (headingDiff <= 180) {
-                        headingDiff = 360 - headingDiff;
-                        this.heading = (this.heading - turnRate + 360) % 360;
-                    } else {
-                        this.heading = (this.heading - turnRate + 360) % 360;
-                    }
-                }
-
-                this.heading = (this.heading + 360) % 360;
-
-                if (Math.abs(this.heading - this.targetHeading) <= turnRate) {
-                    this.heading = this.targetHeading;  // Snap to the target heading
-                }
-            }
-
-            // Update heading in control box every 1 second
-            updateControlBox(this);
-
-            // If headingOnly is true, don't update the position on the radar
-            if (headingOnly) {
-                return;
-            }
-
-            // Update position based on the current heading (every 4 seconds)
-            const angleRad = (this.heading - 90) * Math.PI / 180;
-            const deltaX = distancePerUpdateNauticalMiles * Math.cos(angleRad);
-            const deltaY = distancePerUpdateNauticalMiles * Math.sin(angleRad);
-
-            this.position.x += deltaX * zoomLevel;
-            this.position.y -= deltaY * zoomLevel;
-
-            // Adjust altitude gradually towards the targetAltitude
-            const verticalChangePerSecond = this.verticalClimbDescendRate / 60;  // Feet per second
-            const verticalChangePerUpdate = verticalChangePerSecond * (updateInterval / 1000);  // Change per update
-
-            if (this.altitude !== this.targetAltitude) {
-                const altitudeDiff = this.targetAltitude - this.altitude;
-                if (Math.abs(altitudeDiff) <= verticalChangePerUpdate) {
-                    this.altitude = this.targetAltitude;  // Snap to target altitude if close enough
-                } else {
-                    this.altitude += Math.sign(altitudeDiff) * verticalChangePerUpdate;  // Gradual altitude change
-                }
-
-                // Update control box and label
-                updateControlBox(this);
-                this.updateLabelPosition();
-            }
-
-            // Adjust speed gradually towards the targetSpeed
-            const speedChangePerUpdate = this.speedChangeRate * (updateInterval / 1000);  // Change per update
-
-            if (this.speed !== this.targetSpeed) {
-                const speedDiff = this.targetSpeed - this.speed;
-                if (Math.abs(speedDiff) <= speedChangePerUpdate) {
-                    this.speed = this.targetSpeed;  // Snap to target speed if close enough
-                } else {
-                    this.speed += Math.sign(speedDiff) * speedChangePerUpdate;  // Gradual speed change
-                }
-
-                // Update control box and label
-                updateControlBox(this);
-                this.updateLabelPosition();
-            }
-
-            // Update the blip's position on the radar
-            this.updateBlipPosition();
+        // Handle orbit left
+        if (this.orbitLeft) {
+            this.heading = (this.heading - 2 + 360) % 360; // 2 degrees per second
+            //console.log(`Orbiting Left: New Heading = ${this.heading}`);
         }
+
+        // Handle orbit right
+        if (this.orbitRight) {
+            this.heading = (this.heading + 2) % 360; // 2 degrees per second
+            //console.log(`Orbiting Right: New Heading = ${this.heading}`);
+        }
+
+        // Handle gradual heading change if not orbiting
+        if (!this.orbitLeft && !this.orbitRight && this.heading !== this.targetHeading) {
+            let headingDiff = (this.targetHeading - this.heading + 360) % 360;
+
+            // Normalize headingDiff to find the shortest turn direction
+            if (headingDiff > 180) {
+                headingDiff -= 360; // Turn left
+            }
+
+            // Update heading based on the direction to the target heading
+            this.heading += Math.sign(headingDiff) * Math.min(Math.abs(headingDiff), 2); // 2 degrees max turn
+            this.heading = (this.heading + 360) % 360; // Normalize to [0, 360)
+
+            //console.log(`Adjusting Heading: New Heading = ${this.heading}`);
+        }
+
+        // Update heading in control box
+        updateControlBox(this);
+    }
+
+    // Update position every 4 seconds (or as per your logic)
+    if (currentTime - lastPositionUpdateTime >= 4000) { // 4000 milliseconds = 4 seconds
+        lastPositionUpdateTime = currentTime;
+
+        // Update position based on the current heading
+        const angleRad = (this.heading - 90) * Math.PI / 180;
+        const deltaX = distancePerUpdateNauticalMiles * Math.cos(angleRad);
+        const deltaY = distancePerUpdateNauticalMiles * Math.sin(angleRad);
+
+        this.position.x += deltaX * zoomLevel;
+        this.position.y -= deltaY * zoomLevel;
+
+        // Adjust altitude gradually towards the targetAltitude
+        const verticalChangePerSecond = this.verticalClimbDescendRate / 60;  // Feet per second
+        const verticalChangePerUpdate = verticalChangePerSecond * (updateInterval / 1000);  // Change per update
+
+        if (this.altitude !== this.targetAltitude) {
+            const altitudeDiff = this.targetAltitude - this.altitude;
+            if (Math.abs(altitudeDiff) <= verticalChangePerUpdate) {
+                this.altitude = this.targetAltitude;  // Snap to target altitude if close enough
+            } else {
+                this.altitude += Math.sign(altitudeDiff) * verticalChangePerUpdate;  // Gradual altitude change
+            }
+
+            // Update control box and label
+            updateControlBox(this);
+            this.updateLabelPosition();
+        }
+
+        // Adjust speed gradually towards the targetSpeed
+        const speedChangePerUpdate = this.speedChangeRate * (updateInterval / 1000);  // Change per update
+
+        if (this.speed !== this.targetSpeed) {
+            const speedDiff = this.targetSpeed - this.speed;
+            if (Math.abs(speedDiff) <= speedChangePerUpdate) {
+                this.speed = this.targetSpeed;  // Snap to target speed if close enough
+            } else {
+                this.speed += Math.sign(speedDiff) * speedChangePerUpdate;  // Gradual speed change
+            }
+
+            // Update control box and label
+            updateControlBox(this);
+            this.updateLabelPosition();
+        }
+
+        // Update the blip's position on the radar
+        this.updateBlipPosition();
+    }
+}
 
         // Function to start orbiting left
         startOrbitLeft() {
@@ -2407,7 +2405,9 @@
     let clickedPosition = { x: 0, y: 0 };
     let historyDotsVisible = true; // Initialize the flag to track the visibility state of the history dots
     let labelsVisible = true; // //Initialize the flag to track the visibility state of the labels
-
+    // Variables to track time
+let lastHeadingUpdateTime = 0;
+let lastPositionUpdateTime = 0;
     //To add the dragging functionality to labels
     let isLabelDragging = false; // Global flag to track label dragging
 
@@ -2422,6 +2422,8 @@
 
     // Start the movement update loop
     moveAircraftBlips();
+    
+
 
 
 
