@@ -510,7 +510,6 @@
             rangeRingsContainer.style.animationPlayState = 'running'; // Resume radar rings rotation
 
             moveAircraftBlips(); // Resume aircraft movements
-            
         }
     }
 

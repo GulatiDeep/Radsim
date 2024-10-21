@@ -9,6 +9,21 @@
 </head>
 
 <body>
+    <style>
+        /* Add some basic styling for the help dialog */
+        .help-dialog {
+            display: none; 
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 1000;
+        }
+    </style>
     <div id="container">
 
 
@@ -65,17 +80,19 @@
         </div>
 
         <div id="controlPanel">
-            <div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
                 <center><b><u>Aircraft Control Panel</u></b></center>
+                <button id="helpButton" class="help-button" title="Help">?</button>
             </div>
-
+            
             <!-- Control Boxes will be dynamically added here -->
-            
-            
+
+
 
         </div>
 
-        
+
 
         <!-- Aircraft Creation Dialog -->
         <div id="aircraftDialog" class="dialog" style="display:none;">
@@ -142,7 +159,12 @@
         </div>
 
 
-
+        <!-- Help Dialog -->
+        <div id="helpDialog" class="help-dialog">
+            <h2>Help</h2>
+            
+            <button id="closeHelpButton" class="control-button">Close</button>
+        </div>
 
     </div>
     <div id="controlStatusBar">
@@ -155,11 +177,12 @@
 
 
     <script src="radar.js"></script>
+    <script src="readme.js"></script>
     <script src="functions.js"></script>
     <script src="aircraftBlipClass.js"></script>
     <script src="aircraft.js"></script>
     <script src="eventListeners.js"></script>
     <script src="commands.js"></script>
-</body>
 
+</body>
 </html>

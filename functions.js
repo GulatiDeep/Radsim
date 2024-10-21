@@ -1,4 +1,6 @@
-//********functions.js script file starts here**********/
+
+
+    //********functions.js script file starts here**********/
 
     //File containing all the functions
 
@@ -268,10 +270,11 @@
 
     // Function to update aircraft blips' positions every 4 seconds
     function moveAircraftBlips() {
-    const currentTime = Date.now();
-    aircraftBlips.forEach(blip => blip.move(currentTime));
-    requestAnimationFrame(moveAircraftBlips); // Or setTimeout, depending on your loop mechanism
-}
+        if (!isPaused) {
+            aircraftBlips.forEach(blip => blip.move(false));  // Update both heading and position
+            setTimeout(moveAircraftBlips, updateInterval);  // Schedule next movement update
+        }
+    }
 
     //Formation Handling
     // Function to toggle the control boxes for formation aircraft based on checkbox status

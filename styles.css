@@ -1,3 +1,5 @@
+/* --------Style.css starts here ---------*/
+
 
 /* ---------- Global Styles ---------- */
 
@@ -14,7 +16,8 @@
 
 
 /* Body and HTML global styles for layout */
-body, html {
+body,
+html {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -170,7 +173,8 @@ body, html {
 /* Range rings in radar, with rotation animation */
 .range-rings {
     animation: rotate 4s linear infinite;
-    animation-play-state: running; /* Ensure animation starts running */
+    animation-play-state: running;
+    /* Ensure animation starts running */
     border-radius: 100%;
     height: 100%;
     position: absolute;
@@ -223,8 +227,8 @@ body, html {
 /* Plus sign for SSR code 0000 */
 /* Style for the plus sign */
 .plus-sign {
-    width: 8px ;
-    height: 8px ;
+    width: 8px;
+    height: 8px;
     background: transparent !important;
     z-index: 3;
     position: relative;
@@ -239,7 +243,8 @@ body, html {
 }
 
 .plus-sign::before {
-    width: 2px; /* Thickness of the vertical line */
+    width: 2px;
+    /* Thickness of the vertical line */
     height: 100%;
     left: 50%;
     top: 0;
@@ -247,7 +252,8 @@ body, html {
 }
 
 .plus-sign::after {
-    height: 2px; /* Thickness of the horizontal line */
+    height: 2px;
+    /* Thickness of the horizontal line */
     width: 100%;
     top: 50%;
     left: 0;
@@ -260,7 +266,8 @@ body, html {
     border-radius: 3px;
     white-space: nowrap;
     font-size: 12px;
-    color: yellow; /* Default label color */
+    color: yellow;
+    /* Default label color */
 }
 
 /* Aircraft label leading line */
@@ -269,7 +276,8 @@ body, html {
     position: absolute;
     background-color: grey;
     z-index: 1;
-    transform-origin: 0 0; /* Ensure the line grows from the start point */
+    transform-origin: 0 0;
+    /* Ensure the line grows from the start point */
 }
 
 
@@ -280,7 +288,8 @@ body, html {
     width: 2px;
     height: 2px;
     background-color: yellow;
-    border-radius: 50%; /* Makes the dots circular */
+    border-radius: 50%;
+    /* Makes the dots circular */
     position: absolute;
     z-index: 1;
 }
@@ -288,7 +297,8 @@ body, html {
 /* Container for history dots */
 .history-container {
     position: absolute;
-    pointer-events: none; /* Prevent interaction */
+    pointer-events: none;
+    /* Prevent interaction */
 }
 
 
@@ -313,10 +323,11 @@ body, html {
 
 /* Radar and menu bar on the left */
 #radarContainer {
-    flex: 3; /* 3/4 of the width */
+    flex: 3;
+    /* 3/4 of the width */
     display: flex;
     flex-direction: column;
-    
+
 }
 
 
@@ -333,11 +344,18 @@ body, html {
     gap: 5px;
     z-index: 5;
     position: relative;
-    right: 0; /* Align to the right */
-    width: 25%; /* Take 25% width of the screen */
-    height: calc(100% - 20px);; /* Reduce height by 20px to make space for status bar */
-    overflow-y: auto; /* Enables vertical scrolling */
-    max-height: calc(100% - 20px);; /* Ensure the panel respects height limits */
+    right: 0;
+    /* Align to the right */
+    width: 25%;
+    /* Take 25% width of the screen */
+    height: calc(100% - 20px);
+    ;
+    /* Reduce height by 20px to make space for status bar */
+    overflow-y: auto;
+    /* Enables vertical scrolling */
+    max-height: calc(100% - 20px);
+    ;
+    /* Ensure the panel respects height limits */
 }
 
 #controlStatusBar {
@@ -347,23 +365,32 @@ body, html {
     font-size: 12px;
     font-style: italic;
     display: flex;
-    align-items: center; /* Align text vertically */
-    justify-content: right; /* Align text to the right */
-    text-align: right; /* Ensure text is aligned to the right */
+    align-items: center;
+    /* Align text vertically */
+    justify-content: right;
+    /* Align text to the right */
+    text-align: right;
+    /* Ensure text is aligned to the right */
     padding: 5px;
     box-sizing: border-box;
-    position: fixed; /* Fix it to the screen */
-    bottom: 0; /* Align to the bottom */
-    right: 0; /* Align to the right */
-    width: 25%; /* Take 25% width of the screen */
-    z-index: 100; /* Ensure it stays on top */
+    position: fixed;
+    /* Fix it to the screen */
+    bottom: 0;
+    /* Align to the bottom */
+    right: 0;
+    /* Align to the right */
+    width: 25%;
+    /* Take 25% width of the screen */
+    z-index: 100;
+    /* Ensure it stays on top */
 }
 
 
 
 
 .disabled-panel {
-    pointer-events: none;   /* Disables interactions with all child elements */
+    pointer-events: none;
+    /* Disables interactions with all child elements */
 }
 
 /* Control box for each aircraft */
@@ -377,8 +404,10 @@ body, html {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    user-select: none; /* Prevents text selection when clicking */
-    overflow: visible; /* Ensure no overflow issues */
+    user-select: none;
+    /* Prevents text selection when clicking */
+    overflow: visible;
+    /* Ensure no overflow issues */
 }
 
 /* Common style for each info box */
@@ -388,38 +417,46 @@ body, html {
     border-radius: 4px;
     margin: 1px;
     font-size: 11px;
-    color: black; /* Text color */
+    color: black;
+    /* Text color */
 }
 
 /* Different background colors for each type of info */
 .callsign-box {
-    background-color: #007bff; /* Blue for callsign */
+    background-color: #007bff;
+    /* Blue for callsign */
     font-size: 14px;
     font-weight: bold;
-    color: white; /* Text color */
+    color: white;
+    /* Text color */
 }
 
 .ssr-box {
-    background-color: lightblue; /* Green for SSR code */
+    background-color: lightblue;
+    /* Green for SSR code */
 }
 
 .heading-box {
-    background-color: lightblue; /* Yellow for heading */
+    background-color: lightblue;
+    /* Yellow for heading */
 }
 
 .altitude-box {
-    background-color: lightblue; /* Red for altitude */
+    background-color: lightblue;
+    /* Red for altitude */
 }
 
 .speed-box {
-    background-color: lightblue; /* Cyan for speed */
+    background-color: lightblue;
+    /* Cyan for speed */
 }
 
 /* Command input and last command container */
 .command-input-container {
     display: flex;
     align-items: center;
-    gap: 5px; /* Space between the input and the last command */
+    gap: 5px;
+    /* Space between the input and the last command */
 }
 
 /* Input field in control box */
@@ -429,7 +466,8 @@ body, html {
     border-radius: 4px;
     border: 1px solid #ccc;
     font-size: 12px;
-    box-sizing: border-box; /* Include padding in width calculation */
+    box-sizing: border-box;
+    /* Include padding in width calculation */
 }
 
 /* Last command display */
@@ -439,7 +477,8 @@ body, html {
     background-color: #f0f0f0;
     padding: 5px;
     border-radius: 4px;
-    box-sizing: border-box; /* Include padding in width calculation */
+    box-sizing: border-box;
+    /* Include padding in width calculation */
 }
 
 
@@ -495,10 +534,10 @@ body, html {
     transition: background-color 0.3s ease;
     width: 100%;
     margin-top: 5px;
-    
+
 }
 
-.dialog label{
+.dialog label {
     font-size: 12px;
     font-weight: bold;
 }
@@ -510,42 +549,54 @@ body, html {
 
 /* Container for radio buttons to display in a grid */
 #ssrFormationContainer {
-    display: grid ;
-    grid-template-columns: repeat(2, 50%) ; /* Creates a grid with 4 columns */
-    gap: 5px ; /* Adjust spacing between radio buttons */
-    margin-top: 5px; /* Optional: margin to add space above the container */
+    display: grid;
+    grid-template-columns: repeat(2, 50%);
+    /* Creates a grid with 4 columns */
+    gap: 5px;
+    /* Adjust spacing between radio buttons */
+    margin-top: 5px;
+    /* Optional: margin to add space above the container */
 }
 
 /* Style for labels to ensure proper alignment */
 #ssrFormationContainer label {
     display: flex;
-    align-items: center ; /* Center the radio buttons and labels vertically */
-    margin: 0 ; /* Remove default margin */
-    padding: 0 ; /* Remove default padding */
+    align-items: center;
+    /* Center the radio buttons and labels vertically */
+    margin: 0;
+    /* Remove default margin */
+    padding: 0;
+    /* Remove default padding */
 }
 
 
 
 /* Container for radio buttons to display in a grid */
 #formationSizeContainer {
-    display: grid ;
-    grid-template-columns: repeat(4, auto) ; /* Creates a grid with 4 columns */
-    gap: 2px ; /* Adjust spacing between radio buttons */
-    margin-top: 5px; /* Optional: margin to add space above the container */
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    /* Creates a grid with 4 columns */
+    gap: 2px;
+    /* Adjust spacing between radio buttons */
+    margin-top: 5px;
+    /* Optional: margin to add space above the container */
 }
 
 /* Style for labels to ensure proper alignment */
 #formationSizeContainer label {
     display: flex;
-    align-items: center ; /* Center the radio buttons and labels vertically */
-    margin: 0 ; /* Remove default margin */
-    padding: 0 ; /* Remove default padding */
+    align-items: center;
+    /* Center the radio buttons and labels vertically */
+    margin: 0;
+    /* Remove default margin */
+    padding: 0;
+    /* Remove default padding */
 }
 
 /* Reset margin and padding on radio buttons for better alignment */
 #formationSizeContainer input[type="radio"] {
-    margin: 0 ;
-    padding: 0 ;
+    margin: 0;
+    padding: 0;
 }
 
 
@@ -577,7 +628,7 @@ body, html {
     background-color: #007bff;
     color: white;
     border-radius: 10px;
-    
+
 }
 
 
@@ -604,3 +655,77 @@ body, html {
 }
 
 
+/* ---------- Help Dialog Styles ---------- */
+
+.help {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    width: 50%;
+    z-index: 1000;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Help Dialog content layout */
+.help-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 5px;
+    
+}
+
+
+/* Help Dialog buttons */
+.help button {
+    padding: 5px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 5px;
+
+}
+
+.help label {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.help button:hover {
+    background-color: #0056b3;
+}
+
+/* ---------- Button Styles ---------- */
+.help-button {
+    background-color: #007BFF;
+    /* Blue background */
+    color: white;
+    /* White text */
+    border: none;
+    /* Remove default border */
+    padding: 4px 8px;
+    /* Padding */
+    border-radius: 6px;
+    /* Rounded corners */
+    cursor: pointer;
+    /* Pointer cursor */
+}
+
+.help-button:hover {
+    background-color: #0056b3;
+    /* Darker blue on hover */
+}
