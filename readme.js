@@ -5,12 +5,12 @@ function openHelpDialog() {
     helpDialog.innerHTML = `
         <div class="help-content">
     <fieldset>
-        <legend style="font-weight: bold; text-decoration: underline;">User Manual: Commands for use of Radsim</legend>
+        <legend style="font-weight: bold; text-decoration: underline; color: #007BFF; font-size: 14px;">User Manual: Commands for use of Radar Simulator</legend>
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr>
-                    <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Commands</th>
-                    <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Description</th>
+                    <th style="border: 1px solid #ccc; padding: 8px; text-align: left; text-decoration: underline;">Commands</th>
+                    <th style="border: 1px solid #ccc; padding: 8px; text-align: left; text-decoration: underline;">Description</th>
                 </tr>
             </thead>
             <tbody>
