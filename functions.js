@@ -240,6 +240,7 @@ function createAircraftBlip() {
         const ssrCode = document.getElementById('ssrInput').value.trim();
 
         const blip = new AircraftBlip(callsign, headingInput, speedInput, altitudeInput, selectedPosition.x, selectedPosition.y, ssrCode);
+
         blip.role = 'Individual';  // Assign individual role
         console.log(`C/S ${callsign} created as individual aircraft.`);  // Log message
 
@@ -248,7 +249,7 @@ function createAircraftBlip() {
     } else {
         console.log("Formation: C/S " + getBaseCallsign(callsignInput) + " (" + formationSize + " aircraft) created.");
         // Handle formation aircraft creation
-        for (let i = 1; i <= formationSize; i++) {
+        for (let i = formationSize; i >= 1; i--) {
             const callsign = `${callsignInput}-${i}`;
             const ssrCode = document.getElementById(`formationSSRInput_${i}`).value.trim();
 
@@ -264,17 +265,34 @@ function createAircraftBlip() {
             }
 
             aircraftBlips.push(blip);
-            createControlBox(blip, formationSize, i);  // Create control box for each blip
+            //createControlBox(blip, formationSize, i);  // Create control box for each blip
         }
+        // Create control boxes in original order
+        for (let i = 1; i <= formationSize; i++) {
+            const callsign = `${callsignInput}-${i}`;
+            const blip = aircraftBlips.find(b => b.callsign === callsign);
+            createControlBox(blip, formationSize, i);
+        }
+
     }
 
     return true;  // Return true to indicate successful creation
 }
 
+//for providing focus to clicked aircraft control box
+function focusControlBoxInput(callsign) {
+    const input = document.getElementById(`commandInput_${callsign}`);
+    if (input) {
+        input.focus();
+    }
+}
+
+
 // Function to update aircraft blips' positions every 4 seconds
 function moveAircraftBlips() {
     if (!isPaused) {
         aircraftBlips.forEach(blip => blip.move(false));  // Update both heading and position
+
         setTimeout(moveAircraftBlips, updateInterval);  // Schedule next movement update
     }
 }

@@ -1,4 +1,6 @@
-// Function to open the help dialog
+//*********Readme.js file starts here***********// 
+
+//Function to open the help dialog
 function openHelpDialog() {
     const helpDialog = document.createElement('div');
     helpDialog.className = 'help';
@@ -67,7 +69,7 @@ function openHelpDialog() {
 
     // Close button event listener
     const closeHelpButton = helpDialog.querySelector('#closeHelpButton');
-    closeHelpButton.addEventListener('click', function() {
+    closeHelpButton.addEventListener('click', function () {
         document.body.removeChild(helpDialog);
     });
 
@@ -87,3 +89,7 @@ function openHelpDialog() {
 
 // Event listener for help button
 document.getElementById('helpButton').addEventListener('click', openHelpDialog);
+
+
+
+//*************Readme.js file ends here ************/

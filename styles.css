@@ -47,14 +47,14 @@ html {
 
 /* Active state for buttons */
 .control-button.active {
-    background-color: #4CAF50;
+    background-color: lightgreen;
     /* Red for inactive state */
     color: black;
 }
 
 /* In-Active state for buttons */
 .control-button.inactive {
-    background-color: #f44336;
+    background-color: lightcoral;
     /* Red for inactive state */
     color: black;
 }
@@ -172,7 +172,7 @@ html {
 
 /* Range rings in radar, with rotation animation */
 .range-rings {
-    animation: rotate 4s linear infinite;
+    animation: rotate 8s linear infinite;
     animation-play-state: running;
     /* Ensure animation starts running */
     border-radius: 100%;
@@ -183,10 +183,69 @@ html {
 
 /* Individual rings on the radar */
 .ring {
-    border: 0.2px dotted White;
+    border: 0.2px dotted gray;
     border-radius: 100%;
     position: absolute;
 }
+
+/* Permanent Marker lines originating from the center of the radar scope */
+
+/* North line */
+#northLine {
+    position: absolute;
+    top: -50%; /* Position the line 100% above the visible area */
+    left: 50%;
+    width: 0.2px;
+    height: 100%; /* Extend the height to cover more than enough for panning */
+    background-color: gray;
+    z-index: 0; /* Ensure it's above other elements */
+    transform-origin: center center;
+    opacity: 0.25;
+}
+
+/* South line */
+#southLine {
+    position: absolute;
+    bottom: -50%; /* Position the line 100% below the visible area */
+    left: 50%;
+    width: 0.1px;
+    height: 100%; /* Extend the height to cover more than enough for panning */
+    background-color: gray;
+    z-index: 0;
+    transform-origin: center center;
+    opacity: 0.25;
+}
+
+/* East line */
+#eastLine {
+    position: absolute;
+    top: 50%;
+    left: -50%; /* Position the line 100% left of the visible area */
+    width: 100%; /* Extend the width to cover more than enough for panning */
+    height: 0.1px;
+    background-color: gray;
+    z-index: 0;
+    transform-origin: center center;
+    opacity: 0.25;
+}
+
+/* West line */
+#westLine {
+    position: absolute;
+    top: 50%;
+    right: -50%; /* Position the line 100% right of the visible area */
+    width: 100%; /* Extend the width to cover more than enough for panning */
+    height: 0.1px;
+    background-color: gray;
+    z-index: 0;
+    transform-origin: center center;
+    opacity: 0.25;
+}
+
+
+
+
+
 
 
 /* Direction line in radar */
@@ -222,6 +281,7 @@ html {
     background-color: yellow;
     position: absolute;
     z-index: 2;
+    cursor: pointer;
 }
 
 /* Plus sign for SSR code 0000 */
@@ -232,6 +292,7 @@ html {
     background: transparent !important;
     z-index: 3;
     position: relative;
+    cursor: pointer;
 }
 
 /* Vertical and horizontal lines for plus sign */
@@ -267,6 +328,7 @@ html {
     white-space: nowrap;
     font-size: 12px;
     color: yellow;
+    cursor: pointer; 
     /* Default label color */
 }
 
@@ -304,12 +366,12 @@ html {
 
 /* Optional: Style for the history dots toggle button */
 #historyDots.active {
-    background-color: #4CAF50;
+    background-color: lightgreen;
     /* Green for active state */
 }
 
 #historyDots.inactive {
-    background-color: #f44336;
+    background-color: lightcoral;
     /* Red for inactive state */
 }
 
@@ -408,6 +470,10 @@ html {
     /* Prevents text selection when clicking */
     overflow: visible;
     /* Ensure no overflow issues */
+}
+
+.control-box input:focus {
+    background-color: yellow;
 }
 
 /* Common style for each info box */

@@ -52,6 +52,8 @@ function processCommandForBlip(blip, command) {
     const verticalRateMatch = command.match(/^V(\d+)$/);
     const ssrMatch = command.match(/^SSR([0-7]{4})$/);
 
+    let isValidCommand = false; // Track whether the command is valid
+
     console.log(`Command "${command}" received by C/S ${blip.callsign}.`);
 
     // Handle heading command
@@ -67,6 +69,7 @@ function processCommandForBlip(blip, command) {
 
         const turnDirection = direction === 'L' ? 'Left' : 'Right';
         updateStatusBar(`Aircraft ${blip.callsign} turning ${turnDirection} heading ${blip.targetHeading}°`);
+        isValidCommand = true;
     }
 
     // Handle speed command
@@ -74,6 +77,7 @@ function processCommandForBlip(blip, command) {
         const speed = parseInt(speedMatch[1], 10);
         blip.setTargetSpeed(speed);
         updateStatusBar(`Aircraft ${blip.callsign} speed set to ${speed} knots.`);
+        isValidCommand = true;
     }
 
     // Handle altitude command
@@ -81,6 +85,7 @@ function processCommandForBlip(blip, command) {
         const altitude = parseInt(altitudeMatch[1], 10) * 100;
         blip.targetAltitude = altitude;
         updateStatusBar(`Aircraft ${blip.callsign} target altitude set to ${altitude} feet.`);
+        isValidCommand = true;
     }
 
     // Handle vertical rate command
@@ -88,6 +93,7 @@ function processCommandForBlip(blip, command) {
         const rate = parseInt(verticalRateMatch[1], 10);
         blip.verticalClimbDescendRate = rate;
         updateStatusBar(`Aircraft ${blip.callsign} vertical rate set to ${rate} feet per minute.`);
+        isValidCommand = true;
     }
 
     // Handle SSR code command
@@ -104,36 +110,43 @@ function processCommandForBlip(blip, command) {
 
         blip.setSSRCode(newSSRCode);
         updateStatusBar(`Aircraft ${blip.callsign} SSR code set to 3-${newSSRCode}`);
+        isValidCommand = true;
     }
 
     // Handle report heading command
     else if (command === "RH") {
         const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
         updateStatusBar(`Aircraft ${blip.callsign} heading: ${formattedHeading}°`);
+        isValidCommand = true;
     }
 
     // Handle delete command
     else if (command === "DEL") {
         deleteAircraft(blip);
         updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
+        isValidCommand = true;
+        
     }
 
     // Handle orbit left command
     else if (command === "OL") {
         blip.startOrbitLeft();
         updateStatusBar(`Aircraft ${blip.callsign} orbiting left.`);
+        isValidCommand = true;
     }
 
     // Handle orbit right command
     else if (command === "OR") {
         blip.startOrbitRight();
         updateStatusBar(`Aircraft ${blip.callsign} orbiting right.`);
+        isValidCommand = true;
     }
 
     // Handle stop turn command
     else if (command === "ST") {
         blip.stopTurn();
         updateStatusBar(`Aircraft ${blip.callsign} stopping turn.`);
+        isValidCommand = true;
     }
 
     // Handle invalid command
@@ -145,7 +158,9 @@ function processCommandForBlip(blip, command) {
     const lastCommandDisplay = document.getElementById(`lastCommand_${blip.callsign}`);
     if (lastCommandDisplay) {
         lastCommandDisplay.textContent = `${command}`;
+        lastCommandDisplay.style.backgroundColor = isValidCommand ? 'lightgreen' : 'lightcoral'; // Green for valid, red for invalid
     }
+    
 }
 
 

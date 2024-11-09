@@ -106,7 +106,7 @@
         updateStatusBar('Runway: ' + runwayDesignation);
 
         // Update the button text with the current runway designation
-        changeRunwayButton.textContent = `Runway ${runwayDesignation}`;
+        changeRunwayButton.textContent = `RW ${runwayDesignation}`;
 
 
         runway.style.transform = `rotate(${angle}deg)`;
@@ -542,5 +542,6 @@
         return { x: relativeX, y: relativeY };
     }
 
+    
 
     //radar.js script file ends here

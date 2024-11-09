@@ -12,7 +12,7 @@
     <style>
         /* Add some basic styling for the help dialog */
         .help-dialog {
-            display: none; 
+            display: none;
             position: fixed;
             left: 50%;
             top: 50%;
@@ -31,6 +31,19 @@
 
             <div id="radarScope">
                 <div id="panContainer">
+                    <!-- North Marker line -->
+                    <div id="northLine"></div>
+
+                    <!-- South Marker line -->
+                    <div id="southLine"></div>
+
+                    <!-- East Marker line -->
+                    <div id="eastLine"></div>
+
+                    <!-- West Marker line -->
+                    <div id="westLine"></div>
+
+
                     <div class="range-rings" id="rangeRingsContainer"></div>
                     <div id="runway" class="runway"></div>
                     <div id="directionLine" class="direction-line"></div>
@@ -67,7 +80,7 @@
                         <option value="36">18/36</option>
                     </select>
                 </div>
-                <button id="changeRunway" class="control-button">Runway</button>
+                <button id="changeRunway" class="control-button">RW</button>
                 <button id="SRAdistanceMarkers" class="control-button">SRA</button>
                 <button id="historyDots" class="control-button">History</button>
                 <button id="label" class="control-button">Label</button>
@@ -80,12 +93,12 @@
         </div>
 
         <div id="controlPanel">
-            
+
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <center><b><u>Aircraft Control Panel</u></b></center>
                 <button id="helpButton" class="help-button" title="Help">?</button>
             </div>
-            
+
             <!-- Control Boxes will be dynamically added here -->
 
 
@@ -162,7 +175,7 @@
         <!-- Help Dialog -->
         <div id="helpDialog" class="help-dialog">
             <h2>Help</h2>
-            
+
             <button id="closeHelpButton" class="control-button">Close</button>
         </div>
 
@@ -185,4 +198,5 @@
     <script src="commands.js"></script>
 
 </body>
+
 </html>

@@ -198,7 +198,7 @@ class AircraftBlip {
     updateLabelInfo(blip) {
         // Only display label info if SSR code is not 0000
         if (this.ssrCode !== '0000') {
-            this.label.innerHTML = `${this.callsign}<br>3-${this.ssrCode}<br>A${Math.round(this.altitude / 100)}<br>N${this.speed}`;
+            this.label.innerHTML = `3-${this.ssrCode}<br>A${Math.round(this.altitude / 100)}<br>N${this.speed}`;
         } else {
             this.label.innerHTML = `N${this.speed}`; // Display only speed if SSR code is 0000
         }
@@ -444,6 +444,12 @@ class AircraftBlip {
 
         // Update the blip's position on the radar
         this.updateBlipPosition();
+
+
+        //for shifting the focus on associated input box for command to clicked aircraft blip
+        this.element.addEventListener('click', () => {
+            focusControlBoxInput(this.callsign);
+        });
     }
 
 
