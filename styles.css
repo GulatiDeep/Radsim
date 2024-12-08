@@ -602,8 +602,9 @@ html {
 .command-input-container {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
     /* Space between the input and the last command */
+    
 }
 
 /* Input field in control box */
@@ -896,8 +897,14 @@ html {
 
 .checkbox {
     position: absolute;
-    bottom: 3px; /* Positioned at the bottom of the control box */
-    right: 120px; /* To the left of the right button */
+    bottom: 5px; /* Positioned at the bottom of the control box */
+    right: 110px; /* To the left of the right button */
+    width: 16px; /* Explicitly define width */
+    height: 16px; /* Explicitly define height */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margin */
+    box-sizing: border-box; /* Ensure size includes border */
+    cursor: pointer; /* Ensures a pointer cursor for interactivity */
 }
 
 

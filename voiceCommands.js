@@ -36,6 +36,9 @@ function handleVoiceCommand(command) {
             console.log(`Command executing for individual aircraft: ${callsign}.`);
             processCommandForBlip(blip, parsedCommand);
 
+            const voiceCallsign = pronounceCallsign(callsign);
+            speak(`${voiceCallsign}, ${voiceAction}`);
+
         } else {
             console.warn(`${callsign} does not exist on radar scope`);
             return;
@@ -60,6 +63,10 @@ function handleVoiceCommand(command) {
                     processCommandForBlip(currentBlip, parsedCommand); // Execute the command for each aircraft
                 }
             }
+            
+            const voiceCallsign = pronounceCallsign(callsign);
+            speak(`${voiceCallsign}, ${voiceAction}`);
+
         } else {
             console.warn(`Formation callsign ${callsign} does not exist on radar scope`);
             speak(`Formation callsign ${callsign} not found. Please check the callsign.`);

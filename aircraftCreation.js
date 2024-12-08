@@ -689,6 +689,7 @@ document.getElementById('aircraftDialog').addEventListener('keypress', (event) =
 document.getElementById('initialAircraftDialog').addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         openFullscreen();
+        speechActivated = true;
         if (createInitialAircraftBlip()) {
             closeInitialAircraftDialog();
         }

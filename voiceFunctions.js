@@ -100,15 +100,17 @@ function speak(text) {
 // Activate speech synthesis on button click on Initial Aircraft Creation
 document.getElementById('createInitialAircraftButton').addEventListener('click', () => {
     speechActivated = true;
-    //speak('Speech synthesis activated.');
+    speak('Speech synthesis activated.');
     //document.getElementById('activateSpeech').style.display = 'none'; // Hide button after activation
 });
 
 // Activate speech synthesis on button click on Initial Aircraft Creation
 document.getElementById('cancelInitialAircraftButton').addEventListener('click', () => {
     speechActivated = true;
-    //speak('Speech synthesis activated.');
+    speak('Speech synthesis activated.');
 });
+
+
 
 
 
