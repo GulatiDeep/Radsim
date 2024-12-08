@@ -103,7 +103,7 @@
         const oppositeRunway = (selectedValue + 18) % 36 || 36;
         runwayDesignation = oppositeRunway.toString().padStart(2, '0');
         //console.log(`Runway selected: Runway ${runwayDesignation}`);
-        updateStatusBar('Runway: ' + runwayDesignation);
+        updateStatusBar('→ Runway: ' + runwayDesignation);
 
         // Update the button text with the current runway designation
         changeRunwayButton.textContent = `RW ${runwayDesignation}`;
@@ -259,7 +259,7 @@
         updateTransform();
 
         aircraftBlips.forEach(blip => blip.updateBlipPosition()); // Correct blip positions
-        updateStatusBar('Reset to Center of Screen');
+        
     }
 
 
@@ -267,7 +267,7 @@
     changeRunwayButton.addEventListener('click', () => {
         isDirectionReversed = !isDirectionReversed; // Toggle the direction
         drawRunway();
-        //updateStatusBar('Runway changed to Runway: ' + runwayDesignation);
+        
     });
 
     // Set the initial state of the button (optional)
@@ -282,11 +282,11 @@
         if (areMarkersVisible) {
             SRAdistanceMarkersButton.classList.add('active');
             SRAdistanceMarkersButton.classList.remove('inactive');
-            updateStatusBar('SRA Distance Markers On');
+            updateStatusBar('→ SRA Distance Markers On');
         } else {
             SRAdistanceMarkersButton.classList.add('inactive');
             SRAdistanceMarkersButton.classList.remove('active');
-            updateStatusBar('SRA Distance Markers Off');
+            updateStatusBar('→ SRA Distance Markers Off');
         }
 
         const markers = document.querySelectorAll('.distance-marker');
@@ -428,48 +428,28 @@
         };
     }
 
+// Reference the display element in the HTML
+const displayElement = document.getElementById('radarDisplay');
 
-    let displayElement = null;
+// Function to update the display element with distance and bearing
+function updateDisplay(x, y) {
+    if (!displayElement) return; // Ensure the display element exists
 
-    // Function to create the display element if it doesn't exist
-    function createDisplayElement() {
-        if (!displayElement) {
-            displayElement = document.createElement('div');
-            displayElement.style.position = 'fixed'; // Fixed position to stay at the top left corner
-            displayElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            displayElement.style.color = 'white';
-            displayElement.style.padding = '5px';
-            displayElement.style.borderRadius = '3px';
-            displayElement.style.fontSize = '12px';
-            displayElement.style.zIndex = '1000'; // Ensure it's above other elements
-            document.body.appendChild(displayElement);
-        }
-    }
+    const rect = radarScope.getBoundingClientRect();
+    const result = getDistanceAndBearing(x - rect.left, y - rect.top);
 
-    // Function to update the display element with distance and bearing
-    function updateDisplay(x, y) {
-        createDisplayElement(); // Ensure the display element is created
+    // Update the content of the display element
+    displayElement.textContent = `${result.bearing}° / ${result.distanceNM} NM`;
+}
 
-        const rect = radarScope.getBoundingClientRect();
-        const result = getDistanceAndBearing(x - rect.left, y - rect.top);
+// Event listener for mouse move to update the display
+radarScope.addEventListener('mousemove', (event) => {
+    const rect = radarScope.getBoundingClientRect();
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
 
-        displayElement.style.left = '10px'; // Position at top left corner
-        displayElement.style.top = '10px';
-        displayElement.textContent = `${result.bearing}° / ${result.distanceNM} NM`;
-    }
-
-    // Event listener for mouse move to update the display
-    radarScope.addEventListener('mousemove', (event) => {
-        const rect = radarScope.getBoundingClientRect();
-        const mouseX = event.clientX;
-        const mouseY = event.clientY;
-
-        updateDisplay(mouseX, mouseY);
-    });
-
-    // Initialize the display element on page load
-    createDisplayElement();
-
+    updateDisplay(mouseX, mouseY);
+});
 
 
     //******************Functions related to radar scope******************//
@@ -498,13 +478,13 @@
 
         if (isPaused) {
             pauseButton.textContent = 'Resume';
-            updateStatusBar('Exercise paused.');
+            updateStatusBar('→ Exercise paused.');
             disableControlPanel();
 
             rangeRingsContainer.style.animationPlayState = 'paused'; // Stop radar rings rotation
         } else {
             pauseButton.textContent = 'Pause';
-            updateStatusBar('Exercise resumed.');
+            updateStatusBar('→ Exercise resumed.');
             enableControlPanel();
 
             rangeRingsContainer.style.animationPlayState = 'running'; // Resume radar rings rotation
@@ -542,6 +522,102 @@
         return { x: relativeX, y: relativeY };
     }
 
-    
+    // Function to request fullscreen
+function openFullscreen() {
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+    } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+        document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
+        document.documentElement.webkitRequestFullscreen();
+    } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+        document.documentElement.msRequestFullscreen();
+    }
+}
 
+
+    
     //radar.js script file ends here
+
+    
+//********All event listeners w.r.t. radar scope placed here**********/
+
+    // Attach event listener to the pause button
+    document.getElementById('pauseButton').addEventListener('click', togglePause);
+
+    //Event listener to Toggle the visibility of labels and update the button's appearance
+    document.getElementById('label').addEventListener('click', () => {
+        labelsVisible = !labelsVisible;
+
+        // Get the label button element
+        const labelButton = document.getElementById('label');
+
+        // Update the button's appearance based on the current state
+        if (labelsVisible) {
+            labelButton.classList.add('active');
+            labelButton.classList.remove('inactive');
+            updateStatusBar('→ Labels Visible');
+        } else {
+            labelButton.classList.add('inactive');
+            labelButton.classList.remove('active');
+            updateStatusBar('→ Labels Hidden');
+        }
+
+        // Update visibility for all aircraft labels and lines
+        aircraftBlips.forEach(blip => {
+            if (blip.label) {
+                blip.label.style.display = labelsVisible ? 'block' : 'none';
+            }
+            if (blip.line) {
+                blip.line.style.display = labelsVisible ? 'block' : 'none';
+            }
+        });
+    });
+
+    //Event listener to Toggle the visibility of history dots and update the button's appearance
+    document.getElementById('historyDots').addEventListener('click', () => {
+        // Toggle the visibility state
+        historyDotsVisible = !historyDotsVisible;
+
+        // Get the history button element
+        const historyButton = document.getElementById('historyDots');
+
+        // Update the button's appearance based on the current state
+        if (historyDotsVisible) {
+            historyButton.classList.add('active');
+            historyButton.classList.remove('inactive');
+            updateStatusBar('→ History Dots Visible');
+        } else {
+            historyButton.classList.add('inactive');
+            historyButton.classList.remove('active');
+            updateStatusBar('→ History Dots Hidden');
+        }
+
+        // Immediately apply the visibility change by updating all blips
+        aircraftBlips.forEach(blip => blip.updateHistoryDots());
+    });
+
+
+    // Attach event listeners to track window resizing or zooming
+    window.addEventListener('resize', () => {
+        updateRadarCenter();
+        createRangeRings();  // Reposition range rings correctly
+        aircraftBlips.forEach(blip => blip.updateBlipPosition());
+    });
+
+   
+
+// Check for orientation change using matchMedia
+function checkOrientation() {
+    if (window.matchMedia("(orientation: portrait)").matches) {
+        alert("Please rotate your device to landscape mode for the best experience.");
+    }
+}
+
+// Add event listener for orientation changes
+window.addEventListener("resize", checkOrientation);
+
+// Initial check on page load
+checkOrientation();
+
+

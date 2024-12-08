@@ -3,33 +3,36 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radar Simulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <title>Voice Based Radar Simulator</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <style>
-        /* Add some basic styling for the help dialog */
-        .help-dialog {
-            display: none;
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            z-index: 1000;
-        }
-    </style>
+    
     <div id="container">
 
 
         <div id="radarContainer">
+            
 
             <div id="radarScope">
+                <table class="top-table">
+                    <tr>
+                        <td class="table-cell" id="radarDisplay">
+                            000° / 00.0 NM
+                        </td>
+                        <td class="table-cell" id="aircraftCountDisplay">
+                            Total Aircraft: 0<!-- Aircraft Count Display -->
+                        </td>
+                        <td class="table-cell">
+                            
+                        </td>
+                        <td class="table-cell">
+                            <button id="pauseButton" class="control-button">Pause</button>
+                        </td>
+                    </tr>
+                </table>
                 <div id="panContainer">
                     <!-- North Marker line -->
                     <div id="northLine"></div>
@@ -48,8 +51,8 @@
                     <div id="runway" class="runway"></div>
                     <div id="directionLine" class="direction-line"></div>
                 </div>
-                <button id="pauseButton" class="control-button"
-                    style="position: absolute; top: 10px; right: 10px;">Pause</button>
+
+
             </div>
 
             <div class="menu-bar">
@@ -84,30 +87,75 @@
                 <button id="SRAdistanceMarkers" class="control-button">SRA</button>
                 <button id="historyDots" class="control-button">History</button>
                 <button id="label" class="control-button">Label</button>
+                <button id="pushToTalk" class="control-button inactive">Push to Talk</button>
+
                 <div id="statusBar" class="status-bar"></div> <!-- Status bar element -->
             </div>
 
-
-
-
         </div>
+
 
         <div id="controlPanel">
-
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <center><b><u>Aircraft Control Panel</u></b></center>
-                <button id="helpButton" class="help-button" title="Help">?</button>
+            <div class="tab" >
+                <button class="tablinks active" onclick="openCity(event, 'aircraftControlPanel')">Aircraft Control
+                            Panel</button>
+                <button class="tablinks" onclick="openCity(event, 'commandLogs')">Log</button>
+                <button id="helpButton" class="help-button" style= "position: absolute; right:5px; background-color: #007BFF; color: white; padding: 4px 8px; border-radius: 6px; cursor: pointer;" title="Help">?</button>
+            
             </div>
+            
+            <div id="aircraftControlPanel" class="tabcontent" style="display: block;">
+            
+            </div>
+            
+            <div id="commandLogs" class="tabcontent">
+                <!-- All commands will be logged here-->
+            
+            </div>
+        </div>
+    
 
-            <!-- Control Boxes will be dynamically added here -->
+        <!-- Dialog Boxes-->
+        <!-- initial Aircraft Creation Dialog -->
+        <div id="initialAircraftDialog" class="dialog" style="display:none;">
+            <div class="dialog-content">
+
+                <!-- Aircraft Information Fieldset -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Initial Exercise Settings</legend>
+
+                    <!-- Individual Fighter input -->
+                    <label for="individualFighterInput">Individual Fighter AC:</label>
+                    <input type="number" id="individualFighterInput" min="0" max="10" value="0">
+
+                    <!-- Individual Transport input -->
+                    <label for="individualTransportInput">Individual Transport AC:</label>
+                    <input type="number" id="individualTransportInput" min="0" max="10" value="0">
+
+                    <!-- Fighter Formation (2AC) input -->
+                    <label for="fighterFormation2acInput">Fighter Formation (2AC):</label>
+                    <input type="number" id="fighterFormation2acInput" min="0" max="10" value="0">
+
+                    <!-- Fighter Formation (3AC) input -->
+                    <label for="fighterFormation3acInput">Fighter Formation (3AC):</label>
+                    <input type="number" id="fighterFormation3acInput" min="0" max="10" value="0">
+
+                    <!-- Fighter Formation (4AC) input -->
+                    <label for="fighterFormation4acInput">Fighter Formation (4AC):</label>
+                    <input type="number" id="fighterFormation4acInput" min="0" max="10" value="0">
+
+                </fieldset>
 
 
-
+                <!-- Create and Cancel buttons -->
+                <div>
+                    <button id="createInitialAircraftButton" class="control-button">Create</button>
+                    <button id="cancelInitialAircraftButton" class="control-button">Cancel</button>
+                </div>
+            </div>
         </div>
 
-
-
-        <!-- Aircraft Creation Dialog -->
+        <!-- Manual Aircraft Creation Dialog -->
         <div id="aircraftDialog" class="dialog" style="display:none;">
             <div class="dialog-content">
 
@@ -115,51 +163,24 @@
                 <fieldset style="border-radius: 8px;">
                     <legend style="font-weight: bold;">Aircraft Creation</legend>
 
-                    <!-- Callsign input -->
-                    <label for="callsignInput">Callsign:</label>
-                    <input type="text" id="callsignInput" required>
-                    <!-- Validate callsign when focus is lost -->
+                    <!-- Aircraft Type input -->
+                    <label for="aircraftTypeInput">Aircraft Type:</label>
+                    <div class="dropdown">
+                        <select id="aircraftTypeInput">
+                            <!-- Aircraft Type Options -->
+                            <option value="individualTransport">Transport Aircraft</option>
+                            <option value="individualFighter">Individual Fighter Aircraft</option>
+                            <option value="fighterFormation2ac">2 Aircraft Formation</option>
+                            <option value="fighterFormation3ac">3 Aircraft Formation</option>
+                            <option value="fighterFormation4ac">4 Aircraft Formation</option>
+                        </select>
+                    </div>
 
                     <!-- Heading input -->
                     <label for="headingInput">Heading (001-360):</label>
-                    <input type="number" id="headingInput" min="001" max="360" value="001" required>
+                    <input type="number" id="headingInput" min="000" max="360" value="001" required>
 
-                    <!-- Altitude input -->
-                    <label for="altitudeInput">Altitude (in 100s of feet):</label>
-                    <input type="number" id="altitudeInput" value="100" required>
 
-                    <!-- Speed input -->
-                    <label for="speedInput">Speed (knots):</label>
-                    <input type="number" id="speedInput" value="300" required>
-
-                    <!-- SSR Input Field for Single Aircraft -->
-                    <div id="singleSSRInput" style="display: block;">
-                        <label for="ssrInput">Squawk (Single Aircraft):</label>
-                        <input type="number" id="ssrInput" min="0000" max="7777" value="0000" required>
-                    </div>
-
-                    <!-- SSR Input Fields for Formations -->
-                    <div id="formationSSRInputs" style="display: none;">
-                        <label for="formationSSRInput">Squawk Codes (Formation):</label>
-                        <div id="ssrFormationContainer">
-                            <!-- SSR input fields will be generated here dynamically -->
-                        </div>
-                    </div>
-
-                </fieldset>
-
-                <!-- Formation Fieldset -->
-                <fieldset style="border-radius: 8px;">
-                    <legend style="font-weight: bold;">Formation Size</legend>
-
-                    <!-- Radio buttons for formation size -->
-                    <div id="formationSizeContainer">
-                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="1" checked>
-                            1</label>
-                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="2"> 2</label>
-                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="3"> 3</label>
-                        <label style="font-size: 14px;"><input type="radio" name="formationSize" value="4"> 4</label>
-                    </div>
                 </fieldset>
 
 
@@ -170,7 +191,6 @@
                 </div>
             </div>
         </div>
-
 
         <!-- Help Dialog -->
         <div id="helpDialog" class="help-dialog">
@@ -183,19 +203,21 @@
     <div id="controlStatusBar">
         © For Feedback, please contact Deep Gulati.
     </div>
-    <!-- Custom Context Menu -->
+
+    <!-- Custom Right Click Context Menu -->
     <ul id="radarContextMenu" class="context-menu" style="display: none;">
         <li id="createAircraftContextMenu">Create Aircraft</li>
     </ul>
 
-
+    <!-- Scripts -->
     <script src="radar.js"></script>
     <script src="readme.js"></script>
+    <script src="aircraftCreation.js"></script>
     <script src="functions.js"></script>
-    <script src="aircraftBlipClass.js"></script>
     <script src="aircraft.js"></script>
-    <script src="eventListeners.js"></script>
     <script src="commands.js"></script>
+    <script src="voiceFunctions.js"></script>
+    <script src="voiceCommands.js"></script>
 
 </body>
 

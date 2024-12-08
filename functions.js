@@ -1,283 +1,9 @@
 
-
-
-
-
 //********functions.js script file starts here**********/
 
 //File containing all the functions
 
-//************Functions related to aircraft blip, leading line and associated labels ***********/
 
-// Open create aircraft dialog box
-function openAircraftDialog() {
-    const dialog = document.getElementById('aircraftDialog');
-    dialog.style.display = 'block';
-    dialog.style.top = `50%`;  // Center the dialog
-    dialog.style.left = `50%`;
-    dialog.style.transform = `translate(-50%, -50%)`;
-    document.getElementById('callsignInput').focus();
-}
-
-// Close create aircraft dialog box
-function closeAircraftDialog() {
-    const dialog = document.getElementById('aircraftDialog');
-    dialog.style.display = 'none';
-    resetDialogFields();
-}
-
-// Reset form fields to their default values
-function resetDialogFields() {
-    const callsignInput = document.getElementById('callsignInput');
-    const ssrInput = document.getElementById('ssrInput');
-    const headingInput = document.getElementById('headingInput');
-    const speedInput = document.getElementById('speedInput');
-    const altitudeInput = document.getElementById('altitudeInput');
-    const singleSSRInput = document.getElementById('singleSSRInput');
-    const formationSSRInputs = document.getElementById('formationSSRInputs');
-    const ssrFormationContainer = document.getElementById('ssrFormationContainer');
-
-    // Reset callsign input
-    callsignInput.value = '';
-    callsignInput.style.backgroundColor = '';
-
-    // Reset single SSR input
-    ssrInput.value = '0000';
-    ssrInput.style.backgroundColor = '';
-
-    // Reset heading, speed, and altitude inputs
-    headingInput.value = '001';
-    speedInput.value = '300';
-    altitudeInput.value = '100';
-
-    // Hide formation SSR inputs and clear container
-    singleSSRInput.style.display = 'block';
-    formationSSRInputs.style.display = 'none';
-    ssrFormationContainer.innerHTML = '';
-
-    // Reset formation size to default
-    document.querySelector('input[name="formationSize"][value="1"]').checked = true;
-}
-
-//Functions to validate various inputs
-// Validate the callsign based on whether it's an individual or formation
-function validateCallsign(formationSize) {
-    const callsignInput = document.getElementById('callsignInput');
-    const callsign = callsignInput.value.trim();
-
-    // Check if the callsign is valid based on formation size
-    if (formationSize == 1) {
-        // For single aircraft, the callsign should be a 3-digit number, excluding 000
-        const isValidIndividualCallsign = /^[A-Za-z0-9]+$/.test(callsign) && callsign !== '000';
-        if (!isValidIndividualCallsign) {
-            callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
-            return false;
-        }
-    } else {
-        // For formations, callsign should contain only alphabetic characters
-        const isValidFormationCallsign = /^[A-Za-z]+$/.test(callsign);
-        if (!isValidFormationCallsign) {
-            callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
-            return false;
-        }
-    }
-
-    // Get the base callsign by removing any trailing numbers
-    const baseCallsign = getBaseCallsign(callsign);
-
-    // Check for existing blips to avoid duplicate callsigns
-    const existingBlips = aircraftBlips.filter(blip => getBaseCallsign(blip.callsign) === baseCallsign);
-
-    if (formationSize == 1) {
-        // For single aircraft, ensure the exact callsign does not exist
-        const existingBlip = existingBlips.find(blip => blip.callsign === callsign);
-        if (existingBlip) {
-            callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
-            return false;
-        }
-    } else {
-        // For formations, ensure the base callsign is not already in use
-        const baseCallsignExists = existingBlips.some(blip => blip.callsign !== callsign);
-        if (baseCallsignExists) {
-            callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
-            return false;
-        }
-    }
-
-    callsignInput.style.backgroundColor = '';  // Reset to default
-    return true;
-}
-
-// Validate SSR code(s) for single or formation aircraft
-function validateSsrCode(formationSize) {
-    if (formationSize == 1) {
-        const ssrInput = document.getElementById('ssrInput');
-        let ssrCode = ssrInput.value.trim();
-
-        // Set default SSR code if none is entered
-        if (ssrCode === '') {
-            ssrCode = '0000';
-            ssrInput.value = ssrCode;  // Update the input field with the default value
-        }
-
-        if (validateSingleSsrCode(ssrCode)) {
-            ssrInput.style.backgroundColor = ''; // Reset to default
-            return true;
-        }
-        ssrInput.style.backgroundColor = '#f8d7da'; // Light red color for invalid SSR
-        return false;
-    } else {
-        const ssrInputs = document.querySelectorAll('.formation-ssr-input');
-        const ssrCodes = new Set();  // To track unique SSR codes except '0000'
-        let isValid = true;
-
-        ssrInputs.forEach(input => {
-            let ssrCode = input.value.trim();
-
-            // Set default SSR code if none is entered
-            if (ssrCode === '') {
-                ssrCode = '0000';
-                input.value = ssrCode;  // Update the input field with the default value
-            }
-
-            if (!validateSingleSsrCode(ssrCode) || (ssrCode !== '0000' && ssrCodes.has(ssrCode))) {
-                input.style.backgroundColor = '#f8d7da';  // Highlight invalid field
-                isValid = false;
-            } else {
-                input.style.backgroundColor = '';  // Reset to default
-                if (ssrCode !== '0000') {
-                    ssrCodes.add(ssrCode);  // Add to the set if not '0000'
-                }
-            }
-        });
-
-        return isValid;
-    }
-}
-
-// Helper function to validate a single SSR code
-function validateSingleSsrCode(ssrCode) {
-    // Skip duplication check for emergency SSR codes (7500, 7600, 7700)
-    if (ssrCode === '7500' || ssrCode === '7600' || ssrCode === '7700') {
-        return true;  // Valid emergency codes
-    }
-
-    // Validate SSR code format (octal) and allow '0000' to be duplicate
-    const existingSSR = aircraftBlips.find(blip => blip.ssrCode === ssrCode && ssrCode !== '0000');
-    return /^[0-7]{4}$/.test(ssrCode) && !existingSSR;
-}
-
-function validateHeading() {
-    const headingInput = document.getElementById('headingInput');
-    const heading = parseInt(headingInput.value, 10);
-
-    if (isNaN(heading) || heading < 1 || heading > 360) {
-        headingInput.style.backgroundColor = '#f8d7da'; // Light red color
-        return false;
-    }
-
-    headingInput.style.backgroundColor = ''; // Reset to default
-    return true;
-}
-
-function validateSpeed() {
-    const speedInput = document.getElementById('speedInput');
-    const speed = parseInt(speedInput.value, 10);
-
-    if (isNaN(speed)) {
-        speedInput.style.backgroundColor = '#f8d7da'; // Light red color
-        return false;
-    }
-
-    speedInput.style.backgroundColor = ''; // Reset to default
-    return true;
-}
-
-function validateAltitude() {
-    const altitudeInput = document.getElementById('altitudeInput');
-    const altitude = parseInt(altitudeInput.value * 100, 10); // Convert to feet
-
-    if (isNaN(altitude)) {
-        altitudeInput.style.backgroundColor = '#f8d7da'; // Light red color
-        return false;
-    }
-
-    altitudeInput.style.backgroundColor = ''; // Reset to default
-    return true;
-}
-
-// Function to remove trailing numbers from a callsign to get formation callsign
-function getBaseCallsign(callsign) {
-    return callsign.replace(/-\d+$/, ''); // Remove trailing '-' followed by digits
-}
-
-
-//*******Function related to aircraft blip */
-// Function to Create Aircraft blip(s) after validating inputs from Dialog Box
-function createAircraftBlip() {
-    const formationSize = parseInt(document.querySelector('input[name="formationSize"]:checked').value, 10);
-
-    // Validate all input fields including SSR codes
-    const isCallsignValid = validateCallsign(formationSize);
-    const isSsrCodeValid = validateSsrCode(formationSize);
-    const isHeadingValid = validateHeading();
-    const isSpeedValid = validateSpeed();
-    const isAltitudeValid = validateAltitude();
-
-    if (!isCallsignValid || !isSsrCodeValid || !isHeadingValid || !isSpeedValid || !isAltitudeValid) {
-        return false;
-    }
-
-    // Get the input values
-    const callsignInput = document.getElementById('callsignInput').value.trim();
-    const headingInput = parseInt(document.getElementById('headingInput').value, 10);
-    const speedInput = parseInt(document.getElementById('speedInput').value, 10);
-    const altitudeInput = parseInt(document.getElementById('altitudeInput').value * 100, 10);  // Convert to feet
-
-    if (formationSize === 1) {
-        // Handle individual aircraft creation
-        const callsign = callsignInput;
-        const ssrCode = document.getElementById('ssrInput').value.trim();
-
-        const blip = new AircraftBlip(callsign, headingInput, speedInput, altitudeInput, selectedPosition.x, selectedPosition.y, ssrCode);
-
-        blip.role = 'Individual';  // Assign individual role
-        console.log(`C/S ${callsign} created as individual aircraft.`);  // Log message
-
-        aircraftBlips.push(blip);
-        createControlBox(blip, formationSize, 1);  // Create control box
-    } else {
-        console.log("Formation: C/S " + getBaseCallsign(callsignInput) + " (" + formationSize + " aircraft) created.");
-        // Handle formation aircraft creation
-        for (let i = formationSize; i >= 1; i--) {
-            const callsign = `${callsignInput}-${i}`;
-            const ssrCode = document.getElementById(`formationSSRInput_${i}`).value.trim();
-
-            const blip = new AircraftBlip(callsign, headingInput, speedInput, altitudeInput, selectedPosition.x, selectedPosition.y, ssrCode);
-
-            if (i === 1) {
-                blip.role = 'Leader';  // Assign leader role
-                blip.formationSize = formationSize;
-                console.log(`C/S ${callsign} created as formation leader.`);
-            } else {
-                blip.role = 'Member';  // Assign member role
-                console.log(`C/S ${callsign} created as formation member.`);
-            }
-
-            aircraftBlips.push(blip);
-            //createControlBox(blip, formationSize, i);  // Create control box for each blip
-        }
-        // Create control boxes in original order
-        for (let i = 1; i <= formationSize; i++) {
-            const callsign = `${callsignInput}-${i}`;
-            const blip = aircraftBlips.find(b => b.callsign === callsign);
-            createControlBox(blip, formationSize, i);
-        }
-
-    }
-
-    return true;  // Return true to indicate successful creation
-}
 
 //for providing focus to clicked aircraft control box
 function focusControlBoxInput(callsign) {
@@ -310,7 +36,7 @@ function toggleFormationControlBoxes(enable, formationSize, firstAircraftCallsig
 
     // Loop through the formation starting from the next number
     for (let i = startFrom; i <= 4; i++) {
-        const currentCallsign = `${getBaseCallsign(firstAircraftCallsign)}-${i}`;  // Construct the callsign for the rest of the formation
+        const currentCallsign = `${getFormationCallsign(firstAircraftCallsign)}-${i}`;  // Construct the callsign for the rest of the formation
         if (enable) {
             enableControlBox(currentCallsign);
         } else {
@@ -331,7 +57,7 @@ function updateHeadingPeriodically() {
 
 // Function to delete a single aircraft
 function deleteAircraft(blip) {
-    const baseCallsign = getBaseCallsign(blip.callsign);
+    const formationCallsign = getFormationCallsign(blip.callsign);
 
     // Check if the aircraft being deleted is the leader
     if (blip.role === "Leader") {
@@ -343,18 +69,104 @@ function deleteAircraft(blip) {
         }
     }
 
+    // Check if the formation is still active
+    if (blip.role === "Member" || blip.role === "Leader") {
+        if (!isFormationActive(formationCallsign)) {
+            // If no members are left, remove the base callsign from the list
+            removeFormationCallsignFromSet(formationCallsign);
+        }
+    } else {
+        // If deleting an individual aircraft, ensure no formation-related cleanup is required
+        //console.log(`Deleting individual aircraft: ${blip.callsign}`);
+    }
+
+    // Decrement the total aircraft count
+    totalAircraftCount--;
+
+    // Remove the callsign from the allAircraftCallsigns array
+    allAircraftCallsigns = allAircraftCallsigns.filter(callsign => callsign !== blip.callsign);
+
     // Remove the blip from the aircraftBlips array
     aircraftBlips = aircraftBlips.filter(b => b !== blip);
 
     // Remove the elements from the DOM
     removeAircraftElements(blip);
 
-    updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
+    // Update control boxes for remaining formation members
+    const remainingMembers = aircraftBlips.filter(member =>
+        getFormationCallsign(member.callsign) === formationCallsign
+    );
+
+    remainingMembers.forEach(member => {
+        const controlBox = document.getElementById(`controlBox_${member.callsign}`);
+        if (controlBox) {
+            // Ensure the buttons and event listeners are attached
+            if (!document.getElementById(`orbitLeft_${member.callsign}`)) {
+                controlBox.querySelector('.command-input-container').innerHTML += `
+                    <div class="control-buttons-container">
+                        <button class="control-button orbit-left-button" id="orbitLeft_${member.callsign}">←</button>
+                        <button class="control-button stop-turn-button" id="stopTurn_${member.callsign}">-</button>
+                        <button class="control-button orbit-right-button" id="orbitRight_${member.callsign}">→</button>
+                        <button class="control-button delete-button" id="delete_${member.callsign}">X</button>
+                    </div>
+                `;
+
+                // Attach event listeners to the new buttons
+                document.getElementById(`orbitLeft_${member.callsign}`).addEventListener('click', () => {
+                    processCommandForBlip(member, "OL");
+                });
+
+                document.getElementById(`stopTurn_${member.callsign}`).addEventListener('click', () => {
+                    processCommandForBlip(member, "ST");
+                });
+
+                document.getElementById(`orbitRight_${member.callsign}`).addEventListener('click', () => {
+                    processCommandForBlip(member, "OR");
+                });
+
+                document.getElementById(`delete_${member.callsign}`).addEventListener('click', () => {
+                    deleteAircraft(member);
+                });
+            }
+        }
+    });
+
+    // Display the updated counts
+    displayAircraftCounts();
+
+    // Update the status bar
+    updateStatusBar(`→ ${blip.callsign} deleted.`);
+
+    //Logging into console
+        console.log(`→ ${blip.callsign} deleted.`);
+
+        //Logging into Command Log
+        commandLogs.innerHTML += `<br><br>→ "<b style="color: red">${blip.callsign}</b>" deleted. `;
+    
+}
+
+
+
+// Helper function to check if a formation still has any members
+function isFormationActive(formationCallsign) {
+    // Find all aircraft whose callsign starts with the base callsign
+    const formationMembers = aircraftBlips.filter(b => getFormationCallsign(b.callsign) === formationCallsign);
+
+    // If there are no formation members left, the formation is no longer active
+    return formationMembers.length > 0;
+}
+
+// Helper function to remove the base callsign from the set of active callsigns
+function removeFormationCallsignFromSet(formationCallsign) {
+    const index = allAircraftCallsigns.findIndex(callsign => getFormationCallsign(callsign) === formationCallsign);
+    if (index !== -1) {
+        allAircraftCallsigns.splice(index, 1); // Remove the base callsign
+    }
 }
 
 // Helper function to find the next aircraft in the formation (after the leader)
 function findNextAircraftInFormation(leaderBlip) {
-    const baseCallsign = getBaseCallsign(leaderBlip.callsign);
+    const formationCallsign = getFormationCallsign(leaderBlip.callsign);
 
     // Extract the number from the leader's callsign
     const leaderNumberMatch = leaderBlip.callsign.match(/-(\d+)$/);
@@ -366,7 +178,7 @@ function findNextAircraftInFormation(leaderBlip) {
 
     // Find the next aircraft in sequence based on the leader's numeric suffix
     for (let i = startFrom; i <= leaderBlip.formationSize; i++) {
-        const nextCallsign = `${baseCallsign}-${i}`;
+        const nextCallsign = `${formationCallsign}-${i}`;
         const nextBlip = aircraftBlips.find(blip => blip.callsign === nextCallsign);
         //console.log(`Next Callsign in sequence is: ${nextCallsign}`);
         if (nextBlip) return nextBlip;  // Return the next aircraft found
@@ -380,25 +192,37 @@ function promoteToLeader(newLeaderBlip, newFormationSize) {
     newLeaderBlip.role = "Leader";  // Assign leader role
     newLeaderBlip.formationSize = newFormationSize - 1;  // Update formation size
 
-    // Update the control box: Add the checkbox to the new leader (unchecked by default)
     const controlBox = document.getElementById(`controlBox_${newLeaderBlip.callsign}`);
+
     if (controlBox) {
-        controlBox.querySelector('.command-input-container').innerHTML += `
-            <input type="checkbox" id="formationCheckbox_${newLeaderBlip.callsign}">
-        `;
+        // Reinitialize control box HTML to add buttons
+        controlBox.querySelector('.command-input-container').innerHTML += `<input class= "checkbox" type="checkbox" id="formationCheckbox_${newLeaderBlip.callsign}">`;
 
+        // Re-attach event listeners to buttons
+        document.getElementById(`orbitLeft_${newLeaderBlip.callsign}`).addEventListener('click', () => {
+            processCommand(newLeaderBlip, "OL");
+        });
 
-        // Add event listener for the checkbox in the first aircraft's control box
-        if (newFormationSize >= 1) {
-            const checkbox = document.getElementById(`formationCheckbox_${newLeaderBlip.callsign}`);
-            checkbox.addEventListener('change', function () {
-                toggleFormationControlBoxes(!checkbox.checked, newFormationSize, newLeaderBlip.callsign); // Reversed logic
-            });
-        }
-        console.log(`${newLeaderBlip.callsign} is now new Formation leader. Remaining Formation size is ${newLeaderBlip.formationSize}.`)
+        document.getElementById(`stopTurn_${newLeaderBlip.callsign}`).addEventListener('click', () => {
+            processCommand(newLeaderBlip, "ST");
+        });
 
+        document.getElementById(`orbitRight_${newLeaderBlip.callsign}`).addEventListener('click', () => {
+            processCommand(newLeaderBlip, "OR");
+        });
+
+        document.getElementById(`delete_${newLeaderBlip.callsign}`).addEventListener('click', () => {
+            processCommand(newLeaderBlip, "DEL");
+        });
+
+        // Add event listener for the checkbox
+        const checkbox = document.getElementById(`formationCheckbox_${newLeaderBlip.callsign}`);
+        checkbox.addEventListener('change', function () {
+            toggleFormationControlBoxes(!checkbox.checked, newFormationSize, newLeaderBlip.callsign); // Reversed logic
+        });
+
+        //console.log(`${newLeaderBlip.callsign} is now the new leader of the formation.`);
     }
-
 }
 
 // Helper function to remove aircraft elements from the DOM
@@ -418,7 +242,7 @@ function removeAircraftElements(blip) {
 //***********Functions related to Control Boxes
 // Function to Create control box for aircraft
 function createControlBox(blip, formationSize, aircraftIndex) {
-    const controlPanel = document.getElementById('controlPanel');
+    const aircraftControlPanel = document.getElementById('aircraftControlPanel');
     const controlBox = document.createElement('div');
     controlBox.className = 'control-box';
     controlBox.id = `controlBox_${blip.callsign}`;  // Unique ID based on callsign
@@ -443,11 +267,15 @@ function createControlBox(blip, formationSize, aircraftIndex) {
             <input type="text" id="commandInput_${blip.callsign}">
             <span id="lastCommand_${blip.callsign}" class="last-command"></span>
             ${formationSize > 1 && aircraftIndex === 1 ?
-            `<input type="checkbox" id="formationCheckbox_${blip.callsign}" checked> ` : ''}
+            `<input class= "checkbox" type="checkbox" id="formationCheckbox_${blip.callsign}" checked> ` : ''}
+            <button class="control-button orbit-left-button" id="orbitLeft_${blip.callsign}"><i class="arrow left"></i></button>
+            <button class="control-button stop-turn-button" id="stopTurn_${blip.callsign}">—</button>
+            <button class="control-button orbit-right-button" id="orbitRight_${blip.callsign}"><i class="arrow right"></i></button>
+            <button class="control-button delete-button" id="delete_${blip.callsign}">X</button>
         </div>
     `;
 
-    controlPanel.appendChild(controlBox);
+    aircraftControlPanel.appendChild(controlBox);
 
     // Disable the control box if it's not the first aircraft in the formation
     if (formationSize > 1 && aircraftIndex > 1) {
@@ -465,8 +293,25 @@ function createControlBox(blip, formationSize, aircraftIndex) {
     // Event listener for Enter key to handle commands for each aircraft
     controlBox.addEventListener('keypress', (event) => {
         if (event.key === 'Enter') {
-            processCommand(this.formationSize, blip);
+            processCommand(blip);
         }
+    });
+
+    // Event listeners for the buttons
+    document.getElementById(`orbitLeft_${blip.callsign}`).addEventListener('click', () => {
+        processCommand(blip, "OL");
+    });
+
+    document.getElementById(`stopTurn_${blip.callsign}`).addEventListener('click', () => {
+        processCommand(blip, "ST");
+    });
+
+    document.getElementById(`orbitRight_${blip.callsign}`).addEventListener('click', () => {
+        processCommand(blip, "OR");
+    });
+
+    document.getElementById(`delete_${blip.callsign}`).addEventListener('click', () => {
+        processCommand(blip, "DEL");
     });
 }
 
@@ -501,13 +346,35 @@ function updateControlBox(blip) {
 // Helper functions to enable or disable control boxes
 function enableControlBox(callsign) {
     const commandInput = document.getElementById(`commandInput_${callsign}`);
-    if (commandInput) commandInput.disabled = false;
+    const orbitLeft = document.getElementById(`orbitLeft_${callsign}`);
+    const orbitRight = document.getElementById(`orbitRight_${callsign}`);
+    const stopTurn = document.getElementById(`stopTurn_${callsign}`);
+    const deleteBtn = document.getElementById(`delete_${callsign}`);
+
+    if (commandInput) {
+        commandInput.disabled = false;
+        orbitLeft.disabled = false;
+        orbitRight.disabled = false;
+        stopTurn.disabled = false;
+        deleteBtn.disabled = false;
+    }
 }
 
 // Function to disable the control box
 function disableControlBox(callsign) {
     const commandInput = document.getElementById(`commandInput_${callsign}`);
-    if (commandInput) commandInput.disabled = true;
+    const orbitLeft = document.getElementById(`orbitLeft_${callsign}`);
+    const orbitRight = document.getElementById(`orbitRight_${callsign}`);
+    const stopTurn = document.getElementById(`stopTurn_${callsign}`);
+    const deleteBtn = document.getElementById(`delete_${callsign}`);
+
+    if (commandInput) {
+        commandInput.disabled = true;
+        orbitLeft.disabled = true;
+        orbitRight.disabled = true;
+        stopTurn.disabled = true;
+        deleteBtn.disabled = true;
+    }
 }
 
 //*******Function to enable dragging of labels
@@ -559,6 +426,20 @@ function dragElement(elmnt, blip) {
 }
 
 
+//Functions for tabbed browsing
+function openCity(evt, cityName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
 
 
 //********functions.js script file ends here**********/

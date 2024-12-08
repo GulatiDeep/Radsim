@@ -3,6 +3,32 @@
 
 /* ---------- Global Styles ---------- */
 
+/* Landscape mode for devices */
+@media (orientation: landscape) {
+    body {
+        background-color: #f0f0f0; /* Example background for landscape mode */
+    }
+}
+
+/* Portrait mode for devices */
+@media (orientation: portrait) {
+    body {
+        background-color: #ffcccc; /* Example background for portrait mode */
+    }
+
+    .landscape-message {
+        display: block;
+    }
+}
+
+.landscape-message {
+    display: none;
+    text-align: center;
+    font-size: 20px;
+    color: red;
+}
+
+
 /* Keyframe animation for rotating the range rings */
 @keyframes rotate {
     from {
@@ -10,7 +36,7 @@
     }
 
     to {
-        transform: rotate(360deg);
+        transform: rotate(0deg);
     }
 }
 
@@ -111,6 +137,63 @@ html {
     /* Same width as specific markers */
 }
 
+/* ---------- Top Bar & Dropdowns ---------- */
+
+/* Top table bar at the top of the screen */
+/* Table styling */
+.top-table {
+    color: white; /* Text color */
+    top: 0;
+    height: 30px;
+    box-sizing: border-box;
+    border-collapse: collapse; /* Ensures borders don't double up between cells */
+    align-items: center;
+    gap: 10px;
+    justify-content: space-around;
+    z-index: 999;
+    position: absolute;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    
+}
+
+/* Cell styling */
+.table-cell {
+    text-align: center; /* Center content horizontally */
+    vertical-align: middle; /* Center content vertically */
+    padding: 0px 10px 0 10px; /* Add spacing inside the cells */
+    font-size: 12px; /* Font size */
+    border: 1px solid white; /* Add border to cells */
+    width: 25%;
+    z-index: 1000;
+    color: white;
+}
+
+/* Aircraft count display style */
+.aircraft-count-display {
+    position: fixed; /* Fixed position to stay at the top left corner */
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    z-index: 1000; /* Ensure it's above other elements */
+    left: 10px; /* Position at top left corner */
+    top: 30px;
+}
+
+
+/* Remove the left border for the first cell in each row */
+.top-table tr td:first-child {
+    border-left: none;
+}
+
+/* Remove the right border for the last cell in each row */
+.top-table tr td:last-child {
+    border-right: none;
+}
+
+
 
 /* ---------- Menu Bar & Dropdowns ---------- */
 
@@ -183,7 +266,7 @@ html {
 
 /* Individual rings on the radar */
 .ring {
-    border: 0.2px dotted gray;
+    border: 0.2px solid gray;
     border-radius: 100%;
     position: absolute;
 }
@@ -251,7 +334,7 @@ html {
 /* Direction line in radar */
 .direction-line {
     background-color: white;
-    opacity: 0.5;
+    opacity: 0.75;
 }
 
 
@@ -399,11 +482,10 @@ html {
 #controlPanel {
     flex: 1;
     background-color: #f0f0f0;
-    padding: 5px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 0px;
     z-index: 5;
     position: relative;
     right: 0;
@@ -447,9 +529,6 @@ html {
     /* Ensure it stays on top */
 }
 
-
-
-
 .disabled-panel {
     pointer-events: none;
     /* Disables interactions with all child elements */
@@ -462,7 +541,7 @@ html {
     background-color: #e0e0e0;
     box-sizing: border-box;
     border-radius: 4px;
-    margin-bottom: 1px;
+    margin-bottom: 5px;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -470,6 +549,8 @@ html {
     /* Prevents text selection when clicking */
     overflow: visible;
     /* Ensure no overflow issues */
+    position: relative; /* Ensure the control-box is the reference for absolute positioning */
+    
 }
 
 .control-box input:focus {
@@ -527,7 +608,7 @@ html {
 
 /* Input field in control box */
 .control-box input {
-    width: 40%;
+    width: 30%;
     padding: 5px;
     border-radius: 4px;
     border: 1px solid #ccc;
@@ -742,7 +823,22 @@ html {
 }
 
 
+
+
 /* Help Dialog content layout */
+.help-dialog {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    z-index: 1000;
+}
+
 .help-content {
     display: flex;
     flex-direction: column;
@@ -796,3 +892,172 @@ html {
     background-color: #0056b3;
     /* Darker blue on hover */
 }
+
+
+.checkbox {
+    position: absolute;
+    bottom: 3px; /* Positioned at the bottom of the control box */
+    right: 120px; /* To the left of the right button */
+}
+
+
+/* Common styles for Orbit buttons */
+.orbit-left-button,
+.orbit-right-button,
+.stop-turn-button,
+.delete-button {
+    position: absolute;
+    bottom: 3px; /* Positioned at the bottom of the control box */
+    font-size: 14px; /* Match font size */
+    font-weight: bold; /* Bold for better visibility */
+    color: black;
+    border: 1px solid #ccc; /* Subtle border */
+    border-radius: 3px; /* Rounded corners */
+    cursor: pointer;
+    width: 28px;
+    height: 25px;
+}
+
+/* Disabled state styles */
+.orbit-left-button:disabled,
+.orbit-right-button:disabled,
+.stop-turn-button:disabled,
+.delete-button:disabled {
+    background-color: #f0f0f0; /* Light grey background */
+    color: #a0a0a0; /* Faded text color */
+    border-color: #dcdcdc; /* Light grey border */
+    cursor: not-allowed; /* Show "not allowed" cursor */
+    pointer-events: none; /* Disable pointer interactions */
+}
+
+/* Disabled state styles */
+.orbit-left-button:disabled .arrow,
+.orbit-right-button:disabled .arrow {
+    border-color: #a0a0a0; /* Faded grey color for arrow */
+}
+
+/* Hover styles */
+.orbit-left-button:hover,
+.orbit-right-button:hover,
+.stop-turn-button:hover,
+.delete-button:hover {
+    background-color: #007bff; /* Darker blue on hover */
+    color: white; /* White text on hover */
+}
+
+/* Positioning for orbit buttons */
+.orbit-left-button {
+    right: 104px; /* To the left of the stop-turn button */
+}
+
+.orbit-right-button {
+    right: 38px; /* Flush with the control box edge */
+}
+
+.stop-turn-button {
+    right: 71px; /* Between the left and right buttons */
+}
+
+/* Specific arrow button styles */
+.arrow {
+    border: solid black;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 3px;
+    margin: auto;
+}
+
+/* Left arrow rotation */
+.left {
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+}
+
+/* Right arrow rotation */
+.right {
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+}
+
+/* Delete button styles */
+.delete-button {
+    right: 5px;
+    color: white; /* White text */
+    background-color: red; /* Red for critical action */
+    border: 1px solid darkred;
+}
+
+/* Delete button hover */
+.delete-button:hover {
+    background-color: darkred; /* Darker red on hover */
+}
+
+
+.control-buttons-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 5px;
+}
+
+/*Tabbed browsing*/
+/* Style the tab container */
+.tab {
+    background-color: #f9f9f9;
+    display: flex;
+    border-bottom: 1px solid #ccc;
+    justify-content: flex-start;
+    gap: 2px;
+    margin: 3px;
+  }
+  
+  /* Style the tab buttons */
+  .tab button {
+    background-color: white;
+    border: 1px solid white;
+    border-radius: 8px 8px 0 0; /* Rounded top corners like browser tabs */
+    cursor: pointer;
+    padding: 4px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Hover effect for buttons */
+  .tab button:hover {
+    background-color: #d0d0d0;
+    color: #333;
+    transform: translateY(-1px); /* Subtle lift effect */
+    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Style the active/current tab */
+  .tab button.active {
+    background-color: black;
+    color: white;
+    border-bottom: 1px solid; /* Seamlessly connect with the tab content */
+    transform: translateY(-1px);
+    box-shadow: none; /* Remove shadow for the active tab */
+  }
+  
+  /* Style the tab content */
+  .tabcontent {
+    display: none;
+    border-top: none;
+    background-color: white;
+    box-sizing: border-box;
+    padding: 5px;
+    z-index: 5;
+    position: relative;
+    right: 0;
+    /* Align to the right */
+    height: calc(100% - 20px);
+    font-size: 12px;
+    /* Reduce height by 20px to make space for status bar */
+    overflow-y: auto;
+    /* Enables vertical scrolling */
+    max-height: calc(100% - 20px);
+    
+    /* Ensure the panel respects height limits */
+  }
