@@ -607,17 +607,17 @@ function openFullscreen() {
 
    
 
-// Check for orientation change using matchMedia
-function checkOrientation() {
-    if (window.matchMedia("(orientation: portrait)").matches) {
-        alert("Please rotate your device to landscape mode for the best experience.");
-    }
-}
+// // Check for orientation change using matchMedia
+// function checkOrientation() {
+//     if (window.matchMedia("(orientation: portrait)").matches) {
+//         alert("Please rotate your device to landscape mode for the best experience.");
+//     }
+// }
 
-// Add event listener for orientation changes
-window.addEventListener("resize", checkOrientation);
+// // Add event listener for orientation changes
+// window.addEventListener("resize", checkOrientation);
 
-// Initial check on page load
-checkOrientation();
+// // Initial check on page load
+// checkOrientation();
 
 

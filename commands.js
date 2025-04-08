@@ -93,7 +93,7 @@ function propagateCommandToFormation(formationCallsign, command) {
 function processCommandForBlip(blip, command) {
     const headingMatch = command.match(/^([LR])(\d{3})$/);
     const speedMatch = command.match(/^S(\d+)$/);
-    const altitudeMatch = command.match(/^H(\d{1,2})$/);
+    const altitudeMatch = command.match(/^H(\d{1,3})$/);
     const verticalRateMatch = command.match(/^V(\d+)$/);
     const ssrMatch = command.match(/^SSR([0-7]{4})$/);
 
