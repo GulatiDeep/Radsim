@@ -133,17 +133,24 @@ function processCommandForBlip(blip, command) {
 
     }
 
-    // Handle altitude command
+
     else if (altitudeMatch) {
         const altitude = parseInt(altitudeMatch[1], 10) * 100;
         blip.targetAltitude = altitude;
         updateStatusBar(`→ Aircraft ${blip.callsign} target altitude set to ${altitude} feet.`);
         isValidCommand = true;
-
+    
         const voiceAlt = pronounceAlt(altitude);
-        voiceAction = `setting altitude to, ${voiceAlt} feet.`;
-
+    
+        if (blip.altitude < altitude) {
+            voiceAction = `climbing to, ${voiceAlt} feet.`;
+        } else if (blip.altitude > altitude) {
+            voiceAction = `descending to, ${voiceAlt} feet.`;
+        } else {
+            voiceAction = `Maintaining, ${voiceAlt} feet.`;  // Optional case
+        }
     }
+    
 
     // Handle vertical rate command
     else if (verticalRateMatch) {
@@ -237,7 +244,7 @@ function processCommandForBlip(blip, command) {
     else {
         updateStatusBar(`→ Invalid command: ${command}.`);
 
-        voiceAction = `received invalid command.`;
+        voiceAction = `Say Again`;
     }
 
     // Update the last command display

@@ -254,9 +254,17 @@ class AircraftBlip {
 
     //To update the informatioin on label based on primary or secondary pickup
     updateLabelInfo(blip) {
-        // Only display label info if SSR code is not 0000
+        const level = Math.round(this.altitude / 100);
+        let arrow = '';
+    
+        if (this.altitude < this.targetAltitude) {
+            arrow = '↑';  // Climbing
+        } else if (this.altitude > this.targetAltitude) {
+            arrow = '↓';  // Descending
+        }
+    
         if (this.ssrCode !== '0000') {
-            this.label.innerHTML = `3-${this.ssrCode}<br>A${Math.round(this.altitude / 100)}<br>N${this.speed}`;
+            this.label.innerHTML = `3-${this.ssrCode}<br>A${level} ${arrow}<br>N${this.speed}`;
         } else {
             this.label.innerHTML = `N${this.speed}`; // Display only speed if SSR code is 0000
         }
