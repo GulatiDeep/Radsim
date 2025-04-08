@@ -605,4 +605,75 @@ function openFullscreen() {
         aircraftBlips.forEach(blip => blip.updateBlipPosition());
     });
 
+    //Function to Open the Log Tab for tabbed browsing
+function openLogTab(evt, cityName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+    //Functions to make the dialog boxes draggable
+    function makeDraggable(dialogId, handleId) {
+        const dialog = document.getElementById(dialogId);
+        const handle = document.getElementById(handleId);
+    
+        let offsetX = 0, offsetY = 0;
+        let isDragging = false;
+        let dragStart = false;
+    
+        handle.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) return;
+    
+            const rect = dialog.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+    
+            dragStart = true;
+    
+            dialog.style.left = `${rect.left}px`;
+            dialog.style.top = `${rect.top}px`;
+            dialog.style.transform = 'none';
+    
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    
+        function onMouseMove(e) {
+            if (!dragStart) return;
+    
+            // Start dragging only if the mouse moves enough
+            if (!isDragging && (Math.abs(e.movementX) > 2 || Math.abs(e.movementY) > 2)) {
+                isDragging = true;
+            }
+    
+            if (isDragging) {
+                dialog.style.left = `${e.clientX - offsetX}px`;
+                dialog.style.top = `${e.clientY - offsetY}px`;
+            }
+        }
+    
+        function onMouseUp() {
+            isDragging = false;
+            dragStart = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+    }
+    
+    
+    
+
+    makeDraggable('initialAircraftDialog', 'initialAircraftDialog');
+makeDraggable('aircraftDialog', 'aircraftDialog');
+
+    
+
    

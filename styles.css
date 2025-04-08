@@ -648,6 +648,20 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: move;
+}
+
+
+
+.dialog-header {
+    background-color: #f1f1f1;
+    cursor: move;
+    padding: 8px;
+    font-weight: bold;
+    user-select: none;
+    border-bottom: 1px solid #ccc;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 
