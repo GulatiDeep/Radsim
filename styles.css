@@ -236,9 +236,6 @@ html {
 
 
 
-
-
-
 /* ---------- Radar Display ---------- */
 
 /* Container for the radar display */
@@ -250,6 +247,7 @@ html {
     transform-origin: center center;
     transition: transform 0.1s ease;
     width: 100%;
+    
 }
 
 
@@ -412,6 +410,7 @@ html {
     font-size: 12px;
     color: yellow;
     cursor: pointer; 
+    
     /* Default label color */
 }
 
@@ -639,8 +638,6 @@ html {
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 10px;
     width: 250px;
     z-index: 1000;
@@ -649,8 +646,14 @@ html {
     justify-content: center;
     align-items: center;
     cursor: move;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s ease;
 }
 
+.dialog:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
 
 
 .dialog-header {
@@ -902,6 +905,87 @@ html {
     cursor: pointer;
     /* Pointer cursor */
 }
+
+/*Mapping dialog box*/
+/* Dialog specific styling */
+.mapping-dialog {
+    position: absolute;
+    width: 200px;
+    height: 250px;
+    font-size: 12px;
+    padding: 0;
+    font-weight: bold;                            /* 🔹 Make text bold */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* Table and input field look */
+.mapping-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    table-layout: fixed; /* important */
+      
+}
+
+.mapping-table td {
+    padding: 0px 5px;           /* Consistent padding */
+    vertical-align: middle;
+    height: 20px;               /* Consistent height */
+    border-bottom: 1px solid #ccc;
+}
+
+.mapping-table input {
+    box-sizing: border-box;
+    text-transform: uppercase;
+    font-size: 12px;
+    padding: 5px 5px;           /* No extra vertical spacing */
+    height: 20px;               /* Smaller height */
+    
+}
+
+.squawk-cell {
+    text-align: right;
+}
+
+
+.mapping-scroll-container {
+    max-height: 180px; /* Limit to ~10 rows */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+/* Dialog buttons */
+.delete-mapping-button {
+    background-color: red;     /* red */
+    color: white;
+    border-radius: 4px;
+    border: 1px solid black; /* Subtle border */
+    font-size: 12px;
+    padding: 2px 2px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    line-height: 1;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    width: 12px;
+    height: 12px;
+}
+
+.delete-mapping-button:hover {
+    background-color: #d32f2f;     /* darker red on hover */
+}
+
+
 
 .help-button:hover {
     background-color: #0056b3;

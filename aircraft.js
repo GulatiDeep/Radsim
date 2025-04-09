@@ -253,7 +253,7 @@ class AircraftBlip {
     }
 
     //To update the informatioin on label based on primary or secondary pickup
-    updateLabelInfo(blip) {
+    updateLabelInfo1(blip) {
         const level = Math.round(this.altitude / 100);
         let arrow = '';
     
@@ -269,6 +269,58 @@ class AircraftBlip {
             this.label.innerHTML = `N${this.speed}`; // Display only speed if SSR code is 0000
         }
     }
+
+    updateLabelInfo2(blip) {
+        const level = Math.round(this.altitude / 100);
+        const speed = this.speed;
+    
+        const mappedCallsign = ssrToCallsignMap[this.ssrCode]; // Look up callsign
+    
+        let labelContent = '';
+    
+        if (this.ssrCode !== '0000') {
+            if (mappedCallsign) {
+                labelContent += `<strong>${mappedCallsign}</strong><br>`;  // Mapped callsign (highlighted)
+            }
+            labelContent += `3-${this.ssrCode}<br>A${level}<br>N${speed}`;
+        } else {
+            labelContent += `N${speed}`;
+        }
+    
+        this.label.innerHTML = labelContent;
+    }
+
+    updateLabelInfo(blip) {
+        const level = Math.round(this.altitude / 100);
+        const speed = this.speed;
+        const mappedCallsign = ssrToCallsignMap[this.ssrCode];
+        let labelContent = '';
+    
+        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
+    
+        // Prepare label content
+        if (this.ssrCode !== '0000') {
+            if (mappedCallsign) {
+                labelContent += `<strong>${mappedCallsign}</strong><br>`;
+            }
+            labelContent += `3-${this.ssrCode}<br>A${level}<br>N${speed}`;
+        } else {
+            labelContent += `N${speed}`; // Only speed for primary returns
+        }
+    
+        this.label.innerHTML = labelContent;
+    
+        // Set label color based on SSR mapping and emergency status
+        if (isEmergencySSR) {
+            this.label.style.color = 'red';
+        } else if (mappedCallsign) {
+            this.label.style.color = 'hotpink'; // 💖 mapped
+        } else {
+            this.label.style.color = 'yellow'; // default
+        }
+    }
+    
+    
 
     //Set the SSR code based on input
     setSSRCode(newSSRCode) {

@@ -9,12 +9,12 @@
 </head>
 
 <body>
-    
+
     <div id="container">
 
 
         <div id="radarContainer">
-            
+
 
             <div id="radarScope">
                 <table class="top-table">
@@ -26,7 +26,7 @@
                             Total Aircraft: 0<!-- Aircraft Count Display -->
                         </td>
                         <td class="table-cell">
-                            
+
                         </td>
                         <td class="table-cell">
                             <button id="pauseButton" class="control-button">Pause</button>
@@ -87,8 +87,8 @@
                 <button id="SRAdistanceMarkers" class="control-button">SRA</button>
                 <button id="historyDots" class="control-button">History</button>
                 <button id="label" class="control-button">Label</button>
-                <!-- <button id="settings" class="control-button">Settings</button>
-                <button id="mapping-table" class="control-button">Mapping Table</button> -->
+                <button id="settings" class="control-button">Settings</button>
+                <button id="mapping-table" class="control-button" onclick="toggleMappingDialog()">Mapping Table[F6]</button>
                 <button id="pushToTalk" class="control-button inactive">Push to Talk</button>
 
                 <div id="statusBar" class="status-bar"></div> <!-- Status bar element -->
@@ -98,24 +98,26 @@
 
 
         <div id="controlPanel">
-            <div class="tab" >
+            <div class="tab">
                 <button class="tablinks active" onclick="openLogTab(event, 'aircraftControlPanel')">Aircraft Control
-                            Panel</button>
+                    Panel</button>
                 <button class="tablinks" onclick="openLogTab(event, 'commandLogs')">Log</button>
-                <button id="helpButton" class="help-button" style= "position: absolute; right:5px; background-color: #007BFF; color: white; padding: 4px 8px; border-radius: 6px; cursor: pointer;" title="Help">?</button>
-            
+                <button id="helpButton" class="help-button"
+                    style="position: absolute; right:5px; background-color: #007BFF; color: white; padding: 4px 8px; border-radius: 6px; cursor: pointer;"
+                    title="Help">?</button>
+
             </div>
-            
+
             <div id="aircraftControlPanel" class="tabcontent" style="display: block;">
-            
+
             </div>
-            
+
             <div id="commandLogs" class="tabcontent">
                 <!-- All commands will be logged here-->
-            
+
             </div>
         </div>
-    
+
 
         <!-- Dialog Boxes-->
         <!-- initial Aircraft Creation Dialog -->
@@ -194,6 +196,52 @@
             </div>
         </div>
 
+
+        <div id="mappingDialog" class="dialog mapping-dialog" style="display: none;">
+            <div class="dialog-header" id="mappingDialogHeader">Mapping Table</div>
+
+            <div class="dialog-content" style="padding: 1;">
+                <!-- Mapping Table Header -->
+                <!-- <table class="mapping-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Squawk</th>
+                            <th style="width: 65%;">Callsign</th>
+                            <th style="width: 10%;"></th>
+                        </tr>
+                    </thead>
+                </table> -->
+
+                <!-- Input Row (Fixed) -->
+                <table class="mapping-table">
+                    <tbody>
+                        <tr>
+                            <td style="width: 30%;"><input type="text" id="ssrInput" maxlength="4"
+                                    placeholder="CODE" /></td>
+                            <td style="width: 55%;"><input type="text" id="callsignInput" placeholder="CALLSIGN" /></td>
+                            <td style="width: 15%;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Scrollable Mapping List -->
+                <div class="mapping-scroll-container">
+                    <table class="mapping-table">
+                        <tbody id="mappingTableBody">
+                            <!-- New rows are appended here -->
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+        </div>
+
+
+
+
+
+
         <!-- Help Dialog -->
         <div id="helpDialog" class="help-dialog">
             <h2>Help</h2>
@@ -215,6 +263,7 @@
     <script src="radar.js"></script>
     <script src="readme.js"></script>
     <script src="aircraftCreation.js"></script>
+    <script src="mappingtable.js"></script>
     <script src="functions.js"></script>
     <script src="aircraft.js"></script>
     <script src="commands.js"></script>
