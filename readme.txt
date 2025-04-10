@@ -14,6 +14,8 @@ Commands for use of Radsim:
 
 --> SSR1000: Set the squawk code to 1000
 
+--> IDENT: To Squawk IDENT by blinking aircraft blip
+
 --> ST: To make the aircraft stop turning i.e. Wings level
 
 --> OL/OR: To make the aircraft Orbit Left or Right

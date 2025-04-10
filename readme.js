@@ -45,6 +45,10 @@ function openHelpDialog() {
                     <td style="border: 1px solid #ccc; padding: 8px;">Set the squawk code to 1000</td>
                 </tr>
                 <tr>
+                    <td style="border: 1px solid #ccc; padding: 8px;">IDENT</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">To Squawk IDENT by blinking aircraft blip</td>
+                </tr>
+                <tr>
                     <td style="border: 1px solid #ccc; padding: 8px;">ST</td>
                     <td style="border: 1px solid #ccc; padding: 8px;">To make the aircraft stop turning i.e. Wings level</td>
                 </tr>
