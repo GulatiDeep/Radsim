@@ -241,6 +241,15 @@ function processCommandForBlip(blip, command) {
 
     }
 
+    // Handle IDENT command
+    else if (command === "IDENT") {
+        blip.showIdentEffect();  // Call method in AircraftBlip
+        updateStatusBar(`→ Aircraft ${blip.callsign} squawking IDENT.`);
+        isValidCommand = true;
+        voiceAction = 'squawking IDENT';
+    }
+    
+
     // Handle invalid command
     else {
         updateStatusBar(`→ Invalid command: ${command}.`);

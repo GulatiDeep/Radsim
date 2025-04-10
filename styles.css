@@ -429,14 +429,17 @@ html {
 
 /* History dot style */
 .history-dot {
-    width: 2px;
-    height: 2px;
+    width: 10px; /* Slightly larger */
+    height: 10px;
     background-color: yellow;
     border-radius: 50%;
-    /* Makes the dots circular */
+    opacity: 0.9;
     position: absolute;
     z-index: 1;
+    box-shadow: 0 0 4px rgba(255, 255, 0, 0.6); /* Glowing halo */
+    pointer-events: none; /* Ensure dots are non-interactive */
 }
+
 
 /* Container for history dots */
 .history-container {
@@ -456,6 +459,39 @@ html {
     background-color: lightcoral;
     /* Red for inactive state */
 }
+
+.emergency-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 25px;
+    height: 25px;
+    transform: translate(-50%, -50%); /* 🔥 center it */
+    border-radius: 50%;
+    background-color: rgba(255, 0, 0, 0.5);
+    animation: blink 2s infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+
+@keyframes blink {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.8; }
+}
+
+
+
+.ident-line {
+    height: 2px;
+    background-color: white;
+    opacity: 0.7;
+    pointer-events: none;
+    animation: blink 1.5s infinite; 
+}
+
+
+
 
 
 /* Container for splitting the screen */

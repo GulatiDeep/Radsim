@@ -106,24 +106,31 @@ class AircraftBlip {
     createBlipElement() {
         const blip = document.createElement('div');
         blip.className = 'aircraft-blip';
-
-        // Apply additional class for plus sign if SSR code is '0000'
+    
+        // Create blinking emergency circle
+        this.emergencyCircle = document.createElement('div');
+        this.emergencyCircle.className = 'emergency-circle';
+        this.emergencyCircle.style.display = 'none'; // Hidden by default
+    
+        // ✅ Append to blip directly
+        blip.appendChild(this.emergencyCircle);
+    
+        // SSR-based styling
         if (this.ssrCode === '0000') {
-            blip.classList.remove('aircraft-blip'); // Remove the default box class
-            blip.classList.add('plus-sign'); // Add the plus sign class
-
+            blip.classList.remove('aircraft-blip');
+            blip.classList.add('plus-sign');
         } else {
-            blip.classList.remove('plus-sign'); // Remove the plus sign class if it was previously added
-            blip.classList.add('aircraft-blip'); // Ensure the default box style is applied
-
+            blip.classList.remove('plus-sign');
+            blip.classList.add('aircraft-blip');
         }
-
+    
         blip.style.position = 'absolute';
         blip.style.zIndex = '2';
-
+    
         panContainer.appendChild(blip);
         return blip;
     }
+    
 
     // Update label to show callsign, speed, and altitude in the desired format
     createLabelElement() {
@@ -172,13 +179,13 @@ class AircraftBlip {
 
     // Create history dot elements and append to the radar
     createHistoryDots() {
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 15; i++) {
             const dot = document.createElement('div');
             dot.className = 'history-dot';
             dot.style.opacity = 0; // Initially set opacity to 0
             dot.style.position = 'absolute';
-            dot.style.width = '1px';
-            dot.style.height = '1px';
+            dot.style.width = '2px';
+            dot.style.height = '2px';
             dot.style.backgroundColor = 'yellow';
             dot.style.zIndex = '1';
             panContainer.appendChild(dot);
@@ -275,6 +282,52 @@ class AircraftBlip {
     
     }
     
+    //Show Ident Effect on Squawking IDENT
+    showIdentEffect() {
+        // If already active, clear and remove
+        if (this.identElements) {
+            this.identElements.forEach(el => el.remove());
+            this.identElements = null;
+        }
+    
+        const offset = 5;   // Distance from blip
+        const size = 10;     // Length of the diagonal lines
+        const parent = this.element;
+    
+        const lines = [];
+    
+        const positions = [
+            { x1: -offset, y1: -offset, x2: -offset - size, y2: -offset - size }, // Top-left
+            { x1: offset, y1: -offset, x2: offset + size, y2: -offset - size },   // Top-right
+            { x1: -offset, y1: offset, x2: -offset - size, y2: offset + size },   // Bottom-left
+            { x1: offset, y1: offset, x2: offset + size, y2: offset + size }      // Bottom-right
+        ];
+    
+        positions.forEach(pos => {
+            const line = document.createElement('div');
+            line.className = 'ident-line';
+            line.style.left = '50%';
+            line.style.top = '50%';
+            line.style.width = '1px';
+            line.style.height = '2px';
+            line.style.position = 'absolute';
+            line.style.zIndex = '0';
+            line.style.backgroundColor = 'white';
+            line.style.transform = `translate(${pos.x1}px, ${pos.y1}px) rotate(${Math.atan2(pos.y2 - pos.y1, pos.x2 - pos.x1) * 180 / Math.PI}deg) scaleX(${Math.hypot(pos.x2 - pos.x1, pos.y2 - pos.y1)})`;
+            line.style.transformOrigin = 'left center';
+            line.style.animation = 'blink 1.5s infinite';
+    
+            parent.appendChild(line);
+            lines.push(line);
+        });
+    
+        this.identElements = lines;
+    
+        setTimeout(() => {
+            lines.forEach(line => line.remove());
+            this.identElements = null;
+        }, 15000); // 15 seconds
+    }
     
 
     //Set the SSR code based on input
@@ -296,26 +349,30 @@ class AircraftBlip {
     //Update the colour of label and blip based on SSR code like emergency codes
     updateColorBasedOnSSR() {
         const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
-        const isMappedSSR = ssrToCallsignMap[this.ssrCode] !== undefined;
+        const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
     
         if (isEmergencySSR) {
             this.label.style.color = 'red';
             this.line.style.backgroundColor = 'red';
             this.element.style.backgroundColor = 'red';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
+            this.emergencyCircle.style.display = 'block'; // 🔴 show ring
         } else if (isMappedSSR) {
             this.label.style.color = 'hotpink';
             this.line.style.backgroundColor = 'hotpink';
             this.element.style.backgroundColor = 'hotpink';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
+            this.emergencyCircle.style.display = 'none';
         } else {
             this.label.style.color = 'yellow';
             this.line.style.backgroundColor = 'yellow';
             this.line.style.opacity = '25%';
             this.element.style.backgroundColor = 'yellow';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
+            this.emergencyCircle.style.display = 'none';
         }
     }
+    
     
 
     // Update the line position and draw it between the blip and the label
