@@ -67,6 +67,7 @@ class AircraftBlip {
     constructor(callsign, heading, speed, altitude, x, y, ssrCode) {
         this.callsign = callsign;
         this.ssrCode = ssrCode;
+        this.originalSSRCode = (['7500', '7600', '7700'].includes(ssrCode)) ? '0000' : ssrCode; //to retain original ssr code
         this.heading = heading;
         this.speed = speed;
         this.targetSpeed = speed;
@@ -252,35 +253,18 @@ class AircraftBlip {
 
     }
 
-    //To update the informatioin on label based on primary or secondary pickup
-    updateLabelInfo1(blip) {
-        const level = Math.round(this.altitude / 100);
-        let arrow = '';
-    
-        if (this.altitude < this.targetAltitude) {
-            arrow = '↑';  // Climbing
-        } else if (this.altitude > this.targetAltitude) {
-            arrow = '↓';  // Descending
-        }
-    
-        if (this.ssrCode !== '0000') {
-            this.label.innerHTML = `3-${this.ssrCode}<br>A${level} ${arrow}<br>N${this.speed}`;
-        } else {
-            this.label.innerHTML = `N${this.speed}`; // Display only speed if SSR code is 0000
-        }
-    }
-
-    updateLabelInfo2(blip) {
+    updateLabelInfo() {
         const level = Math.round(this.altitude / 100);
         const speed = this.speed;
     
-        const mappedCallsign = ssrToCallsignMap[this.ssrCode]; // Look up callsign
+        const isEmergency = ['7500', '7600', '7700'].includes(this.ssrCode);
+        const codeForMapping = isEmergency ? this.originalSSRCode : this.ssrCode;
+        const mappedCallsign = ssrToCallsignMap[codeForMapping];
     
         let labelContent = '';
-    
         if (this.ssrCode !== '0000') {
             if (mappedCallsign) {
-                labelContent += `<strong>${mappedCallsign}</strong><br>`;  // Mapped callsign (highlighted)
+                labelContent += `<strong>${mappedCallsign}</strong><br>`;
             }
             labelContent += `3-${this.ssrCode}<br>A${level}<br>N${speed}`;
         } else {
@@ -288,80 +272,51 @@ class AircraftBlip {
         }
     
         this.label.innerHTML = labelContent;
-    }
-
-    updateLabelInfo(blip) {
-        const level = Math.round(this.altitude / 100);
-        const speed = this.speed;
-        const mappedCallsign = ssrToCallsignMap[this.ssrCode];
-        let labelContent = '';
     
-        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
-    
-        // Prepare label content
-        if (this.ssrCode !== '0000') {
-            if (mappedCallsign) {
-                labelContent += `<strong>${mappedCallsign}</strong><br>`;
-            }
-            labelContent += `3-${this.ssrCode}<br>A${level}<br>N${speed}`;
-        } else {
-            labelContent += `N${speed}`; // Only speed for primary returns
-        }
-    
-        this.label.innerHTML = labelContent;
-    
-        // Set label color based on SSR mapping and emergency status
-        if (isEmergencySSR) {
-            this.label.style.color = 'red';
-        } else if (mappedCallsign) {
-            this.label.style.color = 'hotpink'; // 💖 mapped
-        } else {
-            this.label.style.color = 'yellow'; // default
-        }
     }
     
     
 
     //Set the SSR code based on input
     setSSRCode(newSSRCode) {
+        if (!['7500', '7600', '7700'].includes(newSSRCode)) {
+            this.originalSSRCode = newSSRCode;
+        }
+    
         this.ssrCode = newSSRCode;
-        // Remove the existing blip
         this.element.remove();
-        // Create a new blip based on the new SSR code
         this.element = this.createBlipElement();
-        this.updateBlipPosition();  // Ensure the new blip is positioned correctly
-        this.updateLabelInfo();  // Update label info as well
-        this.updateColorBasedOnSSR(); // Apply the color change
-        updateControlBox(this);  // Update the control box to reflect the SSR code change
-
+        this.updateBlipPosition();
+        this.updateLabelInfo();
+        this.updateColorBasedOnSSR();
+        updateControlBox(this);
     }
+    
 
     //Update the colour of label and blip based on SSR code like emergency codes
     updateColorBasedOnSSR() {
-        // Check for emergency codes and set colors
-        if (this.ssrCode === '7500' || this.ssrCode === '7600' || this.ssrCode === '7700') {
-            // Change to red for emergencies
+        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
+        const isMappedSSR = ssrToCallsignMap[this.ssrCode] !== undefined;
+    
+        if (isEmergencySSR) {
             this.label.style.color = 'red';
             this.line.style.backgroundColor = 'red';
             this.element.style.backgroundColor = 'red';
-
-            // Change history dots to red
-            this.historyDots.forEach(dot => {
-                dot.style.backgroundColor = 'red';
-            });
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
+        } else if (isMappedSSR) {
+            this.label.style.color = 'hotpink';
+            this.line.style.backgroundColor = 'hotpink';
+            this.element.style.backgroundColor = 'hotpink';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
         } else {
-            // Revert back to default colors
             this.label.style.color = 'yellow';
             this.line.style.backgroundColor = 'yellow';
             this.line.style.opacity = '25%';
             this.element.style.backgroundColor = 'yellow';
-
-            // Revert history dots to yellow
-            this.historyDots.forEach(dot => {
-                dot.style.backgroundColor = 'yellow';
-            });
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
         }
     }
+    
 
     // Update the line position and draw it between the blip and the label
     updateLinePosition() {

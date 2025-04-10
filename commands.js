@@ -188,6 +188,7 @@ function processCommandForBlip(blip, command) {
             const voiceSSR = pronounceSSR(newSSRCode);
             voiceAction = `squawking, ${voiceSSR}.`;
         }
+        blip.updateLabelInfo(); 
     }
 
     // Handle report heading command
