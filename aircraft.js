@@ -178,20 +178,24 @@ class AircraftBlip {
     }
 
     // Create history dot elements and append to the radar
-    createHistoryDots() {
-        for (let i = 0; i < 15; i++) {
+    createHistoryDots1() {
+        for (let i = 0; i < 20; i++) {
             const dot = document.createElement('div');
             dot.className = 'history-dot';
-            dot.style.opacity = 0; // Initially set opacity to 0
-            dot.style.position = 'absolute';
-            dot.style.width = '2px';
-            dot.style.height = '2px';
-            dot.style.backgroundColor = 'yellow';
-            dot.style.zIndex = '1';
             panContainer.appendChild(dot);
             this.historyDots.push(dot);
         }
     }
+
+    createHistoryDots() {
+        for (let i = 0; i < currentHistoryDotCount; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'history-dot';
+            panContainer.appendChild(dot);
+            this.historyDots.push(dot);
+        }
+    }
+    
 
     // Update the blip's position and label position
     updateBlipPosition() {
@@ -215,7 +219,7 @@ class AircraftBlip {
         
         this.history.push({ x: this.position.x, y: this.position.y });
 
-        if (this.history.length > 12) {
+        if (this.history.length > currentHistoryDotCount) {
             this.history.shift();
         }
 
@@ -290,8 +294,8 @@ class AircraftBlip {
             this.identElements = null;
         }
     
-        const offset = 5;   // Distance from blip
-        const size = 10;     // Length of the diagonal lines
+        const offset = 4;   // Distance from blip
+        const size = 6;     // Length of the diagonal lines
         const parent = this.element;
     
         const lines = [];
@@ -306,17 +310,7 @@ class AircraftBlip {
         positions.forEach(pos => {
             const line = document.createElement('div');
             line.className = 'ident-line';
-            line.style.left = '50%';
-            line.style.top = '50%';
-            line.style.width = '1px';
-            line.style.height = '2px';
-            line.style.position = 'absolute';
-            line.style.zIndex = '0';
-            line.style.backgroundColor = 'white';
             line.style.transform = `translate(${pos.x1}px, ${pos.y1}px) rotate(${Math.atan2(pos.y2 - pos.y1, pos.x2 - pos.x1) * 180 / Math.PI}deg) scaleX(${Math.hypot(pos.x2 - pos.x1, pos.y2 - pos.y1)})`;
-            line.style.transformOrigin = 'left center';
-            line.style.animation = 'blink 1.5s infinite';
-    
             parent.appendChild(line);
             lines.push(line);
         });
@@ -326,7 +320,7 @@ class AircraftBlip {
         setTimeout(() => {
             lines.forEach(line => line.remove());
             this.identElements = null;
-        }, 15000); // 15 seconds
+        }, 15000); // 15 seconds timeout
     }
     
 

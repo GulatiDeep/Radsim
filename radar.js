@@ -21,6 +21,7 @@ const SRAdistanceMarkersButton = document.getElementById('SRAdistanceMarkers');
 const directionLine = document.getElementById('directionLine');
 const panContainer = document.getElementById('panContainer');
 
+let currentHistoryDotCount = 20; // Default value (can be updated via settings)
 
 let zoomLevel = parseFloat(zoomSlider.value);
 let panX = 0;
@@ -677,6 +678,7 @@ function makeDraggable(dialogId, handleId) {
 makeDraggable('initialAircraftDialog', 'initialAircraftDialog');
 makeDraggable('aircraftDialog', 'aircraftDialog');
 makeDraggable("mappingDialog", "mappingDialog");
+makeDraggable("settingsDialog", "settingsDialog");
 
 
 const ssrInput = document.getElementById("ssrInput");

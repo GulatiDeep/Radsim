@@ -6,14 +6,16 @@
 /* Landscape mode for devices */
 @media (orientation: landscape) {
     body {
-        background-color: #f0f0f0; /* Example background for landscape mode */
+        background-color: #f0f0f0;
+        /* Example background for landscape mode */
     }
 }
 
 /* Portrait mode for devices */
 @media (orientation: portrait) {
     body {
-        background-color: #ffcccc; /* Example background for portrait mode */
+        background-color: #ffcccc;
+        /* Example background for portrait mode */
     }
 
     .landscape-message {
@@ -142,11 +144,13 @@ html {
 /* Top table bar at the top of the screen */
 /* Table styling */
 .top-table {
-    color: white; /* Text color */
+    color: white;
+    /* Text color */
     top: 0;
     height: 30px;
     box-sizing: border-box;
-    border-collapse: collapse; /* Ensures borders don't double up between cells */
+    border-collapse: collapse;
+    /* Ensures borders don't double up between cells */
     align-items: center;
     gap: 10px;
     justify-content: space-around;
@@ -154,16 +158,21 @@ html {
     position: absolute;
     width: 100%;
     background-color: rgba(0, 0, 0, 0.8);
-    
+
 }
 
 /* Cell styling */
 .table-cell {
-    text-align: center; /* Center content horizontally */
-    vertical-align: middle; /* Center content vertically */
-    padding: 0px 10px 0 10px; /* Add spacing inside the cells */
-    font-size: 12px; /* Font size */
-    border: 1px solid white; /* Add border to cells */
+    text-align: center;
+    /* Center content horizontally */
+    vertical-align: middle;
+    /* Center content vertically */
+    padding: 0px 10px 0 10px;
+    /* Add spacing inside the cells */
+    font-size: 12px;
+    /* Font size */
+    border: 1px solid white;
+    /* Add border to cells */
     width: 25%;
     z-index: 1000;
     color: white;
@@ -171,14 +180,17 @@ html {
 
 /* Aircraft count display style */
 .aircraft-count-display {
-    position: fixed; /* Fixed position to stay at the top left corner */
+    position: fixed;
+    /* Fixed position to stay at the top left corner */
     background-color: rgba(0, 0, 0, 0.7);
     color: white;
     padding: 5px;
     border-radius: 3px;
     font-size: 12px;
-    z-index: 1000; /* Ensure it's above other elements */
-    left: 10px; /* Position at top left corner */
+    z-index: 1000;
+    /* Ensure it's above other elements */
+    left: 10px;
+    /* Position at top left corner */
     top: 30px;
 }
 
@@ -247,7 +259,7 @@ html {
     transform-origin: center center;
     transition: transform 0.1s ease;
     width: 100%;
-    
+
 }
 
 
@@ -274,12 +286,15 @@ html {
 /* North line */
 #northLine {
     position: absolute;
-    top: -50%; /* Position the line 100% above the visible area */
+    top: -50%;
+    /* Position the line 100% above the visible area */
     left: 50%;
     width: 0.2px;
-    height: 100%; /* Extend the height to cover more than enough for panning */
+    height: 100%;
+    /* Extend the height to cover more than enough for panning */
     background-color: gray;
-    z-index: 0; /* Ensure it's above other elements */
+    z-index: 0;
+    /* Ensure it's above other elements */
     transform-origin: center center;
     opacity: 0.25;
 }
@@ -287,10 +302,12 @@ html {
 /* South line */
 #southLine {
     position: absolute;
-    bottom: -50%; /* Position the line 100% below the visible area */
+    bottom: -50%;
+    /* Position the line 100% below the visible area */
     left: 50%;
     width: 0.1px;
-    height: 100%; /* Extend the height to cover more than enough for panning */
+    height: 100%;
+    /* Extend the height to cover more than enough for panning */
     background-color: gray;
     z-index: 0;
     transform-origin: center center;
@@ -301,8 +318,10 @@ html {
 #eastLine {
     position: absolute;
     top: 50%;
-    left: -50%; /* Position the line 100% left of the visible area */
-    width: 100%; /* Extend the width to cover more than enough for panning */
+    left: -50%;
+    /* Position the line 100% left of the visible area */
+    width: 100%;
+    /* Extend the width to cover more than enough for panning */
     height: 0.1px;
     background-color: gray;
     z-index: 0;
@@ -314,8 +333,10 @@ html {
 #westLine {
     position: absolute;
     top: 50%;
-    right: -50%; /* Position the line 100% right of the visible area */
-    width: 100%; /* Extend the width to cover more than enough for panning */
+    right: -50%;
+    /* Position the line 100% right of the visible area */
+    width: 100%;
+    /* Extend the width to cover more than enough for panning */
     height: 0.1px;
     background-color: gray;
     z-index: 0;
@@ -409,8 +430,8 @@ html {
     white-space: nowrap;
     font-size: 12px;
     color: yellow;
-    cursor: pointer; 
-    
+    cursor: pointer;
+
     /* Default label color */
 }
 
@@ -429,15 +450,15 @@ html {
 
 /* History dot style */
 .history-dot {
-    width: 10px; /* Slightly larger */
-    height: 10px;
+    width: 2px;
+    /* Slightly larger */
+    height: 2px;
     background-color: yellow;
-    border-radius: 50%;
-    opacity: 0.9;
+    border-radius: 100%;
     position: absolute;
     z-index: 1;
-    box-shadow: 0 0 4px rgba(255, 255, 0, 0.6); /* Glowing halo */
-    pointer-events: none; /* Ensure dots are non-interactive */
+    pointer-events: none;
+    /* Ensure dots are non-interactive */
 }
 
 
@@ -466,7 +487,8 @@ html {
     left: 50%;
     width: 25px;
     height: 25px;
-    transform: translate(-50%, -50%); /* 🔥 center it */
+    transform: translate(-50%, -50%);
+    /* 🔥 center it */
     border-radius: 50%;
     background-color: rgba(255, 0, 0, 0.5);
     animation: blink 2s infinite;
@@ -476,19 +498,33 @@ html {
 
 
 @keyframes blink {
-    0%, 100% { opacity: 0.2; }
-    50% { opacity: 0.8; }
-}
 
+    0%,
+    100% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
 
 
 .ident-line {
-    height: 2px;
+    left: 50%;
+    top: 50%;
+    height: 1px;
     background-color: white;
     opacity: 0.7;
     pointer-events: none;
-    animation: blink 1.5s infinite; 
+    animation: blink 1.5s infinite;
+    position: absolute;
+    z-index: 0;
+    width: 1px;
+    transform-origin: left center;
+    animation: blink 1.5s infinite;
 }
+
 
 
 
@@ -584,8 +620,9 @@ html {
     /* Prevents text selection when clicking */
     overflow: visible;
     /* Ensure no overflow issues */
-    position: relative; /* Ensure the control-box is the reference for absolute positioning */
-    
+    position: relative;
+    /* Ensure the control-box is the reference for absolute positioning */
+
 }
 
 .control-box input:focus {
@@ -639,7 +676,7 @@ html {
     align-items: center;
     gap: 10px;
     /* Space between the input and the last command */
-    
+
 }
 
 /* Input field in control box */
@@ -801,6 +838,34 @@ html {
 }
 
 
+/*Settings Dialog Box*/
+.settings-dialog {
+    position: absolute;
+    width: 220px;
+    font-size: 12px;
+    padding: 8px;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    
+}
+
+.settings-dialog label {
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.settings-dialog select,
+.settings-dialog input {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 4px;
+    font-size: 12px;
+}
+
 
 
 
@@ -950,7 +1015,8 @@ html {
     height: 250px;
     font-size: 12px;
     padding: 0;
-    font-weight: bold;                            /* 🔹 Make text bold */
+    font-weight: bold;
+    /* 🔹 Make text bold */
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -959,7 +1025,7 @@ html {
     -webkit-backdrop-filter: blur(5px);
     overflow: hidden;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Table and input field look */
@@ -967,14 +1033,17 @@ html {
     width: 100%;
     border-collapse: collapse;
     border-spacing: 0;
-    table-layout: fixed; /* important */
-      
+    table-layout: fixed;
+    /* important */
+
 }
 
 .mapping-table td {
-    padding: 0px 5px;           /* Consistent padding */
+    padding: 0px 5px;
+    /* Consistent padding */
     vertical-align: middle;
-    height: 20px;               /* Consistent height */
+    height: 20px;
+    /* Consistent height */
     border-bottom: 1px solid #ccc;
 }
 
@@ -982,9 +1051,11 @@ html {
     box-sizing: border-box;
     text-transform: uppercase;
     font-size: 12px;
-    padding: 5px 5px;           /* No extra vertical spacing */
-    height: 20px;               /* Smaller height */
-    
+    padding: 5px 5px;
+    /* No extra vertical spacing */
+    height: 20px;
+    /* Smaller height */
+
 }
 
 .squawk-cell {
@@ -993,7 +1064,8 @@ html {
 
 
 .mapping-scroll-container {
-    max-height: 180px; /* Limit to ~10 rows */
+    max-height: 180px;
+    /* Limit to ~10 rows */
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -1001,10 +1073,12 @@ html {
 
 /* Dialog buttons */
 .delete-mapping-button {
-    background-color: red;     /* red */
+    background-color: red;
+    /* red */
     color: white;
     border-radius: 4px;
-    border: 1px solid black; /* Subtle border */
+    border: 1px solid black;
+    /* Subtle border */
     font-size: 12px;
     padding: 2px 2px;
     cursor: pointer;
@@ -1018,7 +1092,8 @@ html {
 }
 
 .delete-mapping-button:hover {
-    background-color: #d32f2f;     /* darker red on hover */
+    background-color: #d32f2f;
+    /* darker red on hover */
 }
 
 
@@ -1031,14 +1106,22 @@ html {
 
 .checkbox {
     position: absolute;
-    bottom: 5px; /* Positioned at the bottom of the control box */
-    right: 110px; /* To the left of the right button */
-    width: 16px; /* Explicitly define width */
-    height: 16px; /* Explicitly define height */
-    padding: 0; /* Remove padding */
-    margin: 0; /* Remove margin */
-    box-sizing: border-box; /* Ensure size includes border */
-    cursor: pointer; /* Ensures a pointer cursor for interactivity */
+    bottom: 5px;
+    /* Positioned at the bottom of the control box */
+    right: 110px;
+    /* To the left of the right button */
+    width: 16px;
+    /* Explicitly define width */
+    height: 16px;
+    /* Explicitly define height */
+    padding: 0;
+    /* Remove padding */
+    margin: 0;
+    /* Remove margin */
+    box-sizing: border-box;
+    /* Ensure size includes border */
+    cursor: pointer;
+    /* Ensures a pointer cursor for interactivity */
 }
 
 
@@ -1048,12 +1131,17 @@ html {
 .stop-turn-button,
 .delete-button {
     position: absolute;
-    bottom: 3px; /* Positioned at the bottom of the control box */
-    font-size: 14px; /* Match font size */
-    font-weight: bold; /* Bold for better visibility */
+    bottom: 3px;
+    /* Positioned at the bottom of the control box */
+    font-size: 14px;
+    /* Match font size */
+    font-weight: bold;
+    /* Bold for better visibility */
     color: black;
-    border: 1px solid #ccc; /* Subtle border */
-    border-radius: 3px; /* Rounded corners */
+    border: 1px solid #ccc;
+    /* Subtle border */
+    border-radius: 3px;
+    /* Rounded corners */
     cursor: pointer;
     width: 28px;
     height: 25px;
@@ -1064,17 +1152,23 @@ html {
 .orbit-right-button:disabled,
 .stop-turn-button:disabled,
 .delete-button:disabled {
-    background-color: #f0f0f0; /* Light grey background */
-    color: #a0a0a0; /* Faded text color */
-    border-color: #dcdcdc; /* Light grey border */
-    cursor: not-allowed; /* Show "not allowed" cursor */
-    pointer-events: none; /* Disable pointer interactions */
+    background-color: #f0f0f0;
+    /* Light grey background */
+    color: #a0a0a0;
+    /* Faded text color */
+    border-color: #dcdcdc;
+    /* Light grey border */
+    cursor: not-allowed;
+    /* Show "not allowed" cursor */
+    pointer-events: none;
+    /* Disable pointer interactions */
 }
 
 /* Disabled state styles */
 .orbit-left-button:disabled .arrow,
 .orbit-right-button:disabled .arrow {
-    border-color: #a0a0a0; /* Faded grey color for arrow */
+    border-color: #a0a0a0;
+    /* Faded grey color for arrow */
 }
 
 /* Hover styles */
@@ -1082,21 +1176,26 @@ html {
 .orbit-right-button:hover,
 .stop-turn-button:hover,
 .delete-button:hover {
-    background-color: #007bff; /* Darker blue on hover */
-    color: white; /* White text on hover */
+    background-color: #007bff;
+    /* Darker blue on hover */
+    color: white;
+    /* White text on hover */
 }
 
 /* Positioning for orbit buttons */
 .orbit-left-button {
-    right: 104px; /* To the left of the stop-turn button */
+    right: 104px;
+    /* To the left of the stop-turn button */
 }
 
 .orbit-right-button {
-    right: 38px; /* Flush with the control box edge */
+    right: 38px;
+    /* Flush with the control box edge */
 }
 
 .stop-turn-button {
-    right: 71px; /* Between the left and right buttons */
+    right: 71px;
+    /* Between the left and right buttons */
 }
 
 /* Specific arrow button styles */
@@ -1123,14 +1222,17 @@ html {
 /* Delete button styles */
 .delete-button {
     right: 5px;
-    color: white; /* White text */
-    background-color: red; /* Red for critical action */
+    color: white;
+    /* White text */
+    background-color: red;
+    /* Red for critical action */
     border: 1px solid darkred;
 }
 
 /* Delete button hover */
 .delete-button:hover {
-    background-color: darkred; /* Darker red on hover */
+    background-color: darkred;
+    /* Darker red on hover */
 }
 
 
@@ -1149,13 +1251,14 @@ html {
     justify-content: flex-start;
     gap: 2px;
     margin: 3px;
-  }
-  
-  /* Style the tab buttons */
-  .tab button {
+}
+
+/* Style the tab buttons */
+.tab button {
     background-color: white;
     border: 1px solid white;
-    border-radius: 8px 8px 0 0; /* Rounded top corners like browser tabs */
+    border-radius: 8px 8px 0 0;
+    /* Rounded top corners like browser tabs */
     cursor: pointer;
     padding: 4px 16px;
     font-size: 14px;
@@ -1163,27 +1266,30 @@ html {
     color: #555;
     transition: all 0.3s ease;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Hover effect for buttons */
-  .tab button:hover {
+}
+
+/* Hover effect for buttons */
+.tab button:hover {
     background-color: #d0d0d0;
     color: #333;
-    transform: translateY(-1px); /* Subtle lift effect */
+    transform: translateY(-1px);
+    /* Subtle lift effect */
     box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Style the active/current tab */
-  .tab button.active {
+}
+
+/* Style the active/current tab */
+.tab button.active {
     background-color: black;
     color: white;
-    border-bottom: 1px solid; /* Seamlessly connect with the tab content */
+    border-bottom: 1px solid;
+    /* Seamlessly connect with the tab content */
     transform: translateY(-1px);
-    box-shadow: none; /* Remove shadow for the active tab */
-  }
-  
-  /* Style the tab content */
-  .tabcontent {
+    box-shadow: none;
+    /* Remove shadow for the active tab */
+}
+
+/* Style the tab content */
+.tabcontent {
     display: none;
     border-top: none;
     background-color: white;
@@ -1199,6 +1305,6 @@ html {
     overflow-y: auto;
     /* Enables vertical scrolling */
     max-height: calc(100% - 20px);
-    
+
     /* Ensure the panel respects height limits */
-  }
+}

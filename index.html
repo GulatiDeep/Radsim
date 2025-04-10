@@ -87,7 +87,7 @@
                 <button id="SRAdistanceMarkers" class="control-button">SRA</button>
                 <button id="historyDots" class="control-button">History</button>
                 <button id="label" class="control-button">Label</button>
-                <button id="settings" class="control-button">Settings</button>
+                <button id="settings" class="control-button" onclick="toggleSettingsDialog()">⚙️</button>
                 <button id="mapping-table" class="control-button" onclick="toggleMappingDialog()">Mapping Table[F6]</button>
                 <button id="pushToTalk" class="control-button inactive">Push to Talk</button>
 
@@ -238,7 +238,34 @@
         </div>
 
 
-
+<!-- Settings Dialog -->
+<div id="settingsDialog" class="dialog settings-dialog" style="display: none;">
+    <div class="dialog-header" id="settingsDialogHeader">Radar Settings</div>
+  
+    <div class="dialog-content">
+      <!-- History Dot Length -->
+      <label for="historyDotCountSelect">History Dot Length:</label>
+      <select id="historyDotCountSelect">
+        <option value="10">10 dots</option>
+        <option value="15">15 dots</option>
+        <option value="20">20 dots</option>
+        <option value="25">25 dots</option>
+        <option value="30">30 dots</option>
+        <option value="35">35 dots</option>
+        <option value="40">40 dots</option>
+        <option value="45">45 dots</option>
+        <option value="50">50 dots</option>
+      </select>
+  
+      <!-- Add more settings below here -->
+  
+      <div style="margin-top: 10px;">
+        <button onclick="applySettings()">Apply</button>
+        <button onclick="toggleSettingsDialog()">Close</button>
+      </div>
+    </div>
+  </div>
+  
 
 
 
@@ -261,9 +288,9 @@
 
     <!-- Scripts -->
     <script src="radar.js"></script>
+    <script src="settings.js"></script>
     <script src="readme.js"></script>
     <script src="aircraftCreation.js"></script>
-    <!-- <script src="mappingtable.js"></script> -->
     <script src="functions.js"></script>
     <script src="aircraft.js"></script>
     <script src="commands.js"></script>
