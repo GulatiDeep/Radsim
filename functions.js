@@ -89,6 +89,19 @@ function deleteAircraft(blip) {
     // Remove the blip from the aircraftBlips array
     aircraftBlips = aircraftBlips.filter(b => b !== blip);
 
+
+    //Deleting Speed Vectors
+    // Remove speed vector elements if they exist
+if (blip.speedVectorLine) {
+    blip.speedVectorLine.remove();
+    blip.speedVectorLine = null;
+}
+if (blip.speedVectorDots && Array.isArray(blip.speedVectorDots)) {
+    blip.speedVectorDots.forEach(dot => dot.remove());
+    blip.speedVectorDots = [];
+}
+
+    
     // Remove the elements from the DOM
     removeAircraftElements(blip);
 

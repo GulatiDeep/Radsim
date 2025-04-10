@@ -5,6 +5,11 @@ function toggleSettingsDialog() {
     dialog.style.display = dialog.style.display === "none" ? "block" : "none";
 }
 
+document.getElementById("speedVectorSelect").addEventListener("change", e => {
+    speedVectorMinutes = parseInt(e.target.value, 10);
+  });
+
+  
 //Function to apply all the settings
 function applySettings() {
     const newDotCount = parseInt(document.getElementById("historyDotCountSelect").value, 10);
@@ -22,6 +27,21 @@ function applySettings() {
         blip.updateHistoryDots(); // ✅ fix: show them instantly
     });
 
-    toggleSettingsDialog();
+    stcaEnabled = document.getElementById("stcaToggle").checked;
+
+    // Optional: hide all alerts immediately if disabled
+    if (!stcaEnabled) {
+        aircraftBlips.forEach(blip => {
+            if (blip.stcaHalo) blip.stcaHalo.style.display = 'none';
+        });
+
+        predictedConflicts.clear();
+        actualConflicts.clear();
+
+        const canvas = document.getElementById("stcaCanvas");
+        if (canvas) canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    toggleSettingsDialog(); // optional close
 }
 

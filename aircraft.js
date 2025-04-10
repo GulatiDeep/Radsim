@@ -15,6 +15,8 @@ let clickedPosition = { x: 0, y: 0 };
 let historyDotsVisible = true; // Initialize the flag to track the visibility state of the history dots
 let labelsVisible = true; // //Initialize the flag to track the visibility state of the labels
 
+let speedVectorMinutes = 0; // default value; can be set by user (0-5)
+
 let allAircraftCallsigns = []; //to initialise the list of callsigns array
 
 // A list to store previously generated positions
@@ -23,7 +25,7 @@ let previousPositions = [];
 // Initialize counters for number of aircraft
 let totalAircraftCount = 0;  // Count of all aircraft, including individual, transport, and formation members
 
-let aircraftCountDisplay= null;
+let aircraftCountDisplay = null;
 
 //To add the dragging functionality to labels
 let isLabelDragging = false; // Global flag to track label dragging
@@ -41,6 +43,7 @@ let formationCallsigns = [
     "Loki", //10
     "Tusker" //11
 ];
+
 
 // Set the initial state of the History button
 document.getElementById('historyDots').classList.add(historyDotsVisible ? 'active' : 'inactive');
@@ -92,6 +95,18 @@ class AircraftBlip {
         this.history = [];
         this.historyDots = [];
 
+        //Speed Vectors
+        this.speedVectorLine = document.createElement('div');
+        this.speedVectorLine.className = 'speed-vector-line';
+        this.speedVectorLine.style.position = 'absolute';
+        this.speedVectorLine.style.zIndex = '1';
+        this.speedVectorLine.style.borderTop = '1px solid white';
+        this.speedVectorLine.style.transformOrigin = '0% 50%';
+        this.speedVectorDots = []; // store dot references
+
+        panContainer.appendChild(this.speedVectorLine);
+
+
         // Create history dots
         this.createHistoryDots();
 
@@ -106,15 +121,22 @@ class AircraftBlip {
     createBlipElement() {
         const blip = document.createElement('div');
         blip.className = 'aircraft-blip';
-    
+
         // Create blinking emergency circle
         this.emergencyCircle = document.createElement('div');
         this.emergencyCircle.className = 'emergency-circle';
         this.emergencyCircle.style.display = 'none'; // Hidden by default
-    
         // ✅ Append to blip directly
         blip.appendChild(this.emergencyCircle);
-    
+
+        //Create STCA circle
+        this.stcaHalo = document.createElement('div');
+        this.stcaHalo.className = 'stca-halo'; // generic blinking circle
+        this.stcaHalo.style.display = 'none';
+        // ✅ Append to blip directly
+        panContainer.appendChild(this.stcaHalo);
+
+
         // SSR-based styling
         if (this.ssrCode === '0000') {
             blip.classList.remove('aircraft-blip');
@@ -123,14 +145,14 @@ class AircraftBlip {
             blip.classList.remove('plus-sign');
             blip.classList.add('aircraft-blip');
         }
-    
+
         blip.style.position = 'absolute';
         blip.style.zIndex = '2';
-    
+
         panContainer.appendChild(blip);
         return blip;
     }
-    
+
 
     // Update label to show callsign, speed, and altitude in the desired format
     createLabelElement() {
@@ -195,7 +217,7 @@ class AircraftBlip {
             this.historyDots.push(dot);
         }
     }
-    
+
 
     // Update the blip's position and label position
     updateBlipPosition() {
@@ -216,7 +238,7 @@ class AircraftBlip {
 
         // Calculate and log bearing and distance
         const { bearing, distanceNM } = this.getBearingAndDistanceFromRadarCenter();
-        
+
         this.history.push({ x: this.position.x, y: this.position.y });
 
         if (this.history.length > currentHistoryDotCount) {
@@ -224,7 +246,80 @@ class AircraftBlip {
         }
 
         this.updateHistoryDots();
+        this.updateSpeedVector();
+        this.updateSTCA();
     }
+
+    updateSTCA() {
+        if (this.stcaHalo) {
+            this.stcaHalo.style.left = `${radarCenter.x + this.position.x * zoomLevel}px`;
+            this.stcaHalo.style.top = `${radarCenter.y - this.position.y * zoomLevel}px`;
+        }
+    }
+
+
+    updateSpeedVector() {
+        // Remove old dots if any
+        this.speedVectorDots.forEach(dot => dot.remove());
+        this.speedVectorDots = [];
+
+        if (!this.speedVectorLine || speedVectorMinutes === 0) {
+            this.speedVectorLine.style.display = 'none';
+            return;
+        }
+
+        const speedNMps = this.speed / 3600;
+        const headingRad = this.heading * Math.PI / 180;
+
+        const startX = this.position.x;
+        const startY = this.position.y;
+        const x1 = radarCenter.x + startX * zoomLevel;
+        const y1 = radarCenter.y - startY * zoomLevel;
+
+        // Line
+        const finalX = startX + Math.sin(headingRad) * speedNMps * speedVectorMinutes * 60;
+        const finalY = startY + Math.cos(headingRad) * speedNMps * speedVectorMinutes * 60;
+        const x2 = radarCenter.x + finalX * zoomLevel;
+        const y2 = radarCenter.y - finalY * zoomLevel;
+
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+        this.speedVectorLine.style.display = 'block';
+        this.speedVectorLine.style.width = `${length}px`;
+        this.speedVectorLine.style.left = `${x1}px`;
+        this.speedVectorLine.style.top = `${y1}px`;
+        this.speedVectorLine.style.height = '1px';
+        this.speedVectorLine.style.borderTop = '0.8px solid white'; // thinner
+        this.speedVectorLine.style.transform = `rotate(${angle}deg)`;
+
+        // Dots at every minute
+        for (let i = 1; i <= speedVectorMinutes; i++) {
+            const t = i * 60; // seconds
+            const dotX = startX + Math.sin(headingRad) * speedNMps * t;
+            const dotY = startY + Math.cos(headingRad) * speedNMps * t;
+            const screenX = radarCenter.x + dotX * zoomLevel;
+            const screenY = radarCenter.y - dotY * zoomLevel;
+
+            const dot = document.createElement('div');
+            dot.className = 'speed-vector-dot';
+            dot.style.position = 'absolute';
+            dot.style.width = '4px';
+            dot.style.height = '4px';
+            dot.style.borderRadius = '50%';
+            dot.style.backgroundColor = 'lime';
+            dot.style.left = `${screenX - 2}px`; // center the dot
+            dot.style.top = `${screenY - 2}px`;
+            dot.style.zIndex = '1';
+
+            panContainer.appendChild(dot);
+            this.speedVectorDots.push(dot);
+        }
+    }
+
+
 
     getBearingAndDistanceFromRadarCenter() {
         const deltaX = this.position.x * zoomLevel;
@@ -267,11 +362,11 @@ class AircraftBlip {
     updateLabelInfo() {
         const level = Math.round(this.altitude / 100);
         const speed = this.speed;
-    
+
         const isEmergency = ['7500', '7600', '7700'].includes(this.ssrCode);
         const codeForMapping = isEmergency ? this.originalSSRCode : this.ssrCode;
         const mappedCallsign = ssrToCallsignMap[codeForMapping];
-    
+
         let labelContent = '';
         if (this.ssrCode !== '0000') {
             if (mappedCallsign) {
@@ -281,11 +376,11 @@ class AircraftBlip {
         } else {
             labelContent += `N${speed}`;
         }
-    
+
         this.label.innerHTML = labelContent;
-    
+
     }
-    
+
     //Show Ident Effect on Squawking IDENT
     showIdentEffect() {
         // If already active, clear and remove
@@ -293,20 +388,20 @@ class AircraftBlip {
             this.identElements.forEach(el => el.remove());
             this.identElements = null;
         }
-    
+
         const offset = 4;   // Distance from blip
         const size = 6;     // Length of the diagonal lines
         const parent = this.element;
-    
+
         const lines = [];
-    
+
         const positions = [
             { x1: -offset, y1: -offset, x2: -offset - size, y2: -offset - size }, // Top-left
             { x1: offset, y1: -offset, x2: offset + size, y2: -offset - size },   // Top-right
             { x1: -offset, y1: offset, x2: -offset - size, y2: offset + size },   // Bottom-left
             { x1: offset, y1: offset, x2: offset + size, y2: offset + size }      // Bottom-right
         ];
-    
+
         positions.forEach(pos => {
             const line = document.createElement('div');
             line.className = 'ident-line';
@@ -314,22 +409,22 @@ class AircraftBlip {
             parent.appendChild(line);
             lines.push(line);
         });
-    
+
         this.identElements = lines;
-    
+
         setTimeout(() => {
             lines.forEach(line => line.remove());
             this.identElements = null;
         }, 15000); // 15 seconds timeout
     }
-    
+
 
     //Set the SSR code based on input
     setSSRCode(newSSRCode) {
         if (!['7500', '7600', '7700'].includes(newSSRCode)) {
             this.originalSSRCode = newSSRCode;
         }
-    
+
         this.ssrCode = newSSRCode;
         this.element.remove();
         this.element = this.createBlipElement();
@@ -338,13 +433,13 @@ class AircraftBlip {
         this.updateColorBasedOnSSR();
         updateControlBox(this);
     }
-    
+
 
     //Update the colour of label and blip based on SSR code like emergency codes
     updateColorBasedOnSSR() {
         const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
         const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
-    
+
         if (isEmergencySSR) {
             this.label.style.color = 'red';
             this.line.style.backgroundColor = 'red';
@@ -366,8 +461,8 @@ class AircraftBlip {
             this.emergencyCircle.style.display = 'none';
         }
     }
-    
-    
+
+
 
     // Update the line position and draw it between the blip and the label
     updateLinePosition() {

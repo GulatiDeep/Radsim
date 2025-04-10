@@ -481,6 +481,18 @@ html {
     /* Red for inactive state */
 }
 
+
+.speed-vector-line {
+    height: 1px;
+    pointer-events: none;
+  }
+
+  .speed-vector-dot {
+    pointer-events: none;
+  }
+  
+
+  
 .emergency-circle {
     position: absolute;
     top: 50%;
@@ -508,6 +520,40 @@ html {
         opacity: 0.8;
     }
 }
+
+
+/* 🔴 STCA Blinking Border Around Blip */
+/* Yellow blinking border for predicted STCA */
+@keyframes stca-blink {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.9; }
+  }
+  
+  .stca-halo {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background-color: rgba(255, 255, 0, 0.5); /* default: yellow */
+    animation: stca-blink 1.5s infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+      
+  
+  
+  
+  
+  /* 🔴 Red Dashed Line Canvas Overlay (in HTML): */
+  #stcaCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 4;
+    pointer-events: none; /* allows interaction below canvas */
+  }
+  
 
 
 .ident-line {
