@@ -575,28 +575,40 @@ document.getElementById('label').addEventListener('click', () => {
     });
 });
 
-// //Event listener to Toggle the visibility of history dots and update the button's appearance
-// document.getElementById('historyDots').addEventListener('click', () => {
-//     // Toggle the visibility state
-//     historyDotsVisible = !historyDotsVisible;
+//To display current time on the radar scope
+// function updateRunningTime() {
+//     const now = new Date();
+//     const timeString = now.toLocaleTimeString();
+//     document.getElementById("runningTime").textContent = `Time: ${timeString}`;
+// }
 
-//     // Get the history button element
-//     const historyButton = document.getElementById('historyDots');
+// // Call it immediately to display time right away
+// updateRunningTime();
 
-//     // Update the button's appearance based on the current state
-//     if (historyDotsVisible) {
-//         historyButton.classList.add('active');
-//         historyButton.classList.remove('inactive');
-//         updateStatusBar('→ History Dots Visible');
-//     } else {
-//         historyButton.classList.add('inactive');
-//         historyButton.classList.remove('active');
-//         updateStatusBar('→ History Dots Hidden');
-//     }
+// // Then update every second
+// setInterval(updateRunningTime, 1000);
+const startTime = Date.now();
 
-//     // Immediately apply the visibility change by updating all blips
-//     aircraftBlips.forEach(blip => blip.updateHistoryDots());
-// });
+function updateTimeDisplays() {
+    const now = new Date();
+    const currentTimeStr = now.toLocaleTimeString();
+    document.getElementById("currentTime").textContent = `${currentTimeStr}`;
+
+    const elapsedMs = Date.now() - startTime;
+    const totalSeconds = Math.floor(elapsedMs / 1000);
+
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+
+    document.getElementById("runningTime").textContent = `[${hours}:${minutes}:${seconds}]`;
+}
+
+// Call immediately so it's visible at start
+updateTimeDisplays();
+
+// Then update both every second
+setInterval(updateTimeDisplays, 1000);
 
 
 // Attach event listeners to track window resizing or zooming
