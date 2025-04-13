@@ -86,22 +86,31 @@ function deleteAircraft(blip) {
     // Remove the callsign from the allAircraftCallsigns array
     allAircraftCallsigns = allAircraftCallsigns.filter(callsign => callsign !== blip.callsign);
 
+    // Clean up STCA conflicts involving this aircraft before removal
+    cleanUpConflictsForDeletedBlip(blip.callsign);
+
     // Remove the blip from the aircraftBlips array
     aircraftBlips = aircraftBlips.filter(b => b !== blip);
 
 
     //Deleting Speed Vectors
     // Remove speed vector elements if they exist
-if (blip.speedVectorLine) {
-    blip.speedVectorLine.remove();
-    blip.speedVectorLine = null;
-}
-if (blip.speedVectorDots && Array.isArray(blip.speedVectorDots)) {
-    blip.speedVectorDots.forEach(dot => dot.remove());
-    blip.speedVectorDots = [];
-}
+    if (blip.speedVectorLine) {
+        blip.speedVectorLine.remove();
+        blip.speedVectorLine = null;
+    }
+    if (blip.speedVectorDots && Array.isArray(blip.speedVectorDots)) {
+        blip.speedVectorDots.forEach(dot => dot.remove());
+        blip.speedVectorDots = [];
+    }
 
-    
+    //Removing STCA
+    if (blip.stcaHalo) {
+        blip.stcaHalo.remove();
+    }
+
+
+
     // Remove the elements from the DOM
     removeAircraftElements(blip);
 
@@ -151,11 +160,11 @@ if (blip.speedVectorDots && Array.isArray(blip.speedVectorDots)) {
     updateStatusBar(`→ ${blip.callsign} deleted.`);
 
     //Logging into console
-        console.log(`→ ${blip.callsign} deleted.`);
+    console.log(`→ ${blip.callsign} deleted.`);
 
-        //Logging into Command Log
-        commandLogs.innerHTML += `<br><br>→ "<b style="color: red">${blip.callsign}</b>" deleted. `;
-    
+    //Logging into Command Log
+    commandLogs.innerHTML += `<br><br>→ "<b style="color: red">${blip.callsign}</b>" deleted. `;
+
 }
 
 

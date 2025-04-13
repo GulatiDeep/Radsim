@@ -130,6 +130,8 @@ class AircraftBlip {
         blip.appendChild(this.emergencyCircle);
 
         //Create STCA circle
+        blip.currentSTCA = "none" | "predicted" | "actual"; //storing state of stca
+
         this.stcaHalo = document.createElement('div');
         this.stcaHalo.className = 'stca-halo'; // generic blinking circle
         this.stcaHalo.style.display = 'none';
@@ -359,27 +361,46 @@ class AircraftBlip {
 
     }
 
+
     updateLabelInfo() {
         const level = Math.round(this.altitude / 100);
         const speed = this.speed;
+
+        let arrow = '';
+
+        if (this.altitude < this.targetAltitude) {
+            arrow = '↑';  // Climbing
+        } else if (this.altitude > this.targetAltitude) {
+            arrow = '↓';  // Descending
+        }
 
         const isEmergency = ['7500', '7600', '7700'].includes(this.ssrCode);
         const codeForMapping = isEmergency ? this.originalSSRCode : this.ssrCode;
         const mappedCallsign = ssrToCallsignMap[codeForMapping];
 
         let labelContent = '';
+
+        // If it's a normal blip (not SSR 0000)
         if (this.ssrCode !== '0000') {
             if (mappedCallsign) {
                 labelContent += `<strong>${mappedCallsign}</strong><br>`;
             }
-            labelContent += `3-${this.ssrCode}<br>A${level}<br>N${speed}`;
+            labelContent += `3-${this.ssrCode}<br>A${level} ${arrow}<br>N${speed}`;
         } else {
+            // For unassigned SSR
             labelContent += `N${speed}`;
         }
 
-        this.label.innerHTML = labelContent;
+        // Add STCA status line if applicable
+        if (this.currentSTCA === 'predicted') {
+            labelContent += `<br><span style="color: yellow;">PRED STCA</span>`;
+        } else if (this.currentSTCA === 'actual') {
+            labelContent += `<br><span style="color: red;">ACT STCA</span>`;
+        }
 
+        this.label.innerHTML = labelContent;
     }
+
 
     //Show Ident Effect on Squawking IDENT
     showIdentEffect() {

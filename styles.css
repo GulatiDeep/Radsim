@@ -542,9 +542,6 @@ html {
   }
       
   
-  
-  
-  
   /* 🔴 Red Dashed Line Canvas Overlay (in HTML): */
   #stcaCanvas {
     position: absolute;
@@ -553,6 +550,38 @@ html {
     z-index: 4;
     pointer-events: none; /* allows interaction below canvas */
   }
+
+  .roaster-box {
+    position: absolute;
+    bottom: 30px;
+    right: 10px;
+    width: 280px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 12px;
+    border: 1px solid #888;
+    border-radius: 6px;
+    padding: 6px;
+    z-index: 5;
+    font-family: monospace;
+    display: none; /* hidden by default */
+}
+
+
+.roaster-entry {
+    margin-bottom: 6px;
+}
+
+.roaster-yellow {
+    color: yellow;
+}
+
+.roaster-red {
+    color: red;
+}
+
   
 
 
