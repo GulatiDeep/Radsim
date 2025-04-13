@@ -575,28 +575,28 @@ document.getElementById('label').addEventListener('click', () => {
     });
 });
 
-//Event listener to Toggle the visibility of history dots and update the button's appearance
-document.getElementById('historyDots').addEventListener('click', () => {
-    // Toggle the visibility state
-    historyDotsVisible = !historyDotsVisible;
+// //Event listener to Toggle the visibility of history dots and update the button's appearance
+// document.getElementById('historyDots').addEventListener('click', () => {
+//     // Toggle the visibility state
+//     historyDotsVisible = !historyDotsVisible;
 
-    // Get the history button element
-    const historyButton = document.getElementById('historyDots');
+//     // Get the history button element
+//     const historyButton = document.getElementById('historyDots');
 
-    // Update the button's appearance based on the current state
-    if (historyDotsVisible) {
-        historyButton.classList.add('active');
-        historyButton.classList.remove('inactive');
-        updateStatusBar('→ History Dots Visible');
-    } else {
-        historyButton.classList.add('inactive');
-        historyButton.classList.remove('active');
-        updateStatusBar('→ History Dots Hidden');
-    }
+//     // Update the button's appearance based on the current state
+//     if (historyDotsVisible) {
+//         historyButton.classList.add('active');
+//         historyButton.classList.remove('inactive');
+//         updateStatusBar('→ History Dots Visible');
+//     } else {
+//         historyButton.classList.add('inactive');
+//         historyButton.classList.remove('active');
+//         updateStatusBar('→ History Dots Hidden');
+//     }
 
-    // Immediately apply the visibility change by updating all blips
-    aircraftBlips.forEach(blip => blip.updateHistoryDots());
-});
+//     // Immediately apply the visibility change by updating all blips
+//     aircraftBlips.forEach(blip => blip.updateHistoryDots());
+// });
 
 
 // Attach event listeners to track window resizing or zooming

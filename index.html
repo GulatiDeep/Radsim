@@ -52,7 +52,7 @@
                     <div id="directionLine" class="direction-line"></div>
 
                     <canvas id="stcaCanvas" width="1920" height="1080"></canvas>
-    <div id="stcaRoasterBox" class="roaster-box"></div>
+                    <div id="stcaRoasterBox" class="roaster-box"></div>
                 </div>
 
 
@@ -88,11 +88,10 @@
                 </div>
                 <button id="changeRunway" class="control-button">RW</button>
                 <button id="SRAdistanceMarkers" class="control-button">SRA</button>
-                <button id="historyDots" class="control-button">History</button>
+                <!-- <button id="historyDots" class="control-button">History</button> -->
                 <button id="label" class="control-button">Label</button>
                 <button id="settings" class="control-button" onclick="toggleSettingsDialog()">⚙️</button>
-                <button id="mapping-table" class="control-button" onclick="toggleMappingDialog()">Mapping
-                    Table[F6]</button>
+                <button id="mapping-table" class="control-button" onclick="toggleMappingDialog()">SEL[F6]</button>
                 <button id="pushToTalk" class="control-button inactive">Push to Talk</button>
 
                 <div id="statusBar" class="status-bar"></div> <!-- Status bar element -->
@@ -124,44 +123,56 @@
 
 
         <!-- Dialog Boxes-->
-        <!-- initial Aircraft Creation Dialog -->
-        <div id="initialAircraftDialog" class="dialog" style="display:none;">
-            <div class="dialog-content">
+<!-- Initial Aircraft Creation Dialog -->
+<div id="initialAircraftDialog" class="dialog" style="display:none;">
+    
+        <div class="dialog-header" id="exerciseDialogHeader">Initial Exercise Settings</div>
+        <div class="dialog-content">
 
-                <!-- Aircraft Information Fieldset -->
-                <fieldset style="border-radius: 8px;">
-                    <legend style="font-weight: bold;">Initial Exercise Settings</legend>
-
-                    <!-- Individual Fighter input -->
-                    <label for="individualFighterInput">Individual Fighter AC:</label>
-                    <input type="number" id="individualFighterInput" min="0" max="10" value="0">
-
-                    <!-- Individual Transport input -->
-                    <label for="individualTransportInput">Individual Transport AC:</label>
-                    <input type="number" id="individualTransportInput" min="0" max="10" value="0">
-
-                    <!-- Fighter Formation (2AC) input -->
-                    <label for="fighterFormation2acInput">Fighter Formation (2AC):</label>
-                    <input type="number" id="fighterFormation2acInput" min="0" max="10" value="0">
-
-                    <!-- Fighter Formation (3AC) input -->
-                    <label for="fighterFormation3acInput">Fighter Formation (3AC):</label>
-                    <input type="number" id="fighterFormation3acInput" min="0" max="10" value="0">
-
-                    <!-- Fighter Formation (4AC) input -->
-                    <label for="fighterFormation4acInput">Fighter Formation (4AC):</label>
-                    <input type="number" id="fighterFormation4acInput" min="0" max="10" value="0">
-
-                </fieldset>
-
-
-                <!-- Create and Cancel buttons -->
-                <div>
-                    <button id="createInitialAircraftButton" class="control-button">Create</button>
-                    <button id="cancelInitialAircraftButton" class="control-button">Cancel</button>
+            <!-- Individual Aircraft Settings -->
+            <fieldset style="border-radius: 8px;">
+                <legend style="font-weight: bold;">Individual Aircraft</legend>
+                <div class="settings-row">
+                    <div>
+                        <label for="individualFighterInput">Fighter AC</label>
+                        <input type="number" id="individualFighterInput" min="0" max="10" value="0">
+                    </div>
+                    <div>
+                        <label for="individualTransportInput">Transport AC</label>
+                        <input type="number" id="individualTransportInput" min="0" max="10" value="0">
+                    </div>
                 </div>
+            </fieldset>
+
+            <!-- Formation Aircraft Settings -->
+            <fieldset style="border-radius: 8px;">
+                <legend style="font-weight: bold;">Fighter Formation Aircraft</legend>
+                <div class="settings-row">
+                    <div>
+                        <label for="fighterFormation2acInput">2AC</label>
+                        <input type="number" id="fighterFormation2acInput" min="0" max="10" value="0">
+                    </div>
+                    <div>
+                        <label for="fighterFormation3acInput">3AC</label>
+                        <input type="number" id="fighterFormation3acInput" min="0" max="10" value="0">
+                    </div>
+                    <div>
+                        <label for="fighterFormation4acInput">4AC</label>
+                        <input type="number" id="fighterFormation4acInput" min="0" max="10" value="0">
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Create and Cancel buttons -->
+            <div class="settings-actions">
+                <button id="createInitialAircraftButton" class="control-button">Create</button>
+                <button id="cancelInitialAircraftButton" class="control-button">Cancel</button>
             </div>
+
         </div>
+    
+</div>
+
 
         <!-- Manual Aircraft Creation Dialog -->
         <div id="aircraftDialog" class="dialog" style="display:none;">
@@ -205,16 +216,6 @@
             <div class="dialog-header" id="mappingDialogHeader">Mapping Table</div>
 
             <div class="dialog-content" style="padding: 1;">
-                <!-- Mapping Table Header -->
-                <!-- <table class="mapping-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 25%;">Squawk</th>
-                            <th style="width: 65%;">Callsign</th>
-                            <th style="width: 10%;"></th>
-                        </tr>
-                    </thead>
-                </table> -->
 
                 <!-- Input Row (Fixed) -->
                 <table class="mapping-table">
@@ -242,52 +243,83 @@
         </div>
 
 
-        <!-- Settings Dialog -->
-        <div id="settingsDialog" class="dialog settings-dialog" style="display: none;">
-            <div class="dialog-header" id="settingsDialogHeader">Radar Settings</div>
+       <!-- Settings Dialog -->
+<div id="settingsDialog" class="dialog settings-dialog" style="display: none;">
+    <div class="dialog-header" id="settingsDialogHeader">Radar Settings</div>
+        <div class="dialog-content">
 
-            <div class="dialog-content">
-                <!-- History Dot Length -->
-                <label for="historyDotCountSelect">History Dot Length:</label>
-                <select id="historyDotCountSelect">
-                    <option value="0">Off</option>
-                    <option value="10">10 dots</option>
-                    <option value="15" selected>15 dots</option>
-                    <option value="20">20 dots</option>
-                    <option value="25">25 dots</option>
-                    <option value="30">30 dots</option>
-                    <option value="35">35 dots</option>
-                    <option value="40">40 dots</option>
-                    <option value="45">45 dots</option>
-                    <option value="50">50 dots</option>
-                </select>
-
-                <label for="speedVectorSelect">Speed Vector (min):</label>
-                <select id="speedVectorSelect">
-                    <option value="0" selected>Off</option>
-                    <option value="1">1 min</option>
-                    <option value="2">2 min</option>
-                    <option value="3">3 min</option>
-                    <option value="4">4 min</option>
-                    <option value="5">5 min</option>
-                </select>
-
-                <div style="margin-top: 10px;">
-                    <label>
-                        <input type="checkbox" id="stcaToggle" checked />
-                        Enable STCA
-                    </label>
+            <!-- Blip Settings -->
+            <fieldset style="border-radius: 8px;">
+                <legend style="font-weight: bold;">Blip Settings</legend>
+                <div class="settings-row">
+                    <div>
+                        <label for="historyDotCountSelect">History Dots</label>
+                        <select id="historyDotCountSelect">
+                            <option value="0">Off</option>
+                            <option value="10">10 dots</option>
+                            <option value="15" selected>15 dots</option>
+                            <option value="20">20 dots</option>
+                            <option value="25">25 dots</option>
+                            <option value="30">30 dots</option>
+                            <option value="35">35 dots</option>
+                            <option value="40">40 dots</option>
+                            <option value="45">45 dots</option>
+                            <option value="50">50 dots</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="speedVectorSelect">Speed Vector</label>
+                        <select id="speedVectorSelect">
+                            <option value="0" selected>Off</option>
+                            <option value="1">1 min</option>
+                            <option value="2">2 min</option>
+                            <option value="3">3 min</option>
+                            <option value="4">4 min</option>
+                            <option value="5">5 min</option>
+                        </select>
+                    </div>
                 </div>
+            </fieldset>
 
-
-                <!-- Add more settings below here -->
-
-                <div style="margin-top: 10px;">
-                    <button onclick="applySettings()">Apply</button>
-                    <button onclick="toggleSettingsDialog()">Close</button>
+            <!-- STCA Settings -->
+            <fieldset style="border-radius: 8px;">
+                <legend style="font-weight: bold;">STCA Settings</legend>
+                <div class="settings-row">
+                    <div>
+                        <label for="horizontalSeparationInput">Horizontal (NM)</label>
+                        <input type="number" id="horizontalSeparationInput" placeholder="H Sep (NM)" value="8">
+                    </div>
+                    <div>
+                        <label for="verticalSeparationInput">Vertical (ft)</label>
+                        <input type="number" id="verticalSeparationInput" placeholder="V Sep (ft)" value="1000">
+                    </div>
                 </div>
+                <div class="settings-row">
+                    <div>
+                        <label for="lookaheadTimeInput">Time (sec)</label>
+                        <input type="number" id="lookaheadTimeInput" placeholder="Time (sec)" value="120">
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <label for="stcaToggle">Enable STCA</label>
+                        <input type="checkbox" id="stcaToggle" checked>
+                        
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Action Buttons -->
+            <div class="settings-actions">
+                <button onclick="applySettings()">Apply</button>
+                <button onclick="toggleSettingsDialog()">Close</button>
             </div>
+
         </div>
+    
+</div>
+
+
+
+
 
 
 
@@ -308,9 +340,6 @@
     <ul id="radarContextMenu" class="context-menu" style="display: none;">
         <li id="createAircraftContextMenu">Create Aircraft</li>
     </ul>
-
-    <!-- <canvas id="stcaCanvas" width="1920" height="1080"></canvas>
-    <div id="stcaRoasterBox" class="roaster-box"></div> -->
 
 
     <!-- Scripts -->

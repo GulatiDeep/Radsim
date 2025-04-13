@@ -6,9 +6,9 @@ const predictedConflicts = new Set();
 const actualConflicts = new Set();
 
 // Separation criteria (STCA thresholds)
-const horizontalSeparationNM = 8;      // in nautical miles
-const verticalSeparationFT = 1000;     // in feet
-const lookaheadSeconds = 120;          // seconds into the future for conflict prediction
+let horizontalSeparationNM = 8;      // in nautical miles
+let verticalSeparationFT = 1000;     // in feet
+let lookaheadSeconds = 120;          // seconds into the future for conflict prediction
 
 
 /**

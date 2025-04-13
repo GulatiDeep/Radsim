@@ -1,35 +1,52 @@
+// ===============================
+// Settings Dialog Handling
+// ===============================
 
-//to open or close the settings dialog box
+// Function to open or close the settings dialog box
 function toggleSettingsDialog() {
     const dialog = document.getElementById("settingsDialog");
     dialog.style.display = dialog.style.display === "none" ? "block" : "none";
 }
 
-document.getElementById("speedVectorSelect").addEventListener("change", e => {
+// Update Speed Vector Minutes immediately when selection changes
+document.getElementById("speedVectorSelect").addEventListener("change", (e) => {
     speedVectorMinutes = parseInt(e.target.value, 10);
-  });
+});
 
-  
-//Function to apply all the settings
+
+// ===============================
+// Apply Settings Function
+// ===============================
+
 function applySettings() {
+    // --- Update History Dots Count ---
     const newDotCount = parseInt(document.getElementById("historyDotCountSelect").value, 10);
-    if (isNaN(newDotCount)) return;
+    if (!isNaN(newDotCount)) {
+        currentHistoryDotCount = newDotCount;
 
-    currentHistoryDotCount = newDotCount;
+        // Clear old dots and recreate with new count
+        aircraftBlips.forEach(blip => {
+            blip.historyDots.forEach(dot => dot.remove());
+            blip.historyDots = [];
+            blip.createHistoryDots();
+            blip.updateHistoryDots();
+        });
+    }
 
-    aircraftBlips.forEach(blip => {
-        // Remove old dots
-        blip.historyDots.forEach(dot => dot.remove());
-        blip.historyDots = [];
-
-        // Recreate and immediately update their position
-        blip.createHistoryDots();
-        blip.updateHistoryDots(); // ✅ fix: show them instantly
-    });
-
+    // --- Update STCA Toggle ---
     stcaEnabled = document.getElementById("stcaToggle").checked;
 
-    // Optional: hide all alerts immediately if disabled
+    // --- Update STCA Parameters ---
+    const horizontalInput = parseFloat(document.getElementById("horizontalSeparationInput").value);
+    if (!isNaN(horizontalInput)) horizontalSeparationNM = horizontalInput;
+
+    const verticalInput = parseFloat(document.getElementById("verticalSeparationInput").value);
+    if (!isNaN(verticalInput)) verticalSeparationFT = verticalInput;
+
+    const lookaheadInput = parseFloat(document.getElementById("lookaheadTimeInput").value);
+    if (!isNaN(lookaheadInput)) lookaheadSeconds = lookaheadInput;
+
+    // --- Clear STCA alerts if disabled ---
     if (!stcaEnabled) {
         aircraftBlips.forEach(blip => {
             if (blip.stcaHalo) blip.stcaHalo.style.display = 'none';
@@ -42,6 +59,54 @@ function applySettings() {
         if (canvas) canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    toggleSettingsDialog(); // optional close
+    // --- Update Status Bar ---
+    updateStatusBar(`✅  Settings successfully applied`);
+
+    // --- Show Toast Notification ---
+    showToast("✅ Settings successfully applied!");
+
+    // --- Close the settings dialog ---
+    toggleSettingsDialog();
+}
+
+// ===============================
+// Simple Toast Notification Handler
+// ===============================
+
+function showToast(message) {
+    const panContainer = document.getElementById("panContainer");
+    if (!panContainer) return; // safety check if panContainer doesn't exist
+
+    // Create toast container if it doesn't exist
+    let toast = document.getElementById("toastNotification");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toastNotification";
+        panContainer.appendChild(toast);  // ← append inside panContainer now
+
+        // Style the toast
+        toast.style.position = "absolute";
+        toast.style.bottom = "30px";
+        toast.style.right = "20px";
+        toast.style.background = "rgba(0,0,0,0.85)";
+        toast.style.color = "#fff";
+        toast.style.padding = "10px 20px";
+        toast.style.borderRadius = "6px";
+        toast.style.fontSize = "14px";
+        toast.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+        toast.style.zIndex = "500";  // high but within radar container
+        toast.style.opacity = "0";
+        toast.style.transition = "opacity 0.3s ease";
+        toast.style.pointerEvents = "none"; // make sure it doesn't block clicks
+    }
+
+    // Update message and show
+    toast.textContent = message;
+    toast.style.opacity = "1";
+
+    // Hide after 2.5 seconds
+    setTimeout(() => {
+        toast.style.opacity = "0";
+    }, 2500);
 }
 

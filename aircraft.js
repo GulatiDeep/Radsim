@@ -12,7 +12,7 @@ let aircraftBlips = []; // To store all created aircraft blips
 let radarCenter = { x: radarScope.offsetWidth / 2, y: radarScope.offsetHeight / 2 }; // Track radar center
 let isPaused = false; // to initialise the exercise pause and resume button
 let clickedPosition = { x: 0, y: 0 };
-let historyDotsVisible = true; // Initialize the flag to track the visibility state of the history dots
+//let historyDotsVisible = true; // Initialize the flag to track the visibility state of the history dots
 let labelsVisible = true; // //Initialize the flag to track the visibility state of the labels
 
 let speedVectorMinutes = 0; // default value; can be set by user (0-5)
@@ -46,7 +46,7 @@ let formationCallsigns = [
 
 
 // Set the initial state of the History button
-document.getElementById('historyDots').classList.add(historyDotsVisible ? 'active' : 'inactive');
+//document.getElementById('historyDots').classList.add(historyDotsVisible ? 'active' : 'inactive');
 
 // Set the initial state of the Label button
 document.getElementById('label').classList.add(labelsVisible ? 'active' : 'inactive');
@@ -555,12 +555,9 @@ class AircraftBlip {
     // Update the history dots' positions based on the aircraft's history
     updateHistoryDots() {
         // Respect the historyDotsVisible flag
-        if (!historyDotsVisible) {
-            this.historyDots.forEach(dot => {
-                dot.style.opacity = 0;
-            });
-            return;
-        }
+        this.historyDots.forEach(dot => {
+            dot.style.display = 'block'; // or whatever is your default display
+        });
 
         const scopeCenterX = radarCenter.x;
         const scopeCenterY = radarCenter.y;
