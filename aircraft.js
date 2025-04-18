@@ -104,6 +104,11 @@ class AircraftBlip {
         this.speedVectorLine.style.transformOrigin = '0% 50%';
         this.speedVectorDots = []; // store dot references
 
+        //for raw pickup
+        this.rawPickupLines = [];
+        this.createRawPickupLines();
+
+
         panContainer.appendChild(this.speedVectorLine);
 
 
@@ -149,21 +154,21 @@ class AircraftBlip {
         panContainer.appendChild(this.msawHalo);
 
         // SSR-based styling with distance check
-const { distanceNM } = this.getBearingAndDistanceFromRadarCenter();
+        const { distanceNM } = this.getBearingAndDistanceFromRadarCenter();
 
-if (this.ssrCode === '0000') {
-    blip.classList.remove('aircraft-blip', 'cross-sign');
-    blip.classList.add('plus-sign');
-} else {
-    blip.classList.remove('plus-sign');
-    if (parseFloat(distanceNM) > 60) {
-        blip.classList.remove('aircraft-blip');
-        blip.classList.add('cross-sign');
-    } else {
-        blip.classList.remove('cross-sign');
-        blip.classList.add('aircraft-blip');
-    }
-}
+        if (this.ssrCode === '0000') {
+            blip.classList.remove('aircraft-blip', 'cross-sign');
+            blip.classList.add('plus-sign');
+        } else {
+            blip.classList.remove('plus-sign');
+            if (parseFloat(distanceNM) > 60) {
+                blip.classList.remove('aircraft-blip');
+                blip.classList.add('cross-sign');
+            } else {
+                blip.classList.remove('cross-sign');
+                blip.classList.add('aircraft-blip');
+            }
+        }
 
         blip.style.position = 'absolute';
         blip.style.zIndex = '2';
@@ -200,6 +205,18 @@ if (this.ssrCode === '0000') {
         return label;
     }
 
+    createRawPickupLines() {
+        const count = 6; // ← Changed from 4 to 6
+    
+        for (let i = 0; i < count; i++) {
+            const line = document.createElement('div');
+            line.className = `raw-pickup-line fade${i + 1}`;
+            panContainer.appendChild(line);
+            this.rawPickupLines.push(line);
+        }
+    }
+    
+    
     // Create the line element connecting the blip and the label
     createLineElement() {
         const line = document.createElement('div');
@@ -237,7 +254,47 @@ if (this.ssrCode === '0000') {
         }
     }
 
+    updateRawPickupLines() {
+        const count = this.rawPickupLines.length;
+        const spacingNM = 0.25; // spacing behind the blip
+        const aheadNM = 0.5;   // line ahead of the blip
+        const blipWidth = 10;
+    
+        const angleRad = this.heading * Math.PI / 180;
+    
+        const baseX = this.position.x;
+        const baseY = this.position.y;
+    
+        for (let i = 0; i < count; i++) {
+            // Distance along the heading axis
+            const distance = (i === 0) ? aheadNM : -(i - 1) * spacingNM;
+    
+            // Position of each raw echo along the aircraft's heading
+            const echoX = baseX + Math.sin(angleRad) * distance;
+            const echoY = baseY + Math.cos(angleRad) * distance;
+    
+            // Convert to screen space
+            const screenX = radarCenter.x + echoX * zoomLevel;
+            const screenY = radarCenter.y - echoY * zoomLevel;
+    
+            const line = this.rawPickupLines[i];
+    
+            line.style.width = `${blipWidth}px`;
+            line.style.height = `1px`;
+            line.style.left = `${screenX - blipWidth / 2}px`;
+            line.style.top = `${screenY}px`;
+    
+            // 🚫 No rotation → always horizontal
+            line.style.transform = `none`;
+        }
+    }
+    
+    
+    
 
+    
+
+    
     // Update the blip's position and label position
     updateBlipPosition() {
         const blipSize = 6;
@@ -274,12 +331,13 @@ if (this.ssrCode === '0000') {
 
         this.history.push({ x: this.position.x, y: this.position.y });
 
-        
+
 
         if (this.history.length > currentHistoryDotCount) {
             this.history.shift();
         }
 
+        this.updateRawPickupLines();
         this.updateHistoryDots();
         this.updateSpeedVector();
         this.updateSTCA();
@@ -536,17 +594,17 @@ if (this.ssrCode === '0000') {
     updateColorBasedOnSSR() {
         const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
         const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
-    
+
         // Remove any previous color classes from cross sign
         this.element.classList.remove('red', 'hotpink', 'yellow');
-    
+
         if (isEmergencySSR) {
             this.label.style.color = 'red';
             this.line.style.backgroundColor = 'red';
             this.element.style.backgroundColor = 'red';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
             this.emergencyCircle.style.display = 'block';
-    
+
             if (this.element.classList.contains('cross-sign')) {
                 this.element.classList.add('red');
             }
@@ -556,7 +614,7 @@ if (this.ssrCode === '0000') {
             this.element.style.backgroundColor = 'hotpink';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
             this.emergencyCircle.style.display = 'none';
-    
+
             if (this.element.classList.contains('cross-sign')) {
                 this.element.classList.add('hotpink');
             }
@@ -567,13 +625,13 @@ if (this.ssrCode === '0000') {
             this.element.style.backgroundColor = 'yellow';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
             this.emergencyCircle.style.display = 'none';
-    
+
             if (this.element.classList.contains('cross-sign')) {
                 this.element.classList.add('yellow');
             }
         }
     }
-    
+
 
 
 

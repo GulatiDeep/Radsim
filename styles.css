@@ -468,6 +468,25 @@ html {
     background-color: yellow; /* default */
 }
 
+.raw-pickup-line {
+    position: absolute;
+    width: 8px;
+    height: 1px;
+    background-color: grey;
+    z-index: 1;
+    pointer-events: none;
+    transform-origin: center;
+}
+
+.raw-pickup-line.fade1 { opacity: 0.9; }
+.raw-pickup-line.fade2 { opacity: 0.75; }
+.raw-pickup-line.fade3 { opacity: 0.6; }
+.raw-pickup-line.fade4 { opacity: 0.45; }
+.raw-pickup-line.fade5 { opacity: 0.3; }
+.raw-pickup-line.fade6 { opacity: 0.15; }
+
+
+
 
 
 /* Aircraft label */
