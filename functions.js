@@ -109,6 +109,11 @@ function deleteAircraft(blip) {
         blip.stcaHalo.remove();
     }
 
+    //Removing STCA
+    if (blip.msawHalo) {
+        blip.msawHalo.remove();
+    }
+
 
 
     // Remove the elements from the DOM

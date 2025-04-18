@@ -611,6 +611,13 @@ updateTimeDisplays();
 setInterval(updateTimeDisplays, 1000);
 
 
+function initializeRadarAudio() {
+    if (!radarAudioContext) {
+        radarAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+
 // Attach event listeners to track window resizing or zooming
 window.addEventListener('resize', () => {
     updateRadarCenter();

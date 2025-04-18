@@ -43,8 +43,17 @@ function applySettings() {
     const verticalInput = parseFloat(document.getElementById("verticalSeparationInput").value);
     if (!isNaN(verticalInput)) verticalSeparationFT = verticalInput;
 
-    const lookaheadInput = parseFloat(document.getElementById("lookaheadTimeInput").value);
-    if (!isNaN(lookaheadInput)) lookaheadSeconds = lookaheadInput;
+    const lookaheadSTCAInput = parseFloat(document.getElementById("lookaheadSTCAInput").value);
+    if (!isNaN(lookaheadSTCAInput)) lookaheadSecondsSTCA = lookaheadSTCAInput;
+
+    // --- MSAW Settings ---
+    msawEnabled = document.getElementById("msawToggle").checked;
+    const msaInput = parseFloat(document.getElementById("minimumAltitudeInput").value);
+    if (!isNaN(msaInput)) minimumSafeAltitudeFT = msaInput;
+
+    const lookaheadMSAWInputValue = parseFloat(document.getElementById("lookaheadMSAWInput").value);
+    if (!isNaN(lookaheadMSAWInputValue)) lookaheadSecondsMSAW = lookaheadMSAWInputValue;
+
 
     // --- Clear STCA alerts if disabled ---
     if (!stcaEnabled) {
@@ -57,6 +66,15 @@ function applySettings() {
 
         const canvas = document.getElementById("stcaCanvas");
         if (canvas) canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Clear MSAW alerts if disabled
+    if (!msawEnabled) {
+        aircraftBlips.forEach(blip => {
+            if (blip.msawHalo) blip.msawHalo.style.display = 'none';
+        });
+        predictedMSAWConflicts.clear();
+        actualMSAWConflicts.clear();
     }
 
     // --- Update Status Bar ---

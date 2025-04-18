@@ -139,14 +139,31 @@ class AircraftBlip {
         panContainer.appendChild(this.stcaHalo);
 
 
-        // SSR-based styling
-        if (this.ssrCode === '0000') {
-            blip.classList.remove('aircraft-blip');
-            blip.classList.add('plus-sign');
-        } else {
-            blip.classList.remove('plus-sign');
-            blip.classList.add('aircraft-blip');
-        }
+        //Create MSAW circle
+        blip.currentMSAW = "none" | "predicted" | "actual"; //storing state of msaw
+
+        this.msawHalo = document.createElement('div');
+        this.msawHalo.className = 'msaw-halo'; // generic blinking circle
+        this.msawHalo.style.display = 'none';
+        // ✅ Append to blip directly
+        panContainer.appendChild(this.msawHalo);
+
+        // SSR-based styling with distance check
+const { distanceNM } = this.getBearingAndDistanceFromRadarCenter();
+
+if (this.ssrCode === '0000') {
+    blip.classList.remove('aircraft-blip', 'cross-sign');
+    blip.classList.add('plus-sign');
+} else {
+    blip.classList.remove('plus-sign');
+    if (parseFloat(distanceNM) > 60) {
+        blip.classList.remove('aircraft-blip');
+        blip.classList.add('cross-sign');
+    } else {
+        blip.classList.remove('cross-sign');
+        blip.classList.add('aircraft-blip');
+    }
+}
 
         blip.style.position = 'absolute';
         blip.style.zIndex = '2';
@@ -241,7 +258,23 @@ class AircraftBlip {
         // Calculate and log bearing and distance
         const { bearing, distanceNM } = this.getBearingAndDistanceFromRadarCenter();
 
+        if (this.ssrCode === '0000') {
+            this.element.classList.remove('aircraft-blip', 'cross-sign');
+            this.element.classList.add('plus-sign');
+        } else {
+            this.element.classList.remove('plus-sign');
+            if (parseFloat(distanceNM) > 60) {
+                this.element.classList.remove('aircraft-blip');
+                this.element.classList.add('cross-sign');
+            } else {
+                this.element.classList.remove('cross-sign');
+                this.element.classList.add('aircraft-blip');
+            }
+        }
+
         this.history.push({ x: this.position.x, y: this.position.y });
+
+        
 
         if (this.history.length > currentHistoryDotCount) {
             this.history.shift();
@@ -250,12 +283,22 @@ class AircraftBlip {
         this.updateHistoryDots();
         this.updateSpeedVector();
         this.updateSTCA();
+        this.updateMSAW();
     }
 
     updateSTCA() {
         if (this.stcaHalo) {
             this.stcaHalo.style.left = `${radarCenter.x + this.position.x * zoomLevel}px`;
             this.stcaHalo.style.top = `${radarCenter.y - this.position.y * zoomLevel}px`;
+        }
+
+
+    }
+
+    updateMSAW() {
+        if (this.msawHalo) {
+            this.msawHalo.style.left = `${radarCenter.x + this.position.x * zoomLevel}px`;
+            this.msawHalo.style.top = `${radarCenter.y - this.position.y * zoomLevel}px`;
         }
     }
 
@@ -398,6 +441,13 @@ class AircraftBlip {
             labelContent += `<br><span style="color: red;">ACT STCA</span>`;
         }
 
+        // Add MSAW status line if applicable
+        if (this.currentMSAW === 'predicted') {
+            labelContent += `<br><span style="color: yellow;">PRED MSAW</span>`;
+        } else if (this.currentMSAW === 'actual') {
+            labelContent += `<br><span style="color: red;">ACT MSAW</span>`;
+        }
+
         this.label.innerHTML = labelContent;
     }
 
@@ -457,7 +507,7 @@ class AircraftBlip {
 
 
     //Update the colour of label and blip based on SSR code like emergency codes
-    updateColorBasedOnSSR() {
+    updateColorBasedOnSSR1() {
         const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
         const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
 
@@ -482,6 +532,48 @@ class AircraftBlip {
             this.emergencyCircle.style.display = 'none';
         }
     }
+
+    updateColorBasedOnSSR() {
+        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
+        const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
+    
+        // Remove any previous color classes from cross sign
+        this.element.classList.remove('red', 'hotpink', 'yellow');
+    
+        if (isEmergencySSR) {
+            this.label.style.color = 'red';
+            this.line.style.backgroundColor = 'red';
+            this.element.style.backgroundColor = 'red';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
+            this.emergencyCircle.style.display = 'block';
+    
+            if (this.element.classList.contains('cross-sign')) {
+                this.element.classList.add('red');
+            }
+        } else if (isMappedSSR) {
+            this.label.style.color = 'hotpink';
+            this.line.style.backgroundColor = 'hotpink';
+            this.element.style.backgroundColor = 'hotpink';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
+            this.emergencyCircle.style.display = 'none';
+    
+            if (this.element.classList.contains('cross-sign')) {
+                this.element.classList.add('hotpink');
+            }
+        } else {
+            this.label.style.color = 'yellow';
+            this.line.style.backgroundColor = 'yellow';
+            this.line.style.opacity = '25%';
+            this.element.style.backgroundColor = 'yellow';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
+            this.emergencyCircle.style.display = 'none';
+    
+            if (this.element.classList.contains('cross-sign')) {
+                this.element.classList.add('yellow');
+            }
+        }
+    }
+    
 
 
 

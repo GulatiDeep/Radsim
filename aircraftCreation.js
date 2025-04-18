@@ -19,6 +19,7 @@ function closeInitialAircraftDialog() {
     const dialog = document.getElementById('initialAircraftDialog');
     dialog.style.display = 'none';
     resetInitialDialogFields();
+    initializeRadarAudio(); // To initialise radar beep sounds for MSAW and STCA
 }
 
 // Reset form fields to their default values

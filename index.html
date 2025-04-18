@@ -54,6 +54,9 @@
 
                     <canvas id="stcaCanvas" width="1920" height="1080"></canvas>
                     <div id="stcaRoasterBox" class="roaster-box"></div>
+
+                    <canvas id="msawCanvas" width="1920" height="1080"></canvas>
+                    <div id="msawRoasterBox" class="roaster-box"></div>
                 </div>
 
 
@@ -297,8 +300,8 @@
                 </div>
                 <div class="settings-row">
                     <div>
-                        <label for="lookaheadTimeInput">Time (sec)</label>
-                        <input type="number" id="lookaheadTimeInput" placeholder="Time (sec)" value="120">
+                        <label for="lookaheadSTCAInput">Time (sec)</label>
+                        <input type="number" id="lookaheadSTCAInput" placeholder="Time (sec)" value="120">
                     </div>
                     <div class="checkbox-wrapper">
                         <label for="stcaToggle">Enable STCA</label>
@@ -307,6 +310,28 @@
                     </div>
                 </div>
             </fieldset>
+
+            <!-- MSAW Settings -->
+            <fieldset>
+                <legend>MSAW Settings</legend>
+                <div class="settings-row">
+                  <div>
+                    <label for="minimumAltitudeInput">Min Safe Alt (ft)</label>
+                    <input type="number" id="minimumAltitudeInput" value="2000">
+                  </div>
+                  <div>
+                    <label for="lookaheadMSAWInput">Time (sec)</label>
+                    <input type="number" id="lookaheadMSAWInput" value="120">
+                  </div>
+                </div>
+                <div class="settings-row">
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox" id="msawToggle" checked>
+                    <label for="msawToggle">Enable MSAW</label>
+                  </div>
+                </div>
+              </fieldset>
+              
 
             <!-- Action Buttons -->
             <div class="settings-actions">
@@ -355,6 +380,7 @@
     <script src="voiceCommands.js"></script>
     <script src="pronounce.js"></script>
     <script src="stca.js"></script>
+    <script src="msaw.js"></script>
 
 
 </body>

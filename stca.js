@@ -8,7 +8,7 @@ const actualConflicts = new Set();
 // Separation criteria (STCA thresholds)
 let horizontalSeparationNM = 8;      // in nautical miles
 let verticalSeparationFT = 1000;     // in feet
-let lookaheadSeconds = 120;          // seconds into the future for conflict prediction
+let lookaheadSecondsSTCA = 120;          // seconds into the future for conflict prediction
 
 
 /**
@@ -369,7 +369,7 @@ function runSTCACheck() {
     const positionCache = {};
     aircraftBlips.forEach(blip => {
         positionCache[blip.callsign] = {};
-        for (let t = 0; t <= lookaheadSeconds; t += 10) {
+        for (let t = 0; t <= lookaheadSecondsSTCA; t += 10) {
             positionCache[blip.callsign][t] = predictPosition(blip, t);
         }
     });
@@ -400,7 +400,7 @@ function runSTCACheck() {
     // =============================================
     // Check for predicted conflicts using cache
     // =============================================
-    for (let t = 0; t <= lookaheadSeconds; t += 10) {
+    for (let t = 0; t <= lookaheadSecondsSTCA; t += 10) {
         const conflictsAtTime = checkPredictedConflictsAtTime(t, positionCache);
 
         // For every predicted conflict pair at time 't'
