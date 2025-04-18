@@ -464,7 +464,11 @@ class AircraftBlip {
 
 
     updateLabelInfo() {
-        const level = Math.round(this.altitude / 100);
+        //const level = Math.round(this.altitude / 100);
+        const rawLevel = Math.round(this.altitude / 100);
+const isAboveTL = this.altitude >= 6000; // FL60 = 6000 ft
+const level = isAboveTL ? `F${rawLevel}` : `A${rawLevel}`;
+
         const speed = this.speed;
 
         let arrow = '';
@@ -486,7 +490,7 @@ class AircraftBlip {
             if (mappedCallsign) {
                 labelContent += `<strong>${mappedCallsign}</strong><br>`;
             }
-            labelContent += `3-${this.ssrCode}<br>A${level} ${arrow}<br>N${speed}`;
+            labelContent += `3-${this.ssrCode}<br>${level} ${arrow}<br>N${speed}`;
         } else {
             // For unassigned SSR
             labelContent += `N${speed}`;
