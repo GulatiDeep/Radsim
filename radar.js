@@ -384,25 +384,6 @@ document.addEventListener('mouseup', () => {
 
 
 
-function smoothZoom(targetZoomLevel) {
-    const step = (targetZoomLevel - zoomLevel) / 10; // Adjust for smoothness
-
-    function animateZoom() {
-        zoomLevel += step;
-        //updateZoomLevel(zoomLevel);
-        //updateBlipPosition(); // Update the blip's position
-        createRangeRings(); // Recreate elements based on new zoom
-        drawRunway(); // Recalculate and redraw the runway
-
-        if (Math.abs(targetZoomLevel - zoomLevel) > Math.abs(step)) {
-            requestAnimationFrame(animateZoom);
-        }
-    }
-
-    animateZoom();
-}
-
-
 // Calculate distance and bearing of the mouse pointer from center of the radar scope
 function getDistanceAndBearing(x, y) {
     // Center of the radar scope (before panning)
@@ -471,41 +452,6 @@ function panRadar(dx, dy) {
     updateRadarCenter(); // Update center after panning
 }
 
-// Function to pause or resume the exercise
-function togglePause() {
-    const pauseButton = document.getElementById('pauseButton');
-    const rangeRingsContainer = document.querySelector('.range-rings');
-    isPaused = !isPaused;
-
-    if (isPaused) {
-        pauseButton.textContent = 'Resume';
-        updateStatusBar('→ Exercise paused.');
-        disableControlPanel();
-
-        rangeRingsContainer.style.animationPlayState = 'paused'; // Stop radar rings rotation
-    } else {
-        pauseButton.textContent = 'Pause';
-        updateStatusBar('→ Exercise resumed.');
-        enableControlPanel();
-
-        rangeRingsContainer.style.animationPlayState = 'running'; // Resume radar rings rotation
-
-        moveAircraftBlips(); // Resume aircraft movements
-    }
-}
-
-// Function to disable the control panel inputs while paused
-function disableControlPanel() {
-    const controlPanel = document.getElementById('controlPanel');
-    controlPanel.classList.add('disabled-panel');  // Disable interactions
-}
-
-// Function to enable the control panel inputs while resumed
-function enableControlPanel() {
-    const controlPanel = document.getElementById('controlPanel');
-    controlPanel.classList.remove('disabled-panel');  // Enable interactions
-}
-
 
 // Calculate mouse position based on radar's original center and panned position
 function calculatePosition(clientX, clientY) {
@@ -523,28 +469,6 @@ function calculatePosition(clientX, clientY) {
     return { x: relativeX, y: relativeY };
 }
 
-// Function to request fullscreen
-function openFullscreen() {
-    if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-    } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-        document.documentElement.mozRequestFullScreen();
-    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
-        document.documentElement.webkitRequestFullscreen();
-    } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-        document.documentElement.msRequestFullscreen();
-    }
-}
-
-
-
-//radar.js script file ends here
-
-
-//********All event listeners w.r.t. radar scope placed here**********/
-
-// Attach event listener to the pause button
-document.getElementById('pauseButton').addEventListener('click', togglePause);
 
 //Event listener to Toggle the visibility of labels and update the button's appearance
 document.getElementById('label').addEventListener('click', () => {
@@ -575,237 +499,40 @@ document.getElementById('label').addEventListener('click', () => {
     });
 });
 
-//To display current time on the radar scope
-// function updateRunningTime() {
-//     const now = new Date();
-//     const timeString = now.toLocaleTimeString();
-//     document.getElementById("runningTime").textContent = `Time: ${timeString}`;
-// }
 
-// // Call it immediately to display time right away
-// updateRunningTime();
+//Function to smooth the appearance of zooming
+function smoothZoom(targetZoomLevel) {
+    const step = (targetZoomLevel - zoomLevel) / 10; // Adjust for smoothness
 
-// // Then update every second
-// setInterval(updateRunningTime, 1000);
-const startTime = Date.now();
+    function animateZoom() {
+        zoomLevel += step;
+        //updateZoomLevel(zoomLevel);
+        //updateBlipPosition(); // Update the blip's position
+        createRangeRings(); // Recreate elements based on new zoom
+        drawRunway(); // Recalculate and redraw the runway
 
-function updateTimeDisplays() {
-    const now = new Date();
-    const currentTimeStr = now.toLocaleTimeString();
-    document.getElementById("currentTime").textContent = `${currentTimeStr}`;
-
-    const elapsedMs = Date.now() - startTime;
-    const totalSeconds = Math.floor(elapsedMs / 1000);
-
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const seconds = String(totalSeconds % 60).padStart(2, '0');
-
-    document.getElementById("runningTime").textContent = `[${hours}:${minutes}:${seconds}]`;
-}
-
-// Call immediately so it's visible at start
-updateTimeDisplays();
-
-// Then update both every second
-setInterval(updateTimeDisplays, 1000);
-
-
-function initializeRadarAudio() {
-    if (!radarAudioContext) {
-        radarAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-}
-
-
-// Attach event listeners to track window resizing or zooming
-window.addEventListener('resize', () => {
-    updateRadarCenter();
-    createRangeRings();  // Reposition range rings correctly
-    aircraftBlips.forEach(blip => blip.updateBlipPosition());
-});
-
-//Function to Open the Log Tab for tabbed browsing
-function openLogTab(evt, cityName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(cityName).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-
-// Functions to make the dialog boxes draggable (with clamping)
-function makeDraggable(dialogId, handleId) {
-    const dialog = document.getElementById(dialogId);
-    const handle = document.getElementById(handleId);
-
-    let offsetX = 0, offsetY = 0;
-    let isDragging = false;
-    let dragStart = false;
-
-    handle.addEventListener('mousedown', (e) => {
-        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) return;
-
-        const rect = dialog.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-
-        dragStart = true;
-
-        dialog.style.left = `${rect.left}px`;
-        dialog.style.top = `${rect.top}px`;
-        dialog.style.bottom = 'auto';           // override bottom if set
-        dialog.style.transform = 'none';        // cancel center transform
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    });
-
-    function onMouseMove(e) {
-        if (!dragStart) return;
-
-        // Start dragging only if the mouse moves enough
-        if (!isDragging && (Math.abs(e.movementX) > 2 || Math.abs(e.movementY) > 2)) {
-            isDragging = true;
-        }
-
-        if (isDragging) {
-            // Clamp within viewport
-            const x = Math.max(0, Math.min(e.clientX - offsetX, window.innerWidth - dialog.offsetWidth));
-            const y = Math.max(0, Math.min(e.clientY - offsetY, window.innerHeight - dialog.offsetHeight));
-
-            dialog.style.left = `${x}px`;
-            dialog.style.top = `${y}px`;
+        if (Math.abs(targetZoomLevel - zoomLevel) > Math.abs(step)) {
+            requestAnimationFrame(animateZoom);
         }
     }
 
-    function onMouseUp() {
-        isDragging = false;
-        dragStart = false;
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-    }
+    animateZoom();
 }
 
 
-makeDraggable('initialAircraftDialog', 'initialAircraftDialog');
-makeDraggable('aircraftDialog', 'aircraftDialog');
-makeDraggable("mappingDialog", "mappingDialog");
-makeDraggable("settingsDialog", "settingsDialog");
+//radar.js script file ends here
 
 
-const ssrInput = document.getElementById("ssrInput");
-const callsignInput = document.getElementById("callsignInput");
-const mappingTableBody = document.getElementById("mappingTableBody");
-
-const ssrToCallsignMap = {}; // Map storage
-
-// ✅ New: Validates 4-digit octal SSR code
-function isValidSquawkCode(code) {
-    return /^[0-7]{4}$/.test(code);  // Only allow 4 digits using 0–7
-}
-
-function addMappingToTable(ssr, callsign) {
-    if (ssrToCallsignMap[ssr]) {
-        alert(`Squawk ${ssr} already mapped to ${ssrToCallsignMap[ssr]}`);
-        return;
-    }
-
-    for (let code in ssrToCallsignMap) {
-        if (ssrToCallsignMap[code].toUpperCase() === callsign.toUpperCase()) {
-            alert(`Callsign ${callsign} already mapped to Squawk ${code}`);
-            return;
-        }
-    }
-
-    // Add to map
-    ssrToCallsignMap[ssr] = callsign;
-
-    // Create new row
-    const row = document.createElement("tr");
-    row.setAttribute("data-ssr", ssr);
-    row.innerHTML = `
-        <td style="width: 30%;" class="squawk-cell">${ssr}</td>
-        <td style="width: 55%;">${callsign}</td>
-        <td style="width: 15%;"><span class="delete-mapping-button" title="Delete">X</span></td>
-    `;
-
-    // Delete logic
-    row.querySelector(".delete-mapping-button").addEventListener("click", () => {
-        delete ssrToCallsignMap[ssr];
-        row.remove();
-        aircraftBlips.forEach(blip => {
-            blip.updateLabelInfo();
-            blip.updateColorBasedOnSSR();
-        });
-    });
-
-    // Insert new row at top
-    mappingTableBody.insertBefore(row, mappingTableBody.firstChild);
-
-    // Reset fields
-    ssrInput.value = "";
-    callsignInput.value = "";
-    ssrInput.focus();
-
-    // ✅ Update aircraft visuals
-    aircraftBlips.forEach(blip => {
-        blip.updateLabelInfo();
-        blip.updateColorBasedOnSSR();
-    });
-}
 
 
-// Listen to Enter key
-[callsignInput, ssrInput].forEach(input => {
-    input.addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
-            const ssr = ssrInput.value.trim();
-            const callsign = callsignInput.value.trim().toUpperCase();
-
-            if (!ssr || !callsign) return;
-
-            // ✅ Use octal validation function
-            if (!isValidSquawkCode(ssr)) {
-                alert("Invalid Squawk Code.\nIt must be a 4-digit octal number (digits 0–7).");
-                return;
-            }
-
-            addMappingToTable(ssr, callsign);
-        }
-    });
-});
-
-function toggleMappingDialog() {
-    const dialog = document.getElementById("mappingDialog");
-
-    if (dialog.style.display === "none" || dialog.style.display === "") {
-        // Show the dialog at bottom-left
-        dialog.style.display = "block";
-        dialog.style.left = "0px";
-        dialog.style.bottom = "50px";
-        dialog.style.top = "auto";
-        dialog.style.transform = "none";
-    } else {
-        // Hide the dialog
-        dialog.style.display = "none";
-    }
-}
 
 
-// Listen for F6 key to toggle mapping dialog
-document.addEventListener("keydown", function (e) {
-    if (e.key === "F6") {
-        e.preventDefault();  // prevent browser default if any
-        toggleMappingDialog();
-    }
-});
+
+
+
+
+
+
 
 
 

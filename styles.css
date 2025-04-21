@@ -395,6 +395,7 @@ html {
     z-index: 3;
     position: relative;
     cursor: pointer;
+    
 }
 
 /* Vertical and horizontal lines for plus sign */
@@ -422,6 +423,22 @@ html {
     left: 0;
     transform: translateY(-50%);
 }
+
+.plus-sign.red::before,
+.plus-sign.red::after {
+    background-color: red;
+}
+
+.plus-sign.hotpink::before,
+.plus-sign.hotpink::after {
+    background-color: hotpink;
+}
+
+.plus-sign.yellow::before,
+.plus-sign.yellow::after {
+    background-color: yellow;
+}
+
 
 /* Cross symbol (if distance > 60 NM) */
 .cross-sign {
@@ -468,6 +485,13 @@ html {
     background-color: yellow; /* default */
 }
 
+.plus-sign.hooked,
+.cross-sign.hooked {
+    outline: 1px dotted white;
+    outline-offset: 3px;
+    
+}
+
 .raw-pickup-line {
     position: absolute;
     width: 8px;
@@ -484,6 +508,18 @@ html {
 .raw-pickup-line.fade4 { opacity: 0.45; }
 .raw-pickup-line.fade5 { opacity: 0.3; }
 .raw-pickup-line.fade6 { opacity: 0.15; }
+
+
+/* Hooked Blip */
+.aircraft-blip.hooked {
+    outline: 1px dotted white;
+    outline-offset: 3px;
+    
+}
+
+
+
+
 
 
 

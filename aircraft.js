@@ -22,6 +22,9 @@ let allAircraftCallsigns = []; //to initialise the list of callsigns array
 // A list to store previously generated positions
 let previousPositions = [];
 
+//for hooking of aircraft
+let hookedBlip = null;
+
 // Initialize counters for number of aircraft
 let totalAircraftCount = 0;  // Count of all aircraft, including individual, transport, and formation members
 
@@ -45,9 +48,6 @@ let formationCallsigns = [
 ];
 
 
-// Set the initial state of the History button
-//document.getElementById('historyDots').classList.add(historyDotsVisible ? 'active' : 'inactive');
-
 // Set the initial state of the Label button
 document.getElementById('label').classList.add(labelsVisible ? 'active' : 'inactive');
 
@@ -67,7 +67,10 @@ moveAircraftBlips();
 
 // AircraftBlip class with all attributes regarding aircraft blip, label and leading line
 class AircraftBlip {
-    constructor(callsign, heading, speed, altitude, x, y, ssrCode) {
+    constructor(callsign, heading, speed, altitude, x, y, ssrCode, id) {
+
+        this.id = id; // This ID will be used to distinguish all aircraft 
+
         this.callsign = callsign;
         this.ssrCode = ssrCode;
         this.originalSSRCode = (['7500', '7600', '7700'].includes(ssrCode)) ? '0000' : ssrCode; //to retain original ssr code
@@ -207,7 +210,7 @@ class AircraftBlip {
 
     createRawPickupLines() {
         const count = 6; // ← Changed from 4 to 6
-    
+
         for (let i = 0; i < count; i++) {
             const line = document.createElement('div');
             line.className = `raw-pickup-line fade${i + 1}`;
@@ -215,8 +218,8 @@ class AircraftBlip {
             this.rawPickupLines.push(line);
         }
     }
-    
-    
+
+
     // Create the line element connecting the blip and the label
     createLineElement() {
         const line = document.createElement('div');
@@ -236,15 +239,6 @@ class AircraftBlip {
     }
 
     // Create history dot elements and append to the radar
-    createHistoryDots1() {
-        for (let i = 0; i < 20; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'history-dot';
-            panContainer.appendChild(dot);
-            this.historyDots.push(dot);
-        }
-    }
-
     createHistoryDots() {
         for (let i = 0; i < currentHistoryDotCount; i++) {
             const dot = document.createElement('div');
@@ -259,42 +253,37 @@ class AircraftBlip {
         const spacingNM = 0.25; // spacing behind the blip
         const aheadNM = 0.5;   // line ahead of the blip
         const blipWidth = 10;
-    
+
         const angleRad = this.heading * Math.PI / 180;
-    
+
         const baseX = this.position.x;
         const baseY = this.position.y;
-    
+
         for (let i = 0; i < count; i++) {
             // Distance along the heading axis
             const distance = (i === 0) ? aheadNM : -(i - 1) * spacingNM;
-    
+
             // Position of each raw echo along the aircraft's heading
             const echoX = baseX + Math.sin(angleRad) * distance;
             const echoY = baseY + Math.cos(angleRad) * distance;
-    
+
             // Convert to screen space
             const screenX = radarCenter.x + echoX * zoomLevel;
             const screenY = radarCenter.y - echoY * zoomLevel;
-    
+
             const line = this.rawPickupLines[i];
-    
+
             line.style.width = `${blipWidth}px`;
             line.style.height = `1px`;
             line.style.left = `${screenX - blipWidth / 2}px`;
             line.style.top = `${screenY}px`;
-    
+
             // 🚫 No rotation → always horizontal
             line.style.transform = `none`;
         }
     }
-    
-    
-    
 
-    
 
-    
     // Update the blip's position and label position
     updateBlipPosition() {
         const blipSize = 6;
@@ -464,54 +453,83 @@ class AircraftBlip {
 
 
     updateLabelInfo() {
-        //const level = Math.round(this.altitude / 100);
+        // Calculate raw level by dividing altitude in feet by 100
         const rawLevel = Math.round(this.altitude / 100);
-const isAboveTL = this.altitude >= 6000; // FL60 = 6000 ft
-const level = isAboveTL ? `F${rawLevel}` : `A${rawLevel}`;
 
+        // Determine if aircraft is above Transition Level (FL60 or 6000 ft)
+        const isAboveTL = this.altitude >= 6000;
+
+        // Format level: 'F' prefix for flight levels, 'A' for altitudes below transition level
+        const level = isAboveTL ? `F${rawLevel}` : `A${rawLevel}`;
+
+        // Get current speed of the aircraft
         const speed = this.speed;
 
+        // Determine climb/descent status using arrows
         let arrow = '';
-
         if (this.altitude < this.targetAltitude) {
-            arrow = '↑';  // Climbing
+            arrow = '↑';  // Aircraft is climbing
         } else if (this.altitude > this.targetAltitude) {
-            arrow = '↓';  // Descending
+            arrow = '↓';  // Aircraft is descending
         }
 
+        // Check if aircraft is using an emergency squawk code (7500, 7600, 7700)
         const isEmergency = ['7500', '7600', '7700'].includes(this.ssrCode);
-        const codeForMapping = isEmergency ? this.originalSSRCode : this.ssrCode;
-        const mappedCallsign = ssrToCallsignMap[codeForMapping];
 
+        // Use original SSR code for mapping if it's an emergency
+        const codeForMapping = isEmergency ? this.originalSSRCode : this.ssrCode;
+
+        // Look up mapped callsign using SSR code
+        //const mappedCallsign = ssrToCallsignMap[codeForMapping];
+        let mappedCallsign = ssrToCallsignMap[codeForMapping];
+
+        // If not found in SSR map and SSR is 0000, check primary mapping
+        if (!mappedCallsign && this.ssrCode === '0000') {
+            mappedCallsign = primarySSRMapping[this.id];
+        }
+
+
+        // Initialize label content string
         let labelContent = '';
 
-        // If it's a normal blip (not SSR 0000)
+        // 🟡 Show callsign on top ALWAYS if found
+        if (mappedCallsign) {
+            labelContent += `<strong>${mappedCallsign}</strong><br>`;
+        }
+
+        // Show SSR code only if not 0000
         if (this.ssrCode !== '0000') {
-            if (mappedCallsign) {
-                labelContent += `<strong>${mappedCallsign}</strong><br>`;
-            }
-            labelContent += `3-${this.ssrCode}<br>${level} ${arrow}<br>N${speed}`;
+            labelContent += `3-${this.ssrCode}<br>`;
+        }
+
+        // SSR code display
+        if (this.ssrCode !== '0000') {
+            labelContent += `${level} ${arrow}<br>N${speed}`;
         } else {
-            // For unassigned SSR
             labelContent += `N${speed}`;
         }
 
-        // Add STCA status line if applicable
+
+        // labelContent += `${level} ${arrow}<br>N${speed}`;
+
+        // Add Short Term Conflict Alert (STCA) status if active
         if (this.currentSTCA === 'predicted') {
             labelContent += `<br><span style="color: yellow;">PRED STCA</span>`;
         } else if (this.currentSTCA === 'actual') {
             labelContent += `<br><span style="color: red;">ACT STCA</span>`;
         }
 
-        // Add MSAW status line if applicable
+        // Add Minimum Safe Altitude Warning (MSAW) status if active
         if (this.currentMSAW === 'predicted') {
             labelContent += `<br><span style="color: yellow;">PRED MSAW</span>`;
         } else if (this.currentMSAW === 'actual') {
             labelContent += `<br><span style="color: red;">ACT MSAW</span>`;
         }
 
+        // Finally, set the label HTML content for this aircraft
         this.label.innerHTML = labelContent;
     }
+
 
 
     //Show Ident Effect on Squawking IDENT
@@ -558,6 +576,11 @@ const level = isAboveTL ? `F${rawLevel}` : `A${rawLevel}`;
             this.originalSSRCode = newSSRCode;
         }
 
+        if (this.ssrCode !== '0000' && primarySSRMapping[this.id]) {
+            delete primarySSRMapping[this.id];
+            updatePrimaryMappingTable();
+        }
+
         this.ssrCode = newSSRCode;
         this.element.remove();
         this.element = this.createBlipElement();
@@ -570,32 +593,6 @@ const level = isAboveTL ? `F${rawLevel}` : `A${rawLevel}`;
 
     //Update the colour of label and blip based on SSR code like emergency codes
     updateColorBasedOnSSR1() {
-        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
-        const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
-
-        if (isEmergencySSR) {
-            this.label.style.color = 'red';
-            this.line.style.backgroundColor = 'red';
-            this.element.style.backgroundColor = 'red';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
-            this.emergencyCircle.style.display = 'block'; // 🔴 show ring
-        } else if (isMappedSSR) {
-            this.label.style.color = 'hotpink';
-            this.line.style.backgroundColor = 'hotpink';
-            this.element.style.backgroundColor = 'hotpink';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
-            this.emergencyCircle.style.display = 'none';
-        } else {
-            this.label.style.color = 'yellow';
-            this.line.style.backgroundColor = 'yellow';
-            this.line.style.opacity = '25%';
-            this.element.style.backgroundColor = 'yellow';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
-            this.emergencyCircle.style.display = 'none';
-        }
-    }
-
-    updateColorBasedOnSSR() {
         const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
         const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
 
@@ -635,6 +632,94 @@ const level = isAboveTL ? `F${rawLevel}` : `A${rawLevel}`;
             }
         }
     }
+
+    updateColorBasedOnSSR2() {
+        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
+        const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
+    
+        // Remove any previous color classes from cross sign and plus sign
+        this.element.classList.remove('red', 'hotpink', 'yellow');
+    
+        if (isEmergencySSR) {
+            this.label.style.color = 'red';
+            this.line.style.backgroundColor = 'red';
+            this.element.style.backgroundColor = 'red';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
+            this.emergencyCircle.style.display = 'block';
+    
+            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
+                this.element.classList.add('red');
+            }
+    
+        } else if (isMappedSSR) {
+            this.label.style.color = 'hotpink';
+            this.line.style.backgroundColor = 'hotpink';
+            this.element.style.backgroundColor = 'hotpink';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
+            this.emergencyCircle.style.display = 'none';
+    
+            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
+                this.element.classList.add('hotpink');
+            }
+    
+        } else {
+            this.label.style.color = 'yellow';
+            this.line.style.backgroundColor = 'yellow';
+            this.line.style.opacity = '25%';
+            this.element.style.backgroundColor = 'yellow';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
+            this.emergencyCircle.style.display = 'none';
+    
+            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
+                this.element.classList.add('yellow');
+            }
+        }
+    }
+    
+    updateColorBasedOnSSR() {
+        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
+        const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
+        const isMappedPrimary = this.ssrCode === '0000' && primarySSRMapping[this.id] !== undefined;
+    
+        // Remove any previous color classes
+        this.element.classList.remove('red', 'hotpink', 'yellow');
+    
+        if (isEmergencySSR) {
+            this.label.style.color = 'red';
+            this.line.style.backgroundColor = 'red';
+            this.element.style.backgroundColor = 'red';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
+            this.emergencyCircle.style.display = 'block';
+    
+            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
+                this.element.classList.add('red');
+            }
+    
+        } else if (isMappedSSR || isMappedPrimary) {
+            this.label.style.color = 'hotpink';
+            this.line.style.backgroundColor = 'hotpink';
+            this.element.style.backgroundColor = 'hotpink';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
+            this.emergencyCircle.style.display = 'none';
+    
+            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
+                this.element.classList.add('hotpink');
+            }
+    
+        } else {
+            this.label.style.color = 'yellow';
+            this.line.style.backgroundColor = 'yellow';
+            this.line.style.opacity = '25%';
+            this.element.style.backgroundColor = 'yellow';
+            this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
+            this.emergencyCircle.style.display = 'none';
+    
+            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
+                this.element.classList.add('yellow');
+            }
+        }
+    }
+    
 
 
 
@@ -837,10 +922,32 @@ const level = isAboveTL ? `F${rawLevel}` : `A${rawLevel}`;
         this.updateBlipPosition();
 
 
-        //for shifting the focus on associated input box for command to clicked aircraft blip
+        // For shifting the focus on associated input box for command to double-clicked aircraft blip and hooking the selected aircraft
+        // On single click → focus input
         this.element.addEventListener('click', () => {
             focusControlBoxInput(this.callsign);
         });
+        this.element.addEventListener('dblclick', () => {
+            //focusControlBoxInput(this.callsign);
+            hookedBlip = this;
+
+            // Optional: visual indicator
+            document.querySelectorAll(".aircraft-blip, .plus-sign, .cross-sign").forEach(b => b.classList.remove("hooked"));
+            this.element.classList.add("hooked");
+            
+        });
+
+        // Unhook aircraft when double-clicking outside a blip/plus/cross
+        document.addEventListener('dblclick', (e) => {
+            const isBlipOrSymbol = e.target.closest('.aircraft-blip, .plus-sign, .cross-sign');
+
+            if (!isBlipOrSymbol) {
+                hookedBlip = null;
+                document.querySelectorAll(".aircraft-blip, .plus-sign, .cross-sign").forEach(b => b.classList.remove("hooked"));
+            }
+        });
+
+
     }
 
 

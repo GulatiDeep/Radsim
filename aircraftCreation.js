@@ -3,6 +3,9 @@
 //Log display initialisation
 let commandLogs = document.getElementById('commandLogs');
 
+let aircraftCounter = 0;  // Global counter for generating unique IDs
+
+
 /********** Functions to create Initial Aircraft on Page load  *****/
 //Function to open initial dialog box for exercise settings
 function openInitialAircraftDialog() {
@@ -102,18 +105,21 @@ function createInitialAircraftBlip() {
             createFormationAircraft(num3AcFormation, 3) &&
             createFormationAircraft(num4AcFormation, 4);
 
-        if (success) {
-            closeInitialAircraftDialog();  // Close the dialog box after creating aircraft
-
-            //Logging into console
-            console.log(`→ Exercise started with total ${totalAircraftCount} aircraft as follows:\n` +
-                `${allAircraftCallsigns.map(callsign => `  - ${callsign}`).join('\n')}`);
-
-            //Logging into Command Log
-            commandLogs.innerHTML += `→ Exercise started with total ${totalAircraftCount} aircraft as follows:<br>
-            <i style="color: green">${allAircraftCallsigns.map(callsign => `&nbsp;&nbsp;&nbsp;&nbsp;- ${callsign}`).join('<br>')}</i>`;
-
-        } else {
+            if (success) {
+                // After aircraft creation, assign unique IDs
+                aircraftCounter++;  // Increment the global counter for the next aircraft
+                assignUniqueAircraftIdToBlips();  // Function to assign unique ID to the aircraft blips
+                closeInitialAircraftDialog();  // Close the dialog box after creating aircraft
+    
+                //Logging into console
+                console.log(`→ Exercise started with total ${totalAircraftCount} aircraft as follows:\n` +
+                    `${allAircraftCallsigns.map(callsign => `  - ${callsign}`).join('\n')}`);
+    
+                //Logging into Command Log
+                commandLogs.innerHTML += `→ Exercise started with total ${totalAircraftCount} aircraft as follows:<br>
+                <i style="color: green">${allAircraftCallsigns.map(callsign => `&nbsp;&nbsp;&nbsp;&nbsp;- ${callsign}`).join('<br>')}</i>`;
+    
+            } else {
             // If any creation failed (due to duplicate callsign), don't proceed
             console.error("Error: Could not create aircraft due to duplicate callsign.");
         }
@@ -122,6 +128,15 @@ function createInitialAircraftBlip() {
         return false;
     }
 }
+
+function assignUniqueAircraftIdToBlips() {
+    // Iterate through the created aircraft and assign the unique ID
+    aircraftBlips.forEach((blip, index) => {
+        blip.id = aircraftCounter + index;  // Assign a unique ID based on the counter
+        // You can store this ID in your `ssrToCallsignMap` or other structures for future mapping
+    });
+}
+
 
 // Function to Create Initial Aircraft blip(s) after validating inputs from Dialog Box
 function createManualAircraftBlip() {
@@ -189,11 +204,13 @@ function createManualAircraftBlip() {
         success = createFormationAircraft(1, formationSize, manualHeading, position);
     }
 
+    // After aircraft is created, assign a unique ID
     if (success) {
+        // Now assign the unique ID based on the global counter
+        aircraftCounter++;  // Increment the global counter for the next aircraft
+        assignUniqueAircraftIdToBlips();  // Function to assign unique ID to the aircraft blips
         closeAircraftCreationDialog(); // Close the dialog box after successful creation
-
     } else {
-        // Log the error if creation fails
         console.error("Error: Could not create aircraft or formation due to duplicate callsign or other issue.");
     }
 
