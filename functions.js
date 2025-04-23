@@ -104,6 +104,13 @@ function deleteAircraft(blip) {
         blip.speedVectorDots = [];
     }
 
+    // Delete raw pickup lines
+if (blip.rawPickupLines && Array.isArray(blip.rawPickupLines)) {
+    blip.rawPickupLines.forEach(line => line.remove());
+    blip.rawPickupLines = [];
+}
+
+
     //Removing STCA
     if (blip.stcaHalo) {
         blip.stcaHalo.remove();

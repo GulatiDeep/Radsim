@@ -1,9 +1,6 @@
 const ssrInput = document.getElementById("ssrInput");
 const callsignInput = document.getElementById("callsignInput");
 const mappingTableBody = document.getElementById("mappingTableBody");
-
-
-
 const ssrToCallsignMap = {}; // Map storage
 
 // ✅ New: Validates 4-digit octal SSR code
@@ -33,6 +30,7 @@ function addMappingToTable(ssr, callsign) {
     row.innerHTML = `
         <td style="width: 30%;" class="squawk-cell">${ssr}</td>
         <td style="width: 55%;">${callsign}</td>
+        
         <td style="width: 15%;"><span class="delete-mapping-button" title="Delete">X</span></td>
     `;
 
@@ -44,6 +42,8 @@ function addMappingToTable(ssr, callsign) {
             blip.updateLabelInfo();
             blip.updateColorBasedOnSSR();
         });
+
+
     });
 
     // Insert new row at top
@@ -58,7 +58,11 @@ function addMappingToTable(ssr, callsign) {
     aircraftBlips.forEach(blip => {
         blip.updateLabelInfo();
         blip.updateColorBasedOnSSR();
+
     });
+
+    // 🟢 Reset inputs and unhook
+    resetMappingInputsAndUnhook();
 }
 
 
@@ -79,6 +83,8 @@ function addMappingToTable(ssr, callsign) {
 
             // ✅ Case 2: Only Callsign provided, and primary aircraft is hooked
             if (!ssr && hookedBlip && hookedBlip.ssrCode === '0000') {
+                console.log("Mapping", hookedBlip?.id, "to", callsign);
+
                 addPrimaryMapping(hookedBlip, callsign);
                 return;
             }
@@ -102,7 +108,6 @@ function toggleMappingDialog() {
         dialog.style.top = "auto";
         dialog.style.transform = "none";
 
-        //updateMappingInputsBasedOnHookedAircraft(); // 🟢 Call the new function to auto-prepare inputs
 
     } else {
         dialog.style.display = "none";
@@ -137,12 +142,17 @@ function addPrimaryMapping(blip, callsign) {
         return;
     }
 
+    // 🟢 Properly isolate
     primarySSRMapping[blip.id] = callsign;
+
     updatePrimaryMappingTable();
 
     blip.updateLabelInfo();
     blip.updateColorBasedOnSSR();
+
+    resetMappingInputsAndUnhook(blip); // ✅ clean exit
 }
+
 
 function deletePrimaryMapping(id) {
     delete primarySSRMapping[id];
@@ -150,11 +160,13 @@ function deletePrimaryMapping(id) {
 
     // Update visuals
     aircraftBlips.forEach(blip => {
-        if (blip.id === id) {
-            blip.updateLabelInfo();
-            blip.updateColorBasedOnSSR();
-        }
+        blip.updateLabelInfo();
+        blip.updateColorBasedOnSSR();
     });
+
+    // 🟢 Reset inputs and unhook
+    resetMappingInputsAndUnhook();
+
 }
 
 function updatePrimaryMappingTable() {
@@ -169,6 +181,7 @@ function updatePrimaryMappingTable() {
         row.innerHTML = `
             <td class="squawk-cell">0000</td>
             <td>${primarySSRMapping[id]}</td>
+            
             <td><span class="delete-mapping-button" title="Delete">X</span></td>
         `;
         row.querySelector(".delete-mapping-button").addEventListener("click", () => {
@@ -179,30 +192,53 @@ function updatePrimaryMappingTable() {
     }
 }
 
-function updateMappingInputsBasedOnHookedAircraft() {
-    if (!hookedBlip) {
-        ssrInput.disabled = false;
-        ssrInput.value = "";
-        callsignInput.value = "";
-        callsignInput.focus();
-        return;
-    }
 
-    const isPrimary = hookedBlip.ssrCode === "0000";
+function resetMappingInputsAndUnhook(blip = null) {
+    ssrInput.disabled = false;
+    ssrInput.value = "";
+    callsignInput.value = "";
+    hookedBlip = null;
 
-    if (isPrimary) {
-        ssrInput.disabled = true;
-        ssrInput.value = "0000";
-        callsignInput.value = "";
-        callsignInput.focus();
-    } else {
-        ssrInput.disabled = false;
-        ssrInput.value = hookedBlip.ssrCode;
-        callsignInput.value = "";
-        callsignInput.focus();
-    }
+    // Only call if a blip is passed
+    if (blip) onAircraftUnhooked(blip);
+
+    // Remove any visual "hooked" highlight
+    document.querySelectorAll(".aircraft-blip, .plus-sign, .cross-sign").forEach(b => b.classList.remove("hooked"));
 }
 
 
 
 
+function onAircraftHooked(blip) {
+    if (blip) {
+        //console.log(`✅ Aircraft Hooked - ID: ${blip.id}, SSR: ${blip.ssrCode}`);
+        blip.element.classList.add("hooked");
+
+        if (blip.ssrCode != "0000") {
+            ssrInput.disabled = false;
+            ssrInput.value = blip.ssrCode;
+
+        }
+        else {
+            ssrInput.disabled = true;
+            ssrInput.value = "";
+
+        }
+        callsignInput.focus();
+
+    }
+}
+
+function onAircraftUnhooked(blip) {
+    if (blip) {
+        console.log(`🛑 Aircraft Unhooked - ID: ${blip.id}, SSR: ${blip.ssrCode}`);
+        hookedBlip = null;
+        ssrInput.disabled = false;
+        ssrInput.value = "";
+        callsignInput.value = "";
+        document.querySelectorAll(".aircraft-blip, .plus-sign, .cross-sign").forEach(b => b.classList.remove("hooked"));
+    }
+}
+
+
+// <td style="width: 15%;"><span class="edit-mapping-button" title="Edit">✏️</span><td></td>

@@ -173,8 +173,12 @@ class AircraftBlip {
             }
         }
 
+
         blip.style.position = 'absolute';
         blip.style.zIndex = '2';
+
+        blip.setAttribute('data-blip-id', this.id);
+
 
         panContainer.appendChild(blip);
         return blip;
@@ -592,120 +596,36 @@ class AircraftBlip {
 
 
     //Update the colour of label and blip based on SSR code like emergency codes
-    updateColorBasedOnSSR1() {
-        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
-        const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
-
-        // Remove any previous color classes from cross sign
-        this.element.classList.remove('red', 'hotpink', 'yellow');
-
-        if (isEmergencySSR) {
-            this.label.style.color = 'red';
-            this.line.style.backgroundColor = 'red';
-            this.element.style.backgroundColor = 'red';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
-            this.emergencyCircle.style.display = 'block';
-
-            if (this.element.classList.contains('cross-sign')) {
-                this.element.classList.add('red');
-            }
-        } else if (isMappedSSR) {
-            this.label.style.color = 'hotpink';
-            this.line.style.backgroundColor = 'hotpink';
-            this.element.style.backgroundColor = 'hotpink';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
-            this.emergencyCircle.style.display = 'none';
-
-            if (this.element.classList.contains('cross-sign')) {
-                this.element.classList.add('hotpink');
-            }
-        } else {
-            this.label.style.color = 'yellow';
-            this.line.style.backgroundColor = 'yellow';
-            this.line.style.opacity = '25%';
-            this.element.style.backgroundColor = 'yellow';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
-            this.emergencyCircle.style.display = 'none';
-
-            if (this.element.classList.contains('cross-sign')) {
-                this.element.classList.add('yellow');
-            }
-        }
-    }
-
-    updateColorBasedOnSSR2() {
-        const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
-        const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
-    
-        // Remove any previous color classes from cross sign and plus sign
-        this.element.classList.remove('red', 'hotpink', 'yellow');
-    
-        if (isEmergencySSR) {
-            this.label.style.color = 'red';
-            this.line.style.backgroundColor = 'red';
-            this.element.style.backgroundColor = 'red';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
-            this.emergencyCircle.style.display = 'block';
-    
-            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
-                this.element.classList.add('red');
-            }
-    
-        } else if (isMappedSSR) {
-            this.label.style.color = 'hotpink';
-            this.line.style.backgroundColor = 'hotpink';
-            this.element.style.backgroundColor = 'hotpink';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
-            this.emergencyCircle.style.display = 'none';
-    
-            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
-                this.element.classList.add('hotpink');
-            }
-    
-        } else {
-            this.label.style.color = 'yellow';
-            this.line.style.backgroundColor = 'yellow';
-            this.line.style.opacity = '25%';
-            this.element.style.backgroundColor = 'yellow';
-            this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
-            this.emergencyCircle.style.display = 'none';
-    
-            if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
-                this.element.classList.add('yellow');
-            }
-        }
-    }
-    
     updateColorBasedOnSSR() {
         const isEmergencySSR = ['7500', '7600', '7700'].includes(this.ssrCode);
         const isMappedSSR = ssrToCallsignMap[this.originalSSRCode] !== undefined;
         const isMappedPrimary = this.ssrCode === '0000' && primarySSRMapping[this.id] !== undefined;
-    
+
         // Remove any previous color classes
         this.element.classList.remove('red', 'hotpink', 'yellow');
-    
+
         if (isEmergencySSR) {
             this.label.style.color = 'red';
             this.line.style.backgroundColor = 'red';
             this.element.style.backgroundColor = 'red';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'red');
             this.emergencyCircle.style.display = 'block';
-    
+
             if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
                 this.element.classList.add('red');
             }
-    
+
         } else if (isMappedSSR || isMappedPrimary) {
             this.label.style.color = 'hotpink';
             this.line.style.backgroundColor = 'hotpink';
             this.element.style.backgroundColor = 'hotpink';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'hotpink');
             this.emergencyCircle.style.display = 'none';
-    
+
             if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
                 this.element.classList.add('hotpink');
             }
-    
+
         } else {
             this.label.style.color = 'yellow';
             this.line.style.backgroundColor = 'yellow';
@@ -713,13 +633,13 @@ class AircraftBlip {
             this.element.style.backgroundColor = 'yellow';
             this.historyDots.forEach(dot => dot.style.backgroundColor = 'yellow');
             this.emergencyCircle.style.display = 'none';
-    
+
             if (this.element.classList.contains('cross-sign') || this.element.classList.contains('plus-sign')) {
                 this.element.classList.add('yellow');
             }
         }
     }
-    
+
 
 
 
@@ -927,23 +847,29 @@ class AircraftBlip {
         this.element.addEventListener('click', () => {
             focusControlBoxInput(this.callsign);
         });
-        this.element.addEventListener('dblclick', () => {
-            //focusControlBoxInput(this.callsign);
-            hookedBlip = this;
 
-            // Optional: visual indicator
+        this.element.addEventListener('dblclick', () => {
+            // Clear previous hook visuals
             document.querySelectorAll(".aircraft-blip, .plus-sign, .cross-sign").forEach(b => b.classList.remove("hooked"));
-            this.element.classList.add("hooked");
+
+            // Hook this aircraft
+            hookedBlip = this;
             
+            // ✅ call function on hook
+            onAircraftHooked(this);
+
         });
+
 
         // Unhook aircraft when double-clicking outside a blip/plus/cross
         document.addEventListener('dblclick', (e) => {
             const isBlipOrSymbol = e.target.closest('.aircraft-blip, .plus-sign, .cross-sign');
 
             if (!isBlipOrSymbol) {
-                hookedBlip = null;
-                document.querySelectorAll(".aircraft-blip, .plus-sign, .cross-sign").forEach(b => b.classList.remove("hooked"));
+                // ✅ call function on unhook
+                onAircraftUnhooked(hookedBlip);
+
+                
             }
         });
 
