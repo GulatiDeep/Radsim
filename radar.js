@@ -21,6 +21,20 @@ const SRAdistanceMarkersButton = document.getElementById('SRAdistanceMarkers');
 const directionLine = document.getElementById('directionLine');
 const panContainer = document.getElementById('panContainer');
 
+//global alert state for inhibition of STCA and MSAW, to be loaded before STCA/MSAW.js file
+//const inhibitedAlerts = new Set(); // Global: shared between STCA and MSAW
+const inhibitedAlerts = new Map(); // key: alert key, value: timestamp
+  function isInhibited(key) {
+    const expiry = inhibitedAlerts.get(key);
+    if (!expiry) return false;
+    if (Date.now() > expiry) {
+      inhibitedAlerts.delete(key);
+      return false;
+    }
+    return true;
+  }
+
+//other global variables
 let currentHistoryDotCount = 20; // Default value (can be updated via settings)
 
 let zoomLevel = parseFloat(zoomSlider.value);

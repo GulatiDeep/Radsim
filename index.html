@@ -57,6 +57,9 @@
 
                     <canvas id="msawCanvas" width="1920" height="1080"></canvas>
                     <div id="msawRoasterBox" class="roaster-box"></div>
+
+                    <div id="alertRoasterBox" class="roaster-box"></div>
+
                 </div>
 
 
@@ -127,55 +130,55 @@
 
 
         <!-- Dialog Boxes-->
-<!-- Initial Aircraft Creation Dialog -->
-<div id="initialAircraftDialog" class="dialog" style="display:none;">
-    
-        <div class="dialog-header" id="exerciseDialogHeader">Initial Exercise Settings</div>
-        <div class="dialog-content">
+        <!-- Initial Aircraft Creation Dialog -->
+        <div id="initialAircraftDialog" class="dialog" style="display:none;">
 
-            <!-- Individual Aircraft Settings -->
-            <fieldset style="border-radius: 8px;">
-                <legend style="font-weight: bold;">Individual Aircraft</legend>
-                <div class="settings-row">
-                    <div>
-                        <label for="individualFighterInput">Fighter AC</label>
-                        <input type="number" id="individualFighterInput" min="0" max="10" value="0">
+            <div class="dialog-header" id="exerciseDialogHeader">Initial Exercise Settings</div>
+            <div class="dialog-content">
+
+                <!-- Individual Aircraft Settings -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Individual Aircraft</legend>
+                    <div class="settings-row">
+                        <div>
+                            <label for="individualFighterInput">Fighter AC</label>
+                            <input type="number" id="individualFighterInput" min="0" max="10" value="0">
+                        </div>
+                        <div>
+                            <label for="individualTransportInput">Transport AC</label>
+                            <input type="number" id="individualTransportInput" min="0" max="10" value="0">
+                        </div>
                     </div>
-                    <div>
-                        <label for="individualTransportInput">Transport AC</label>
-                        <input type="number" id="individualTransportInput" min="0" max="10" value="0">
+                </fieldset>
+
+                <!-- Formation Aircraft Settings -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Fighter Formation Aircraft</legend>
+                    <div class="settings-row">
+                        <div>
+                            <label for="fighterFormation2acInput">2AC</label>
+                            <input type="number" id="fighterFormation2acInput" min="0" max="10" value="0">
+                        </div>
+                        <div>
+                            <label for="fighterFormation3acInput">3AC</label>
+                            <input type="number" id="fighterFormation3acInput" min="0" max="10" value="0">
+                        </div>
+                        <div>
+                            <label for="fighterFormation4acInput">4AC</label>
+                            <input type="number" id="fighterFormation4acInput" min="0" max="10" value="0">
+                        </div>
                     </div>
+                </fieldset>
+
+                <!-- Create and Cancel buttons -->
+                <div class="settings-actions">
+                    <button id="createInitialAircraftButton" class="control-button">Create</button>
+                    <button id="cancelInitialAircraftButton" class="control-button">Cancel</button>
                 </div>
-            </fieldset>
 
-            <!-- Formation Aircraft Settings -->
-            <fieldset style="border-radius: 8px;">
-                <legend style="font-weight: bold;">Fighter Formation Aircraft</legend>
-                <div class="settings-row">
-                    <div>
-                        <label for="fighterFormation2acInput">2AC</label>
-                        <input type="number" id="fighterFormation2acInput" min="0" max="10" value="0">
-                    </div>
-                    <div>
-                        <label for="fighterFormation3acInput">3AC</label>
-                        <input type="number" id="fighterFormation3acInput" min="0" max="10" value="0">
-                    </div>
-                    <div>
-                        <label for="fighterFormation4acInput">4AC</label>
-                        <input type="number" id="fighterFormation4acInput" min="0" max="10" value="0">
-                    </div>
-                </div>
-            </fieldset>
-
-            <!-- Create and Cancel buttons -->
-            <div class="settings-actions">
-                <button id="createInitialAircraftButton" class="control-button">Create</button>
-                <button id="cancelInitialAircraftButton" class="control-button">Cancel</button>
             </div>
 
         </div>
-    
-</div>
 
 
         <!-- Manual Aircraft Creation Dialog -->
@@ -247,107 +250,109 @@
         </div>
 
 
-       <!-- Settings Dialog -->
-<div id="settingsDialog" class="dialog settings-dialog" style="display: none;">
-    <div class="dialog-header" id="settingsDialogHeader">Radar Settings</div>
-        <div class="dialog-content">
+        <!-- Settings Dialog -->
+        <div id="settingsDialog" class="dialog settings-dialog" style="display: none;">
+            <div class="dialog-header" id="settingsDialogHeader">Radar Settings</div>
+            <div class="dialog-content">
 
-            <!-- Blip Settings -->
-            <fieldset style="border-radius: 8px;">
-                <legend style="font-weight: bold;">Blip Settings</legend>
-                <div class="settings-row">
-                    <div>
-                        <label for="historyDotCountSelect">History Dots</label>
-                        <select id="historyDotCountSelect">
-                            <option value="0">Off</option>
-                            <option value="10">10 dots</option>
-                            <option value="15" selected>15 dots</option>
-                            <option value="20">20 dots</option>
-                            <option value="25">25 dots</option>
-                            <option value="30">30 dots</option>
-                            <option value="35">35 dots</option>
-                            <option value="40">40 dots</option>
-                            <option value="45">45 dots</option>
-                            <option value="50">50 dots</option>
-                        </select>
+                <!-- Blip Settings -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Blip Settings</legend>
+                    <div class="settings-row">
+                        <div>
+                            <label for="historyDotCountSelect">History Dots</label>
+                            <select id="historyDotCountSelect">
+                                <option value="0">Off</option>
+                                <option value="10">10 dots</option>
+                                <option value="15" selected>15 dots</option>
+                                <option value="20">20 dots</option>
+                                <option value="25">25 dots</option>
+                                <option value="30">30 dots</option>
+                                <option value="35">35 dots</option>
+                                <option value="40">40 dots</option>
+                                <option value="45">45 dots</option>
+                                <option value="50">50 dots</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="speedVectorSelect">Speed Vector</label>
+                            <select id="speedVectorSelect">
+                                <option value="0" selected>Off</option>
+                                <option value="1">1 min</option>
+                                <option value="2">2 min</option>
+                                <option value="3">3 min</option>
+                                <option value="4">4 min</option>
+                                <option value="5">5 min</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label for="speedVectorSelect">Speed Vector</label>
-                        <select id="speedVectorSelect">
-                            <option value="0" selected>Off</option>
-                            <option value="1">1 min</option>
-                            <option value="2">2 min</option>
-                            <option value="3">3 min</option>
-                            <option value="4">4 min</option>
-                            <option value="5">5 min</option>
-                        </select>
+                </fieldset>
+                
+                <!-- STCA Settings -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">STCA Settings</legend>
+                    <div class="settings-row">
+                        <div>
+                            <label for="horizontalSeparationInput">Horizontal (NM)</label>
+                            <input type="number" id="horizontalSeparationInput" placeholder="H Sep (NM)" value="8">
+                        </div>
+                        <div>
+                            <label for="verticalSeparationInput">Vertical (ft)</label>
+                            <input type="number" id="verticalSeparationInput" placeholder="V Sep (ft)" value="1000">
+                        </div>
                     </div>
-                </div>
-            </fieldset>
+                    <div class="settings-row">
+                        <div>
+                            <label for="lookaheadSTCAInput">Time (sec)</label>
+                            <input type="number" id="lookaheadSTCAInput" placeholder="Time (sec)" value="120">
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <label for="stcaToggle">Enable STCA</label>
+                            <input type="checkbox" id="stcaToggle" checked>
 
-            <!-- STCA Settings -->
-            <fieldset style="border-radius: 8px;">
-                <legend style="font-weight: bold;">STCA Settings</legend>
-                <div class="settings-row">
-                    <div>
-                        <label for="horizontalSeparationInput">Horizontal (NM)</label>
-                        <input type="number" id="horizontalSeparationInput" placeholder="H Sep (NM)" value="8">
+                        </div>
                     </div>
-                    <div>
-                        <label for="verticalSeparationInput">Vertical (ft)</label>
-                        <input type="number" id="verticalSeparationInput" placeholder="V Sep (ft)" value="1000">
-                    </div>
-                </div>
-                <div class="settings-row">
-                    <div>
-                        <label for="lookaheadSTCAInput">Time (sec)</label>
-                        <input type="number" id="lookaheadSTCAInput" placeholder="Time (sec)" value="120">
-                    </div>
-                    <div class="checkbox-wrapper">
-                        <label for="stcaToggle">Enable STCA</label>
-                        <input type="checkbox" id="stcaToggle" checked>
-                        
-                    </div>
-                </div>
-            </fieldset>
+                </fieldset>
 
-            <!-- MSAW Settings -->
-            <fieldset>
-                <legend>MSAW Settings</legend>
-                <div class="settings-row">
-                  <div>
-                    <label for="minimumAltitudeInput">Min Safe Alt (ft)</label>
-                    <input type="number" id="minimumAltitudeInput" value="2000">
-                  </div>
-                  <div>
-                    <label for="lookaheadMSAWInput">Time (sec)</label>
-                    <input type="number" id="lookaheadMSAWInput" value="120">
-                  </div>
-                </div>
-                <div class="settings-row">
-                  <div class="checkbox-wrapper">
-                    <input type="checkbox" id="msawToggle" checked>
-                    <label for="msawToggle">Enable MSAW</label>
-                  </div>
-                </div>
-              </fieldset>
-              
+                <!-- MSAW Settings -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">MSAW Settings</legend>
+                    <div class="settings-row">
+                        <div>
+                            <label for="minimumAltitudeInput">Min Safe Alt (ft)</label>
+                            <input type="number" id="minimumAltitudeInput" value="2000">
+                        </div>
+                        <div>
+                            <label>
+                                <p></p>
+                            </label>
 
-            <!-- Action Buttons -->
-            <div class="settings-actions">
-                <button onclick="applySettings()">Apply</button>
-                <button onclick="toggleSettingsDialog()">Close</button>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+
+                        <div>
+                            <label for="lookaheadMSAWInput">Time (sec)</label>
+                            <input type="number" id="lookaheadMSAWInput" placeholder="Time (sec)" value="120">
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <label for="msawToggle">Enable MSAW</label>
+                            <input type="checkbox" id="msawToggle" checked>
+                        </div>
+
+                    </div>
+                </fieldset>
+
+
+                <!-- Action Buttons -->
+                <div class="settings-actions">
+                    <button onclick="applySettings()">Apply</button>
+                    <button onclick="toggleSettingsDialog()">Close</button>
+                </div>
+
             </div>
 
         </div>
-    
-</div>
-
-
-
-
-
-
 
 
         <!-- Help Dialog -->

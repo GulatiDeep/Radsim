@@ -672,6 +672,11 @@ html {
     color: red;
 }
 
+.roaster-blue {
+    color: lightblue;
+}
+
+
 /* 🔴 MSAW Blinking Border Around Blip */
 /* Yellow blinking border for predicted MSAW */
 @keyframes msaw-blink {

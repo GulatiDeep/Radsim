@@ -516,19 +516,21 @@ class AircraftBlip {
 
         // labelContent += `${level} ${arrow}<br>N${speed}`;
 
-        // Add Short Term Conflict Alert (STCA) status if active
+        // STCA Alert
         if (this.currentSTCA === 'predicted') {
             labelContent += `<br><span style="color: yellow;">PRED STCA</span>`;
         } else if (this.currentSTCA === 'actual') {
             labelContent += `<br><span style="color: red;">ACT STCA</span>`;
         }
 
-        // Add Minimum Safe Altitude Warning (MSAW) status if active
+        // MSAW Alert
         if (this.currentMSAW === 'predicted') {
             labelContent += `<br><span style="color: yellow;">PRED MSAW</span>`;
         } else if (this.currentMSAW === 'actual') {
             labelContent += `<br><span style="color: red;">ACT MSAW</span>`;
         }
+
+
 
         // Finally, set the label HTML content for this aircraft
         this.label.innerHTML = labelContent;
@@ -854,7 +856,7 @@ class AircraftBlip {
 
             // Hook this aircraft
             hookedBlip = this;
-            
+
             // ✅ call function on hook
             onAircraftHooked(this);
 
@@ -869,7 +871,7 @@ class AircraftBlip {
                 // ✅ call function on unhook
                 onAircraftUnhooked(hookedBlip);
 
-                
+
             }
         });
 

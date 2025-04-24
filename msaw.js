@@ -45,21 +45,34 @@ function runMSAWCheck() {
 
     // Actual infringement check — below MSA by 200 ft or more
     aircraftBlips.forEach(blip => {
+        const key = `MSAW|${blip.callsign}`;
+        if (inhibitedAlerts.has(key)) return; // skip processing but still show blue msg
+
         if (blip.altitude <= (minimumSafeAltitudeFT - 200)) {
             newActual.add(blip.callsign);
             triggerActualMSAW(blip);
+            updateMSAWRoaster(blip.callsign, "actual");
         }
     });
+
 
     // Predicted infringement check within lookahead time
     for (let t = 0; t <= lookaheadSecondsMSAW; t += 10) {
         aircraftBlips.forEach(blip => {
             const predictedAlt = positionCache[blip.callsign][t].altitude;
+            if (isInhibited(`MSAW|${blip.callsign}`)) return;
+
+
             if (predictedAlt <= (minimumSafeAltitudeFT - 200)) {
                 if (!newActual.has(blip.callsign)) {
-                    newPredicted.add(blip.callsign);
-                    triggerPredictedMSAW(blip);
+                    const key = `MSAW|${blip.callsign}`;
+                    if (!inhibitedAlerts.has(key)) {
+                        newPredicted.add(blip.callsign);
+                        triggerPredictedMSAW(blip);
+                    }
+                    updateMSAWRoaster(blip.callsign, "predicted"); // show roaster in yellow or blue
                 }
+
             }
         });
     }
@@ -76,11 +89,21 @@ function runMSAWCheck() {
         // If not in actual or predicted conflict
         if (!newActual.has(blip.callsign) && !newPredicted.has(blip.callsign)) {
             // Clear only if the aircraft has climbed back to the MSA
+            const key = `MSAW|${blip.callsign}`;
             if (blip.altitude >= minimumSafeAltitudeFT) {
                 clearMSAW(blip);
+                if (!inhibitedAlerts.has(key)) {
+                    removeMSAWRoaster(blip.callsign);
+                }
             }
+
         }
     });
+
+    const roasterBox = document.getElementById("alertRoasterBox");
+    roasterBox.style.display = roasterBox.children.length > 0 ? "block" : "none";
+
+
 }
 
 
@@ -95,7 +118,7 @@ function triggerPredictedMSAW(blip) {
     }
     blip.currentMSAW = "predicted";
     blip.updateLabelInfo();
-    //playBeepSound();
+    playBeepSound();
 }
 
 
@@ -147,5 +170,61 @@ function playBeepSound() {
 
 
 setInterval(runMSAWCheck, 1000);
+
+const lastMSAWTypeMap = new Map();
+
+function updateMSAWRoaster(callsign, type) {
+    const box = document.getElementById("alertRoasterBox");
+    const key = `MSAW|${callsign}`;
+    const id = `roaster-${key.replace("|", "-")}`;
+    let entry = document.getElementById(id);
+
+    const prevType = lastMSAWTypeMap.get(key);
+    if (prevType === "actual" || type === "actual") {
+        lastMSAWTypeMap.set(key, "actual");
+        type = "actual";
+    }
+
+    const isInhibitedNow = isInhibited(key);
+    const newText = `${type === "actual" ? "Actual MSAW" : "Predicted MSAW"}: ${callsign}`;
+    const newClass = `roaster-entry ${isInhibitedNow ? "roaster-blue" : (type === "actual" ? "roaster-red" : "roaster-yellow")}`;
+
+    if (!entry) {
+        entry = document.createElement("div");
+        entry.id = id;
+        entry.textContent = newText;
+        entry.className = newClass;
+        entry.ondblclick = () => {
+            if (!isInhibited(key)) {
+                inhibitedAlerts.set(key, Date.now() + 60000);
+                clearMSAWByCallsign(callsign);
+                updateMSAWRoaster(callsign, lastMSAWTypeMap.get(key) || type);
+            }
+        };
+        box.appendChild(entry);
+    } else if (entry.textContent !== newText || entry.className !== newClass) {
+    entry.textContent = newText;
+    entry.className = newClass;
+    //console.log("Updated MSAW Roaster", key);
+}
+
+}
+
+
+
+
+
+
+function removeMSAWRoaster(callsign) {
+    const key = `MSAW|${callsign}`;
+    const entry = document.getElementById(`roaster-${key.replace("|", "-")}`);
+    if (entry) entry.remove();
+}
+
+function clearMSAWByCallsign(callsign) {
+    const blip = aircraftBlips.find(b => b.callsign === callsign);
+    if (blip) clearMSAW(blip);
+}
+
 
 

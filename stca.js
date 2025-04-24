@@ -5,6 +5,8 @@ let stcaEnabled = true;
 const predictedConflicts = new Set();
 const actualConflicts = new Set();
 
+
+
 // Separation criteria (STCA thresholds)
 let horizontalSeparationNM = 8;      // in nautical miles
 let verticalSeparationFT = 1000;     // in feet
@@ -204,6 +206,7 @@ function triggerPredictedSTCA(a, b) {
             blip.stcaHalo.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; // Yellow halo for predicted conflict
             blip.currentSTCA = 'predicted'; // Update state
             blip.updateLabelInfo();         // Refresh label with STCA status
+            playBeepSound();
         }
     });
 }
@@ -225,6 +228,7 @@ function triggerActualSTCA(a, b) {
             blip.stcaHalo.style.backgroundColor = 'rgba(255, 0, 0, 0.5)'; // Red halo for actual conflict
             blip.currentSTCA = 'actual'; // Update state (takes precedence)
             blip.updateLabelInfo();      // Refresh label with STCA status
+            playBeepSound(); //play an alert sound for all actual STCA
         }
     });
 }
@@ -314,34 +318,58 @@ function drawSTCALines() {
  * @param {Object} a - First aircraft blip
  * @param {Object} b - Second aircraft blip
  */
+
+
+// Unified Roaster Update Function
+// Track last alert type per key (outside function)
+const lastSTCATypeMap = new Map();
+
+
 function updateRoaster(key, type, a, b) {
-    // Get the container element for the STCA roaster display
-    const box = document.getElementById("stcaRoasterBox");
+    const box = document.getElementById("alertRoasterBox");
+    const id = `roaster-${key.replace("|", "-")}`;
+    let entry = document.getElementById(id);
 
-    // Try to find an existing entry for this conflict pair
-    let entry = document.getElementById(`roaster-${key.replace("|", "-")}`);
-
-    // Calculate conflict details (range, bearing, CPA time) between the two aircraft
-    const { range, bearing, cpaTime } = calculateConflictDetails(a, b);
-
-    // Determine the color class based on conflict type (red for actual, yellow for predicted)
-    const colorClass = type === "actual" ? "roaster-red" : "roaster-yellow";
-
-    // Construct the text label to display in the roaster
-    const label = `${type === "actual" ? "Actual STCA" : "Predicted STCA"}: ${a.callsign} ↔ ${b.callsign} | ${range} NM / ${bearing}° | CPA in ${cpaTime}`;
-
-    // If no existing entry for this conflict, create a new one
-    if (!entry) {
-        entry = document.createElement("div"); // Create a new div element
-        entry.id = `roaster-${key.replace("|", "-")}`; // Unique ID based on conflict key
-        entry.className = `roaster-entry ${colorClass}`; // Apply appropriate color class
-        box.appendChild(entry); // Add it to the roaster box
+    const prevType = lastSTCATypeMap.get(key);
+    if (prevType === "actual" || type === "actual") {
+        lastSTCATypeMap.set(key, "actual");
+        type = "actual";
     }
 
-    // Update the text content and style class for the entry (for both new and existing)
-    entry.textContent = label;
-    entry.className = `roaster-entry ${colorClass}`;
+    const { range, bearing, cpaTime } = calculateConflictDetails(a, b);
+    const isInhibitedNow = isInhibited(key);
+    const newText = `${type === "actual" ? "Actual STCA" : "Predicted STCA"}: ${a.callsign} ↔ ${b.callsign} | ${range} NM / ${bearing}° | CPA in ${cpaTime}`;
+    const newClass = `roaster-entry ${isInhibitedNow ? "roaster-blue" : (type === "actual" ? "roaster-red" : "roaster-yellow")}`;
+
+    if (!entry) {
+        entry = document.createElement("div");
+        entry.id = id;
+        entry.textContent = newText;
+        entry.className = newClass;
+        entry.ondblclick = () => {
+            if (!isInhibited(key)) {
+                inhibitedAlerts.set(key, Date.now() + 60000);
+                clearSTCA(a, b);
+                updateRoaster(key, lastSTCATypeMap.get(key) || type, a, b);
+            }
+        };
+        box.appendChild(entry);
+    } else if (entry.textContent !== newText || entry.className !== newClass) {
+        entry.textContent = newText;
+        entry.className = newClass;
+        //console.log("Updated STCA Roaster", key);
+    }
+
 }
+
+
+
+
+function removeRoaster(key) {
+    const entry = document.getElementById(`roaster-${key.replace("|", "-")}`);
+    if (entry) entry.remove();
+}
+
 
 
 
@@ -351,7 +379,7 @@ function updateRoaster(key, type, a, b) {
  * Runs once every second via setInterval — detects both actual and predicted conflicts,
  * manages conflict sets, updates visuals (halos, roaster), and draws conflict lines.
  */
-function runSTCACheck() {
+function runSTCACheck1() {
     // Exit early if STCA system is currently disabled
     if (!stcaEnabled) return;
 
@@ -387,6 +415,8 @@ function runSTCACheck() {
             if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) {
                 continue; // Both aircraft are in the same formation, skip conflict check
             }
+
+            if (inhibitedAlerts.has(key)) continue;
 
             // If actual conflict detected — add to actual set and trigger visual + roaster update
             if (checkActualConflict(a, b)) {
@@ -450,18 +480,115 @@ function runSTCACheck() {
     // ========================================
     // Show or hide the STCA Roaster box as needed
     // ========================================
-    const roasterBox = document.getElementById("stcaRoasterBox");
-    if (newActual.size + newPredicted.size > 0) {
-        roasterBox.style.display = "block"; // Show if any conflicts exist
-    } else {
-        roasterBox.style.display = "none";  // Hide if no conflicts
-    }
+
+    // const roasterBox = document.getElementById("alertRoasterBox");
+    // roasterBox.style.display = (newActual.size + newPredicted.size > 0 || actualMSAWConflicts.size + predictedMSAWConflicts.size > 0) ? "block" : "none";
+    const roasterBox = document.getElementById("alertRoasterBox");
+    roasterBox.style.display = roasterBox.children.length > 0 ? "block" : "none";
+
+
+
 
     // =============================
     // Draw updated STCA conflict lines
     // =============================
     drawSTCALines();
 }
+
+function runSTCACheck() {
+    if (!stcaEnabled) return;
+
+    aircraftBlips.forEach(blip => {
+        blip.currentSTCA = "none";
+    });
+
+    const newPredicted = new Set();
+    const newActual = new Set();
+
+    const positionCache = {};
+    aircraftBlips.forEach(blip => {
+        positionCache[blip.callsign] = {};
+        for (let t = 0; t <= lookaheadSecondsSTCA; t += 10) {
+            positionCache[blip.callsign][t] = predictPosition(blip, t);
+        }
+    });
+
+    // ===== Check for actual conflicts =====
+    for (let i = 0; i < aircraftBlips.length; i++) {
+        for (let j = i + 1; j < aircraftBlips.length; j++) {
+            const a = aircraftBlips[i];
+            const b = aircraftBlips[j];
+            const key = `${a.callsign}|${b.callsign}`;
+
+            if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) continue;
+
+            if (isInhibited(key)) continue;
+
+            if (checkActualConflict(a, b)) {
+                newActual.add(key);
+                triggerActualSTCA(a, b);
+                updateRoaster(key, 'actual', a, b);
+            }
+        }
+    }
+
+    // ===== Check for predicted conflicts =====
+    for (let t = 0; t <= lookaheadSecondsSTCA; t += 10) {
+        const conflictsAtTime = checkPredictedConflictsAtTime(t, positionCache);
+
+        conflictsAtTime.forEach(({ a, b }) => {
+            const key = `${a.callsign}|${b.callsign}`;
+
+            if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) return;
+
+            if (!newActual.has(key)) {
+                if (!isInhibited(key)) {
+                    newPredicted.add(key);
+                    triggerPredictedSTCA(a, b);
+                }
+                updateRoaster(key, 'predicted', a, b); // Always update message color
+            }
+        });
+    }
+
+    // ===== Update conflict sets =====
+    predictedConflicts.clear();
+    newPredicted.forEach(key => predictedConflicts.add(key));
+
+    actualConflicts.clear();
+    newActual.forEach(key => actualConflicts.add(key));
+
+    // ===== Clear visuals & remove roaster for resolved conflicts =====
+    for (let i = 0; i < aircraftBlips.length; i++) {
+        for (let j = i + 1; j < aircraftBlips.length; j++) {
+            const a = aircraftBlips[i];
+            const b = aircraftBlips[j];
+            const key = `${a.callsign}|${b.callsign}`;
+
+            const isStillInPredicted = newPredicted.has(key);
+            const isStillInActual = newActual.has(key);
+
+            if (!isStillInActual && !isStillInPredicted) {
+                clearSTCA(a, b);
+
+                if (!isInhibited(key)) {
+                    removeRoaster(key);
+                }
+            }
+        }
+    }
+
+    // ===== Unified roaster display toggle =====
+    const roasterBox = document.getElementById("alertRoasterBox");
+    roasterBox.style.display =
+        (newActual.size + newPredicted.size > 0 || actualMSAWConflicts.size + predictedMSAWConflicts.size > 0)
+            ? "block"
+            : "none";
+
+    // ===== Draw conflict lines =====
+    drawSTCALines();
+}
+
 
 /**
  * Clears STCA status and visuals for a pair of aircraft if no conflicts remain.
@@ -501,10 +628,10 @@ function clearSTCA(a, b) {
  *
  * @param {string} key - The conflict pair key in the form "CALLSIGN1|CALLSIGN2"
  */
-function removeRoaster(key) {
+function removeRoaster1(key) {
     // Find the existing roaster entry div by its unique ID
     const entry = document.getElementById(`roaster-${key.replace("|", "-")}`);
-    
+
     // If it exists, remove it from the DOM
     if (entry) entry.remove();
 }
@@ -570,7 +697,5 @@ function cleanUpConflictsForDeletedBlip(deletedCallsign) {
  * updating visuals, STCA roaster entries, and radar lines.
  */
 setInterval(runSTCACheck, 1000);
-
-
 
 
