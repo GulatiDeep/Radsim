@@ -33,6 +33,9 @@ function applySettings() {
         });
     }
 
+    //to set the transition level
+    transitionLevel = parseInt(document.getElementById('transitionLevelSelect').value);
+    
     // --- Update STCA Toggle ---
     stcaEnabled = document.getElementById("stcaToggle").checked;
 
@@ -46,35 +49,70 @@ function applySettings() {
     const lookaheadSTCAInput = parseFloat(document.getElementById("lookaheadSTCAInput").value);
     if (!isNaN(lookaheadSTCAInput)) lookaheadSecondsSTCA = lookaheadSTCAInput;
 
+    //Update excluded volumes
+    stcaExcludedVolume.horizontalRadiusNM = parseFloat(document.getElementById('stcaExcludedHorizontalInput').value);
+    stcaExcludedVolume.verticalCeilingFT = parseFloat(document.getElementById('stcaExcludedVerticalInput').value);
+
     // --- MSAW Settings ---
     msawEnabled = document.getElementById("msawToggle").checked;
+
     const msaInput = parseFloat(document.getElementById("minimumAltitudeInput").value);
     if (!isNaN(msaInput)) minimumSafeAltitudeFT = msaInput;
 
     const lookaheadMSAWInputValue = parseFloat(document.getElementById("lookaheadMSAWInput").value);
     if (!isNaN(lookaheadMSAWInputValue)) lookaheadSecondsMSAW = lookaheadMSAWInputValue;
 
+    //Update excluded volumes
+    msawExcludedVolume.horizontalRadiusNM = parseFloat(document.getElementById('msawExcludedHorizontalInput').value);
+    msawExcludedVolume.verticalCeilingFT = parseFloat(document.getElementById('msawExcludedVerticalInput').value);
+
+    createRangeRings(); // redraw full rings + zones based on new settings
 
     // --- Clear STCA alerts if disabled ---
     if (!stcaEnabled) {
         aircraftBlips.forEach(blip => {
             if (blip.stcaHalo) blip.stcaHalo.style.display = 'none';
+            blip.currentSTCA = "none"; // 💥 Clear STCA state
+            blip.updateLabelInfo();    // 💥 Update label to remove STCA info
         });
-
+    
         predictedConflicts.clear();
         actualConflicts.clear();
-
+    
         const canvas = document.getElementById("stcaCanvas");
         if (canvas) canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    
+        [...document.querySelectorAll("#alertRoasterBox .roaster-entry")].forEach(entry => {
+            if (entry.textContent.includes("STCA")) {
+                entry.remove();
+            }
+        });
     }
+    
 
     // Clear MSAW alerts if disabled
     if (!msawEnabled) {
         aircraftBlips.forEach(blip => {
             if (blip.msawHalo) blip.msawHalo.style.display = 'none';
+            blip.currentMSAW = "none"; // 💥 Clear MSAW state
+            blip.updateLabelInfo();    // 💥 Update label to remove MSAW info
         });
+    
         predictedMSAWConflicts.clear();
         actualMSAWConflicts.clear();
+    
+        [...document.querySelectorAll("#alertRoasterBox .roaster-entry")].forEach(entry => {
+            if (entry.textContent.includes("MSAW")) {
+                entry.remove();
+            }
+        });
+    }
+    
+
+    // 🔥 After clearing, if no entries left, hide the box
+    const box = document.getElementById("alertRoasterBox");
+    if (!box.querySelector(".roaster-entry")) {
+        box.style.display = "none";
     }
 
     // --- Update Status Bar ---

@@ -34,6 +34,24 @@ const inhibitedAlerts = new Map(); // key: alert key, value: timestamp
     return true;
   }
 
+
+// ==============================
+// Excluded Airspace Settings
+// ==============================
+
+//STCA Airspace Volume Settings
+let stcaExcludedVolume = {
+    horizontalRadiusNM: 10,
+    verticalCeilingFT: 2000
+};
+
+//MSAW Airspace Volume Settings
+let msawExcludedVolume = {
+    horizontalRadiusNM: 10,
+    verticalCeilingFT: 20000
+};
+
+
 //other global variables
 let currentHistoryDotCount = 20; // Default value (can be updated via settings)
 
@@ -79,10 +97,63 @@ function createRangeRings() {
 
         rangeRingsContainer.appendChild(ring);
     }
+
+    // to draw excluded zone after rings
+    createExcludedZones(); 
+
+    
     // Create and position the runway and direction line
     drawRunway();
 }
 
+
+function createExcludedZones() {
+    // Remove old zones if they exist
+    const oldSTCA = document.getElementById('excludedZoneSTCA');
+    const oldMSAW = document.getElementById('excludedZoneMSAW');
+    if (oldSTCA) oldSTCA.remove();
+    if (oldMSAW) oldMSAW.remove();
+
+    const rect = radarScope.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const pixelsPerNM = zoomLevel; // Same as your scale
+
+    // STCA Zone
+    if (document.getElementById('stcaToggle').checked) {
+        const stcaZone = document.createElement('div');
+        stcaZone.id = 'excludedZoneSTCA';
+        stcaZone.className = 'excluded-zone-stca';
+
+        const radiusPixels = stcaExcludedVolume.horizontalRadiusNM * pixelsPerNM;
+        const diameter = radiusPixels * 2;
+
+        stcaZone.style.width = `${diameter}px`;
+        stcaZone.style.height = `${diameter}px`;
+        stcaZone.style.left = `${centerX - radiusPixels}px`;
+        stcaZone.style.top = `${centerY - radiusPixels}px`;
+
+        rangeRingsContainer.appendChild(stcaZone);
+    }
+
+    // MSAW Zone
+    if (document.getElementById('msawToggle').checked) {
+        const msawZone = document.createElement('div');
+        msawZone.id = 'excludedZoneMSAW';
+        msawZone.className = 'excluded-zone-msaw';
+
+        const radiusPixels = msawExcludedVolume.horizontalRadiusNM * pixelsPerNM;
+        const diameter = radiusPixels * 2;
+
+        msawZone.style.width = `${diameter}px`;
+        msawZone.style.height = `${diameter}px`;
+        msawZone.style.left = `${centerX - radiusPixels}px`;
+        msawZone.style.top = `${centerY - radiusPixels}px`;
+
+        rangeRingsContainer.appendChild(msawZone);
+    }
+}
 
 
 

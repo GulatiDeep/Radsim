@@ -15,6 +15,8 @@ let clickedPosition = { x: 0, y: 0 };
 //let historyDotsVisible = true; // Initialize the flag to track the visibility state of the history dots
 let labelsVisible = true; // //Initialize the flag to track the visibility state of the labels
 
+let transitionLevel = 60; // default transition level i.e. FL 060
+
 let speedVectorMinutes = 0; // default value; can be set by user (0-5)
 
 let allAircraftCallsigns = []; //to initialise the list of callsigns array
@@ -54,6 +56,11 @@ document.getElementById('label').classList.add(labelsVisible ? 'active' : 'inact
 // Start the heading update loop
 updateHeadingPeriodically();
 
+// Call both functions at the start
+updateAltitudeEverySecond();  // Start updating altitude every second
+updateAltitudeEveryFourSeconds();  // Start updating altitudeEveryFourSeconds every 4 seconds
+
+
 // Start the movement update loop
 moveAircraftBlips();
 
@@ -78,6 +85,7 @@ class AircraftBlip {
         this.speed = speed;
         this.targetSpeed = speed;
         this.altitude = altitude || 10000;
+        this.altitudeEveryFourSeconds = this.altitude;
         this.targetAltitude = this.altitude;
         this.verticalClimbDescendRate = 3000;
         this.speedChangeRate = 10;
@@ -458,10 +466,10 @@ class AircraftBlip {
 
     updateLabelInfo() {
         // Calculate raw level by dividing altitude in feet by 100
-        const rawLevel = Math.round(this.altitude / 100);
+        const rawLevel = Math.round(this.altitudeEveryFourSeconds / 100);
 
-        // Determine if aircraft is above Transition Level (FL60 or 6000 ft)
-        const isAboveTL = this.altitude >= 6000;
+        // Determine if aircraft is above Transition Level
+        const isAboveTL = this.altitude >= (transitionLevel * 100) ;
 
         // Format level: 'F' prefix for flight levels, 'A' for altitudes below transition level
         const level = isAboveTL ? `F${rawLevel}` : `A${rawLevel}`;
@@ -741,42 +749,43 @@ class AircraftBlip {
 
     // Update the blip's position and handle turning gradually
     move(headingOnly = false) {
-        const speedMetersPerSecond = (this.speed / zoomLevel) * 0.514444;
-        const distancePerUpdateMeters = speedMetersPerSecond * (updateInterval / 1000);
-        const distancePerUpdateNauticalMiles = distancePerUpdateMeters / 1852;
+        // Convert speed to meters per second and calculate the distance moved per update in meters
+        const speedMetersPerSecond = (this.speed / zoomLevel) * 0.514444; // Convert knots to meters per second
+        const distancePerUpdateMeters = speedMetersPerSecond * (updateInterval / 1000); // Calculate distance for each update (in meters)
+        const distancePerUpdateNauticalMiles = distancePerUpdateMeters / 1852; // Convert meters to nautical miles
 
-        const now = performance.now(); // High-resolution timestamp in milliseconds
+        const now = performance.now(); // Get high-resolution timestamp in milliseconds
         if (!this.lastUpdate) this.lastUpdate = now; // Initialize timestamp on first call
 
         const elapsedSeconds = (now - this.lastUpdate) / 1000; // Calculate elapsed time in seconds
         this.lastUpdate = now; // Update the last timestamp
 
-        if (isPaused) return;  // Stop any movement or state updates if paused
+        if (isPaused) return;  // If the system is paused, stop any movement or state updates
 
-        // Handle orbit left
+        // Handle orbiting left
         if (this.orbitLeft) {
-            this.heading = (this.heading - this.headingChangeRate * (elapsedSeconds) + 360) % 360;
+            this.heading = (this.heading - this.headingChangeRate * (elapsedSeconds) + 360) % 360; // Update heading for orbit left
         }
 
-        // Handle orbit right
+        // Handle orbiting right
         if (this.orbitRight) {
-            this.heading = (this.heading + this.headingChangeRate * (elapsedSeconds)) % 360;
+            this.heading = (this.heading + this.headingChangeRate * (elapsedSeconds)) % 360; // Update heading for orbit right
         }
 
         // Handle gradual heading change if not orbiting
         if (!this.orbitLeft && !this.orbitRight && this.heading !== this.targetHeading) {
-            let headingDiff = (this.targetHeading - this.heading + 360) % 360;
-            const turnRate = this.headingChangeRate * (elapsedSeconds);
+            let headingDiff = (this.targetHeading - this.heading + 360) % 360; // Calculate heading difference (normalized)
+            const turnRate = this.headingChangeRate * (elapsedSeconds); // Determine how much the heading changes per update
 
-            if (this.turnRight === true) {
-                if (headingDiff > 180) {
+            if (this.turnRight === true) { // Turning right
+                if (headingDiff > 180) { // If the shortest path is turning left
                     headingDiff = 360 - headingDiff;
                     this.heading = (this.heading + turnRate) % 360;
                 } else {
                     this.heading = (this.heading + turnRate) % 360;
                 }
-            } else if (this.turnRight === false) {
-                if (headingDiff <= 180) {
+            } else if (this.turnRight === false) { // Turning left
+                if (headingDiff <= 180) { // If the shortest path is turning right
                     headingDiff = 360 - headingDiff;
                     this.heading = (this.heading - turnRate + 360) % 360;
                 } else {
@@ -784,72 +793,60 @@ class AircraftBlip {
                 }
             }
 
-            this.heading = (this.heading + 360) % 360;
+            this.heading = (this.heading + 360) % 360; // Normalize the heading to ensure it's between 0 and 360 degrees
 
+            // Snap the heading to the target heading if close enough
             if (Math.abs(this.heading - this.targetHeading) <= turnRate) {
-                this.heading = this.targetHeading;  // Snap to the target heading
+                this.heading = this.targetHeading;
             }
         }
 
-        // Update heading in control box every 1 second
+        // Update control box with new heading information every second
         updateControlBox(this);
 
-        // If headingOnly is true, don't update the position on the radar
+        // If only heading should be updated, stop the function here
         if (headingOnly) {
             return;
         }
 
-        // Update position based on the current heading (every 4 seconds)
-        const angleRad = (this.heading - 90) * Math.PI / 180;
-        const deltaX = distancePerUpdateNauticalMiles * Math.cos(angleRad);
-        const deltaY = distancePerUpdateNauticalMiles * Math.sin(angleRad);
+        // Update position based on current heading
+        const angleRad = (this.heading - 90) * Math.PI / 180; // Convert heading to radians
+        const deltaX = distancePerUpdateNauticalMiles * Math.cos(angleRad); // Calculate horizontal movement (X axis)
+        const deltaY = distancePerUpdateNauticalMiles * Math.sin(angleRad); // Calculate vertical movement (Y axis)
 
-        this.position.x += deltaX * zoomLevel;
-        this.position.y -= deltaY * zoomLevel;
+        this.position.x += deltaX * zoomLevel; // Update X position, scaled by zoom level
+        this.position.y -= deltaY * zoomLevel; // Update Y position, scaled by zoom level
 
-        // Adjust altitude gradually towards the targetAltitude
-        const verticalChangePerSecond = this.verticalClimbDescendRate / 60;  // Feet per second
-        const verticalChangePerUpdate = verticalChangePerSecond * (updateInterval / 1000);  // Change per update
+        // Gradually adjust altitude towards the target altitude
+        // That function is written separately out of move() function 
 
-        if (this.altitude !== this.targetAltitude) {
-            const altitudeDiff = this.targetAltitude - this.altitude;
-            if (Math.abs(altitudeDiff) <= verticalChangePerUpdate) {
-                this.altitude = this.targetAltitude;  // Snap to target altitude if close enough
-            } else {
-                this.altitude += Math.sign(altitudeDiff) * verticalChangePerUpdate;  // Gradual altitude change
-            }
 
-            // Update control box and label
-            updateControlBox(this);
-            this.updateLabelPosition();
-        }
 
-        // Adjust speed gradually towards the targetSpeed
-        const speedChangePerUpdate = this.speedChangeRate * (updateInterval / 1000);  // Change per update
+        // Gradually adjust speed towards the target speed
+        const speedChangePerUpdate = this.speedChangeRate * (updateInterval / 1000); // Calculate speed change per update
 
         if (this.speed !== this.targetSpeed) {
-            const speedDiff = this.targetSpeed - this.speed;
+            const speedDiff = this.targetSpeed - this.speed; // Calculate speed difference
             if (Math.abs(speedDiff) <= speedChangePerUpdate) {
-                this.speed = this.targetSpeed;  // Snap to target speed if close enough
+                this.speed = this.targetSpeed; // Snap to target speed if close enough
             } else {
-                this.speed += Math.sign(speedDiff) * speedChangePerUpdate;  // Gradual speed change
+                this.speed += Math.sign(speedDiff) * speedChangePerUpdate; // Gradual speed change
             }
 
-            // Update control box and label
+            // Update control box and label for speed
             updateControlBox(this);
             this.updateLabelPosition();
         }
 
-        // Update the blip's position on the radar
+        // Update the blip's position on the radar to reflect changes
         this.updateBlipPosition();
 
-
-        // For shifting the focus on associated input box for command to double-clicked aircraft blip and hooking the selected aircraft
-        // On single click → focus input
+        // Event listener for single click on the blip — focus on the input box for the selected aircraft
         this.element.addEventListener('click', () => {
             focusControlBoxInput(this.callsign);
         });
 
+        // Event listener for double-click on the blip — hook the selected aircraft
         this.element.addEventListener('dblclick', () => {
             // Clear previous hook visuals
             document.querySelectorAll(".aircraft-blip, .plus-sign, .cross-sign").forEach(b => b.classList.remove("hooked"));
@@ -857,27 +854,20 @@ class AircraftBlip {
             // Hook this aircraft
             hookedBlip = this;
 
-            // ✅ call function on hook
+            // ✅ Call function to handle the aircraft being hooked
             onAircraftHooked(this);
-
         });
 
-
-        // Unhook aircraft when double-clicking outside a blip/plus/cross
+        // Event listener for double-click anywhere on the document — unhook aircraft if clicked outside
         document.addEventListener('dblclick', (e) => {
-            const isBlipOrSymbol = e.target.closest('.aircraft-blip, .plus-sign, .cross-sign');
+            const isBlipOrSymbol = e.target.closest('.aircraft-blip, .plus-sign, .cross-sign'); // Check if clicked element is a blip or hook symbol
 
             if (!isBlipOrSymbol) {
-                // ✅ call function on unhook
+                // ✅ Call function to handle the aircraft being unhooked
                 onAircraftUnhooked(hookedBlip);
-
-
             }
         });
-
-
     }
-
 
 
     // Function to start orbiting left

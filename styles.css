@@ -281,6 +281,25 @@ html {
     position: absolute;
 }
 
+/* For drawing MSAW STCA exlusion area */
+.excluded-zone-msaw {
+    position: absolute;
+    border: 2px dashed rgba(0, 150, 255, 0.5); /* Light Blue dashed border */
+    background-color: rgba(0, 150, 255, 0.05); /* Very light blue inside */
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.excluded-zone-stca {
+    position: absolute;
+    border: 2px dashed rgba(255, 0, 0, 0.5); /* Light Red dashed border */
+    background-color: rgba(255, 0, 0, 0.05); /* Very light red inside */
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+
+
 /* Permanent Marker lines originating from the center of the radar scope */
 
 /* North line */
@@ -676,6 +695,12 @@ html {
     color: lightblue;
 }
 
+/* Add this to your CSS */
+#alertRoasterBox.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
 
 /* 🔴 MSAW Blinking Border Around Blip */
 /* Yellow blinking border for predicted MSAW */
@@ -1035,10 +1060,23 @@ html {
     margin: 0;
     padding: 0;
 }
+
+.fieldsets-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 10px; /* space between STCA and MSAW */
+    width: 100%;
+    justify-content: space-between;
+}
+
+.fieldsets-wrapper fieldset {
+    flex: 1; /* Make both fieldsets equal width */
+}
+
 /* Settings Dialog Box */
 .settings-dialog {
     position: absolute;
-    width: 260px;
+    width: 500px;
     font-size: 14px;
     padding: 5px;
     z-index: 1001;

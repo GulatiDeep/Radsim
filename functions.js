@@ -55,6 +55,45 @@ function updateHeadingPeriodically() {
 }
 
 
+// Function to gradually adjust altitude towards the target altitude every second
+function updateAltitudeEverySecond() {
+    aircraftBlips.forEach(blip => {
+        // Gradually adjust altitude towards the target altitude
+        const verticalChangePerSecond = blip.verticalClimbDescendRate / 60; // Feet per second (convert climb rate from FPM to FPS)
+        const verticalChangePerUpdate = verticalChangePerSecond; // Vertical change per second
+
+        if (blip.altitude !== blip.targetAltitude) {
+            const altitudeDiff = blip.targetAltitude - blip.altitude; // Calculate altitude difference
+            if (Math.abs(altitudeDiff) <= verticalChangePerUpdate) {
+                blip.altitude = blip.targetAltitude; // Snap to target altitude if close enough
+            } else {
+                blip.altitude += Math.sign(altitudeDiff) * verticalChangePerUpdate; // Gradual altitude change
+            }
+
+            // Update control box and label (you can optionally add this here if needed)
+            updateControlBox(blip);  // to update control box every second
+
+        }
+    });
+
+    // Schedule the next update for every second
+    setTimeout(updateAltitudeEverySecond, 1000); // Update altitude every second
+}
+
+// Function to update altitudeEveryFourSeconds every 4 seconds
+function updateAltitudeEveryFourSeconds() {
+    aircraftBlips.forEach(blip => {
+        // Update the altitudeEveryFourSeconds with the current altitude
+        blip.altitudeEveryFourSeconds = blip.altitude;
+
+        blip.updateLabelInfo();  // Update label info with the new altitudeEveryFourSeconds
+    });
+
+    // Schedule the next update for every 4 seconds
+    setTimeout(updateAltitudeEveryFourSeconds, 4000); // Update altitude every 4 seconds
+}
+
+
 // Function to delete a single aircraft
 function deleteAircraft(blip) {
     const formationCallsign = getFormationCallsign(blip.callsign);
@@ -105,10 +144,10 @@ function deleteAircraft(blip) {
     }
 
     // Delete raw pickup lines
-if (blip.rawPickupLines && Array.isArray(blip.rawPickupLines)) {
-    blip.rawPickupLines.forEach(line => line.remove());
-    blip.rawPickupLines = [];
-}
+    if (blip.rawPickupLines && Array.isArray(blip.rawPickupLines)) {
+        blip.rawPickupLines.forEach(line => line.remove());
+        blip.rawPickupLines = [];
+    }
 
 
     //Removing STCA

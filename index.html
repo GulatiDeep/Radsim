@@ -255,94 +255,141 @@
             <div class="dialog-header" id="settingsDialogHeader">Radar Settings</div>
             <div class="dialog-content">
 
-                <!-- Blip Settings -->
-                <fieldset style="border-radius: 8px;">
-                    <legend style="font-weight: bold;">Blip Settings</legend>
-                    <div class="settings-row">
-                        <div>
-                            <label for="historyDotCountSelect">History Dots</label>
-                            <select id="historyDotCountSelect">
-                                <option value="0">Off</option>
-                                <option value="10">10 dots</option>
-                                <option value="15" selected>15 dots</option>
-                                <option value="20">20 dots</option>
-                                <option value="25">25 dots</option>
-                                <option value="30">30 dots</option>
-                                <option value="35">35 dots</option>
-                                <option value="40">40 dots</option>
-                                <option value="45">45 dots</option>
-                                <option value="50">50 dots</option>
-                            </select>
+                <!-- Group Blip Settings and Transition Level side-by-side -->
+                <div class="fieldsets-wrapper">
+                    <!-- Blip Settings -->
+                    <fieldset style="border-radius: 8px;">
+                        <legend style="font-weight: bold;">Blip Settings</legend>
+                        <div class="settings-row">
+                            <div>
+                                <label for="historyDotCountSelect">History Dots</label>
+                                <select id="historyDotCountSelect">
+                                    <option value="0">Off</option>
+                                    <option value="10">10 dots</option>
+                                    <option value="15" selected>15 dots</option>
+                                    <option value="20">20 dots</option>
+                                    <option value="25">25 dots</option>
+                                    <option value="30">30 dots</option>
+                                    <option value="35">35 dots</option>
+                                    <option value="40">40 dots</option>
+                                    <option value="45">45 dots</option>
+                                    <option value="50">50 dots</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="speedVectorSelect">Speed Vector</label>
+                                <select id="speedVectorSelect">
+                                    <option value="0" selected>Off</option>
+                                    <option value="1">1 min</option>
+                                    <option value="2">2 min</option>
+                                    <option value="3">3 min</option>
+                                    <option value="4">4 min</option>
+                                    <option value="5">5 min</option>
+                                </select>
+                            </div>
                         </div>
-                        <div>
-                            <label for="speedVectorSelect">Speed Vector</label>
-                            <select id="speedVectorSelect">
-                                <option value="0" selected>Off</option>
-                                <option value="1">1 min</option>
-                                <option value="2">2 min</option>
-                                <option value="3">3 min</option>
-                                <option value="4">4 min</option>
-                                <option value="5">5 min</option>
-                            </select>
+                    </fieldset>
+
+                    <!-- Transition Level Settings -->
+                    <fieldset style="border-radius: 8px;">
+                        <legend style="font-weight: bold;">Transition Level</legend>
+                        <div class="settings-row">
+                            <div>
+                                <label for="transitionLevelSelect">Transition Level</label>
+                                <select id="transitionLevelSelect">
+                                    <option value="50">FL 050</option>
+                                    <option value="60">FL 060</option>
+                                    <option value="70">FL 070</option>
+                                    <option value="80">FL 080</option>
+                                    <option value="90">FL 090</option>
+                                    <option value="100">FL 100</option>
+                                    <option value="110">FL 110</option>
+                                    <option value="120">FL 120</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                </fieldset>
-                
-                <!-- STCA Settings -->
-                <fieldset style="border-radius: 8px;">
-                    <legend style="font-weight: bold;">STCA Settings</legend>
-                    <div class="settings-row">
-                        <div>
-                            <label for="horizontalSeparationInput">Horizontal (NM)</label>
-                            <input type="number" id="horizontalSeparationInput" placeholder="H Sep (NM)" value="8">
+                    </fieldset>
+                </div>
+
+                <!-- Group STCA and MSAW side by side -->
+                <div class="fieldsets-wrapper">
+                    <!-- STCA Settings -->
+                    <fieldset style="border-radius: 8px;">
+                        <legend style="font-weight: bold;">STCA Settings</legend>
+                        <div class="settings-row">
+                            <div>
+                                <label for="horizontalSeparationInput">Horizontal (NM)</label>
+                                <input type="number" id="horizontalSeparationInput" placeholder="H Sep (NM)" value="8">
+                            </div>
+                            <div>
+                                <label for="verticalSeparationInput">Vertical (ft)</label>
+                                <input type="number" id="verticalSeparationInput" placeholder="V Sep (ft)" value="1000">
+                            </div>
                         </div>
-                        <div>
-                            <label for="verticalSeparationInput">Vertical (ft)</label>
-                            <input type="number" id="verticalSeparationInput" placeholder="V Sep (ft)" value="1000">
+                        <div class="settings-row">
+                            <div>
+                                <label for="lookaheadSTCAInput">Time (sec)</label>
+                                <input type="number" id="lookaheadSTCAInput" placeholder="Time (sec)" value="120">
+                            </div>
+                            <div class="checkbox-wrapper">
+                                <label for="stcaToggle">Enable STCA</label>
+                                <input type="checkbox" id="stcaToggle">
+
+                            </div>
                         </div>
-                    </div>
-                    <div class="settings-row">
-                        <div>
-                            <label for="lookaheadSTCAInput">Time (sec)</label>
-                            <input type="number" id="lookaheadSTCAInput" placeholder="Time (sec)" value="120">
+                        <div class="settings-row">
+                            <div>
+                                <label for="stcaExcludedHorizontalInput">STCA Airspace Radius (NM)</label>
+                                <input type="number" id="stcaExcludedHorizontalInput" value="10">
+                            </div>
+                            <div>
+                                <label for="stcaExcludedVerticalInput">STCA Airspace Ceiling (ft)</label>
+                                <input type="number" id="stcaExcludedVerticalInput" value="2000">
+                            </div>
                         </div>
-                        <div class="checkbox-wrapper">
-                            <label for="stcaToggle">Enable STCA</label>
-                            <input type="checkbox" id="stcaToggle" checked>
+
+                    </fieldset>
+
+                    <!-- MSAW Settings -->
+                    <fieldset style="border-radius: 8px;">
+                        <legend style="font-weight: bold;">MSAW Settings</legend>
+                        <div class="settings-row">
+                            <div>
+                                <label for="minimumAltitudeInput">Min Safe Alt (ft)</label>
+                                <input type="number" id="minimumAltitudeInput" value="2000">
+                            </div>
+                            <div>
+                                <label>
+                                    <p></p>
+                                </label>
+
+                            </div>
+                        </div>
+                        <div class="settings-row">
+
+                            <div>
+                                <label for="lookaheadMSAWInput">Time (sec)</label>
+                                <input type="number" id="lookaheadMSAWInput" placeholder="Time (sec)" value="120">
+                            </div>
+                            <div class="checkbox-wrapper">
+                                <label for="msawToggle">Enable MSAW</label>
+                                <input type="checkbox" id="msawToggle">
+                            </div>
 
                         </div>
-                    </div>
-                </fieldset>
-
-                <!-- MSAW Settings -->
-                <fieldset style="border-radius: 8px;">
-                    <legend style="font-weight: bold;">MSAW Settings</legend>
-                    <div class="settings-row">
-                        <div>
-                            <label for="minimumAltitudeInput">Min Safe Alt (ft)</label>
-                            <input type="number" id="minimumAltitudeInput" value="2000">
-                        </div>
-                        <div>
-                            <label>
-                                <p></p>
-                            </label>
-
-                        </div>
-                    </div>
-                    <div class="settings-row">
-
-                        <div>
-                            <label for="lookaheadMSAWInput">Time (sec)</label>
-                            <input type="number" id="lookaheadMSAWInput" placeholder="Time (sec)" value="120">
-                        </div>
-                        <div class="checkbox-wrapper">
-                            <label for="msawToggle">Enable MSAW</label>
-                            <input type="checkbox" id="msawToggle" checked>
+                        <div class="settings-row">
+                            <div>
+                                <label for="msawExcludedHorizontalInput">MSAW Airspace Radius (NM)</label>
+                                <input type="number" id="msawExcludedHorizontalInput" value="10">
+                            </div>
+                            <div>
+                                <label for="msawExcludedVerticalInput">MSAW Airspace Ceiling (ft)</label>
+                                <input type="number" id="msawExcludedVerticalInput" value="20000">
+                            </div>
                         </div>
 
-                    </div>
-                </fieldset>
-
+                    </fieldset>
+                </div>
 
                 <!-- Action Buttons -->
                 <div class="settings-actions">

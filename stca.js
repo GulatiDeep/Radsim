@@ -1,10 +1,9 @@
 // Enable or disable STCA globally
-let stcaEnabled = true;
+let stcaEnabled = false;
 
 // Sets to track current conflict pairs
 const predictedConflicts = new Set();
 const actualConflicts = new Set();
-
 
 
 // Separation criteria (STCA thresholds)
@@ -365,138 +364,14 @@ function updateRoaster(key, type, a, b) {
 
 
 
-function removeRoaster(key) {
-    const entry = document.getElementById(`roaster-${key.replace("|", "-")}`);
-    if (entry) entry.remove();
-}
-
-
-
-
 /**
  * Main Short Term Conflict Alert (STCA) check loop.
  * 
  * Runs once every second via setInterval — detects both actual and predicted conflicts,
  * manages conflict sets, updates visuals (halos, roaster), and draws conflict lines.
  */
-function runSTCACheck1() {
-    // Exit early if STCA system is currently disabled
-    if (!stcaEnabled) return;
-
-    // Reset each blip’s STCA state to 'none' before processing this cycle
-    aircraftBlips.forEach(blip => {
-        blip.currentSTCA = "none";
-    });
-
-    // Temporary sets to track new conflicts detected this cycle
-    const newPredicted = new Set();
-    const newActual = new Set();
-
-    // Cache predicted positions for each aircraft at multiple future time intervals
-    // Structure: { callsign: { t: { x, y, altitude } } }
-    const positionCache = {};
-    aircraftBlips.forEach(blip => {
-        positionCache[blip.callsign] = {};
-        for (let t = 0; t <= lookaheadSecondsSTCA; t += 10) {
-            positionCache[blip.callsign][t] = predictPosition(blip, t);
-        }
-    });
-
-    // ========================================
-    // Check for actual conflicts (current state)
-    // ========================================
-    for (let i = 0; i < aircraftBlips.length; i++) {
-        for (let j = i + 1; j < aircraftBlips.length; j++) {
-            const a = aircraftBlips[i];
-            const b = aircraftBlips[j];
-            const key = `${a.callsign}|${b.callsign}`;
-
-            // Skip if both aircraft are in the same formation (same base callsign)
-            if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) {
-                continue; // Both aircraft are in the same formation, skip conflict check
-            }
-
-            if (inhibitedAlerts.has(key)) continue;
-
-            // If actual conflict detected — add to actual set and trigger visual + roaster update
-            if (checkActualConflict(a, b)) {
-                newActual.add(key);
-                triggerActualSTCA(a, b);
-                updateRoaster(key, 'actual', a, b);
-            }
-        }
-    }
-
-    // =============================================
-    // Check for predicted conflicts using cache
-    // =============================================
-    for (let t = 0; t <= lookaheadSecondsSTCA; t += 10) {
-        const conflictsAtTime = checkPredictedConflictsAtTime(t, positionCache);
-
-        // For every predicted conflict pair at time 't'
-        conflictsAtTime.forEach(({ a, b }) => {
-            const key = `${a.callsign}|${b.callsign}`;
-
-            // Skip if both aircraft are in the same formation (same base callsign)
-            if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) {
-                return; // Both aircraft are in the same formation, skip conflict check
-            }
-
-            // Only add to predicted conflicts if it wasn't already flagged as an actual conflict
-            if (!newActual.has(key)) {
-                newPredicted.add(key);
-                triggerPredictedSTCA(a, b);
-                updateRoaster(key, 'predicted', a, b);
-            }
-        });
-    }
-
-    // =============================================
-    // Update global conflict sets for this cycle
-    // =============================================
-    predictedConflicts.clear();
-    newPredicted.forEach(key => predictedConflicts.add(key));
-
-    actualConflicts.clear();
-    newActual.forEach(key => actualConflicts.add(key));
-
-    // ====================================================
-    // Clear halos and roaster entries for resolved conflicts
-    // ====================================================
-    for (let i = 0; i < aircraftBlips.length; i++) {
-        for (let j = i + 1; j < aircraftBlips.length; j++) {
-            const a = aircraftBlips[i];
-            const b = aircraftBlips[j];
-            const key = `${a.callsign}|${b.callsign}`;
-
-            // If pair is not in actual or predicted conflict sets — clear its visuals
-            if (!newActual.has(key) && !newPredicted.has(key)) {
-                clearSTCA(a, b);
-                removeRoaster(key);
-            }
-        }
-    }
-
-    // ========================================
-    // Show or hide the STCA Roaster box as needed
-    // ========================================
-
-    // const roasterBox = document.getElementById("alertRoasterBox");
-    // roasterBox.style.display = (newActual.size + newPredicted.size > 0 || actualMSAWConflicts.size + predictedMSAWConflicts.size > 0) ? "block" : "none";
-    const roasterBox = document.getElementById("alertRoasterBox");
-    roasterBox.style.display = roasterBox.children.length > 0 ? "block" : "none";
-
-
-
-
-    // =============================
-    // Draw updated STCA conflict lines
-    // =============================
-    drawSTCALines();
-}
-
 function runSTCACheck() {
-    if (!stcaEnabled) return;
+    if (!stcaEnabled) return; 
 
     aircraftBlips.forEach(blip => {
         blip.currentSTCA = "none";
@@ -514,42 +389,60 @@ function runSTCACheck() {
     });
 
     // ===== Check for actual conflicts =====
-    for (let i = 0; i < aircraftBlips.length; i++) {
-        for (let j = i + 1; j < aircraftBlips.length; j++) {
-            const a = aircraftBlips[i];
-            const b = aircraftBlips[j];
-            const key = `${a.callsign}|${b.callsign}`;
+for (let i = 0; i < aircraftBlips.length; i++) {
+    for (let j = i + 1; j < aircraftBlips.length; j++) {
+        const a = aircraftBlips[i];
+        const b = aircraftBlips[j];
+        const key = `${a.callsign}|${b.callsign}`;
 
-            if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) continue;
+        // Skip conflict if both aircraft are in the same formation (e.g., leader and wingman)
+        if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) continue;
 
-            if (isInhibited(key)) continue;
+        // ===== 🛡️ New check: Skip conflict if BOTH aircraft are inside the excluded airspace =====
+        if (isInsideSTCAExcludedZone(a) && isInsideSTCAExcludedZone(b)) {
+            continue; // Skip STCA conflict if both aircraft inside STCA exclusion zone
+        }
+        
 
-            if (checkActualConflict(a, b)) {
-                newActual.add(key);
-                triggerActualSTCA(a, b);
-                updateRoaster(key, 'actual', a, b);
-            }
+        // Skip conflict if this pair is currently inhibited
+        if (isInhibited(key)) continue;
+
+        // Check if actual conflict exists between a and b
+        if (checkActualConflict(a, b)) {
+            newActual.add(key);
+            triggerActualSTCA(a, b);
+            updateRoaster(key, 'actual', a, b);
         }
     }
+}
 
-    // ===== Check for predicted conflicts =====
-    for (let t = 0; t <= lookaheadSecondsSTCA; t += 10) {
-        const conflictsAtTime = checkPredictedConflictsAtTime(t, positionCache);
+// ===== Check for predicted conflicts =====
+for (let t = 0; t <= lookaheadSecondsSTCA; t += 10) {
+    const conflictsAtTime = checkPredictedConflictsAtTime(t, positionCache);
 
-        conflictsAtTime.forEach(({ a, b }) => {
-            const key = `${a.callsign}|${b.callsign}`;
+    conflictsAtTime.forEach(({ a, b }) => {
+        const key = `${a.callsign}|${b.callsign}`;
 
-            if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) return;
+        // Skip predicted conflict if both aircraft are in the same formation
+        if (getFormationCallsign(a.callsign) === getFormationCallsign(b.callsign)) return;
 
-            if (!newActual.has(key)) {
-                if (!isInhibited(key)) {
-                    newPredicted.add(key);
-                    triggerPredictedSTCA(a, b);
-                }
-                updateRoaster(key, 'predicted', a, b); // Always update message color
+        // ===== 🛡️ New check: Skip predicted conflict if BOTH aircraft are inside the excluded airspace =====
+        if (isInsideSTCAExcludedZone(a) && isInsideSTCAExcludedZone(b)) {
+            return; // Skip STCA conflict if both aircraft inside STCA exclusion zone
+        }
+        
+
+        // If this pair is not already in actual conflict
+        if (!newActual.has(key)) {
+            if (!isInhibited(key)) {
+                newPredicted.add(key);
+                triggerPredictedSTCA(a, b);
             }
-        });
-    }
+            updateRoaster(key, 'predicted', a, b); // Always update message color
+        }
+    });
+}
+
 
     // ===== Update conflict sets =====
     predictedConflicts.clear();
@@ -628,7 +521,7 @@ function clearSTCA(a, b) {
  *
  * @param {string} key - The conflict pair key in the form "CALLSIGN1|CALLSIGN2"
  */
-function removeRoaster1(key) {
+function removeRoaster(key) {
     // Find the existing roaster entry div by its unique ID
     const entry = document.getElementById(`roaster-${key.replace("|", "-")}`);
 
@@ -646,39 +539,86 @@ function removeRoaster1(key) {
  * @param {string} deletedCallsign - The callsign of the aircraft being removed
  */
 function cleanUpConflictsForDeletedBlip(deletedCallsign) {
-    const affectedBlips = new Set(); // Keep track of other blips involved in conflicts with this one
+    const affectedBlips = new Set();
 
-    // Remove predicted conflicts involving the deleted callsign
-    [...predictedConflicts].forEach(key => {
-        if (key.includes(deletedCallsign)) {
-            const [c1, c2] = key.split("|");
-            const otherCallsign = (c1 === deletedCallsign) ? c2 : c1;
-            affectedBlips.add(otherCallsign); // Record affected partner blip
-            predictedConflicts.delete(key);   // Remove the conflict pair
-            removeRoaster(key);               // Remove from roaster UI
+    function removeConflictSet(conflictSet) {
+        [...conflictSet].forEach(key => {
+            if (key.includes(deletedCallsign)) {
+                const [c1, c2] = key.split("|");
+                const otherCallsign = (c1 === deletedCallsign) ? c2 : c1;
+                affectedBlips.add(otherCallsign);
+                conflictSet.delete(key);
+                removeRoaster(key); // always remove even if inhibited
+            }
+        });
+    }
+
+    function removeMSAWConflictSet(msawSet) {
+        if (msawSet.has(deletedCallsign)) {
+            msawSet.delete(deletedCallsign);
+            removeMSAWRoaster(deletedCallsign); // always remove even if inhibited
         }
-    });
+    }
 
-    // Remove actual conflicts involving the deleted callsign
-    [...actualConflicts].forEach(key => {
-        if (key.includes(deletedCallsign)) {
-            const [c1, c2] = key.split("|");
-            const otherCallsign = (c1 === deletedCallsign) ? c2 : c1;
-            affectedBlips.add(otherCallsign); // Record affected partner blip
-            actualConflicts.delete(key);      // Remove the conflict pair
-            removeRoaster(key);               // Remove from roaster UI
+    function forceRemoveRoasterEntries() {
+        const box = document.getElementById("alertRoasterBox");
+
+        const entries = [...box.querySelectorAll(".roaster-entry")].filter(entry => {
+            const id = entry.id.replace("roaster-", "").replace("-", "|");
+            return id.includes(deletedCallsign);
+        });
+
+        // 🔥 Place the fade-out check BEFORE actually removing
+        if (entries.length === box.querySelectorAll(".roaster-entry").length) {
+            box.classList.add("fade-out");
+            setTimeout(() => {
+                box.style.display = "none";
+                box.classList.remove("fade-out");
+            }, 300);
         }
-    });
 
-    // For every affected blip previously in conflict with the deleted blip
+        entries.forEach(entry => entry.remove());
+
+        // 🛠 New code here:
+        if (!box.querySelector(".roaster-entry")) {
+            box.style.display = "none"; // hide if no entries remain
+        }
+    }
+
+
+    function removeInhibitedAlerts() {
+        [...inhibitedAlerts.keys()].forEach(key => {
+            if (key.includes("|")) {
+                const [c1, c2] = key.split("|");
+                if (c1 === deletedCallsign || c2 === deletedCallsign) {
+                    inhibitedAlerts.delete(key);
+                }
+            } else if (key.startsWith("MSAW|")) {
+                const callsign = key.split("|")[1];
+                if (callsign === deletedCallsign) {
+                    inhibitedAlerts.delete(key);
+                }
+            }
+        });
+    }
+
+    // === Perform cleanup ===
+    removeConflictSet(predictedConflicts);
+    removeConflictSet(actualConflicts);
+    removeMSAWConflictSet(predictedMSAWConflicts);
+    removeMSAWConflictSet(actualMSAWConflicts);
+
+    removeInhibitedAlerts();
+
+    // 🛑 Important step
+    forceRemoveRoasterEntries(); // Remove leftover roaster entries (including inhibited ones)
+
+    // === Update affected blips ===
     affectedBlips.forEach(callsign => {
         const blip = aircraftBlips.find(b => b.callsign === callsign);
         if (blip) {
-            // Check if this blip is still in any conflicts
             const stillInPredicted = [...predictedConflicts].some(key => key.includes(callsign));
             const stillInActual = [...actualConflicts].some(key => key.includes(callsign));
-
-            // If no conflicts remain, hide halo and reset state
             if (!stillInPredicted && !stillInActual && blip.stcaHalo) {
                 blip.stcaHalo.style.display = 'none';
                 blip.currentSTCA = 'none';
@@ -686,7 +626,14 @@ function cleanUpConflictsForDeletedBlip(deletedCallsign) {
             }
         }
     });
+
+    const deletedBlip = aircraftBlips.find(b => b.callsign === deletedCallsign);
+    if (deletedBlip) {
+        if (deletedBlip.stcaHalo) deletedBlip.stcaHalo.style.display = 'none';
+        if (deletedBlip.msawHalo) deletedBlip.msawHalo.style.display = 'none';
+    }
 }
+
 
 
 /**
@@ -698,4 +645,15 @@ function cleanUpConflictsForDeletedBlip(deletedCallsign) {
  */
 setInterval(runSTCACheck, 1000);
 
+
+function isInsideSTCAExcludedZone(blip) {
+    const dx = blip.position.x;
+    const dy = blip.position.y;
+    const horizontalDistance = Math.sqrt(dx * dx + dy * dy);
+
+    return (
+        horizontalDistance <= stcaExcludedVolume.horizontalRadiusNM &&
+        blip.altitude <= stcaExcludedVolume.verticalCeilingFT
+    );
+}
 
