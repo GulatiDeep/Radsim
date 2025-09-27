@@ -8,6 +8,8 @@ Commands for use of Radsim:
 
 --> V4000: To set the rate of climb/descend to 4000 ft per minute
 
+--> ROT3: To set the Rate of Turn to 3 degrees per second. Acceptable values between 1 to 5.
+
 --> S600: To set the speed to 600 knots
 
 --> Del: To delete the aircraft

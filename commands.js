@@ -92,14 +92,13 @@ function propagateCommandToFormation(formationCallsign, command) {
 // Function to process a specific command for an individual aircraft or formation member
 function processCommandForBlip(blip, command) {
     const headingMatch = command.match(/^([LR])(\d{3})$/);
+    const rotMatch = command.match(/^ROT([1-5])$/);
     const speedMatch = command.match(/^S(\d+)$/);
     const altitudeMatch = command.match(/^H(\d{1,3})$/);
     const verticalRateMatch = command.match(/^V(\d+)$/);
     const ssrMatch = command.match(/^SSR([0-7]{4})$/);
 
     let isValidCommand = false; // Track whether the command is valid
-
-    //console.log(`Command "${command}" being executed by C/S ${blip.callsign}.`);
 
     // Handle heading command
     if (headingMatch) {
@@ -121,148 +120,160 @@ function processCommandForBlip(blip, command) {
 
     }
 
+    // Handle ROT command (turn rate)
+    else if (rotMatch) {
+        const rot = parseInt(rotMatch[1], 10);
+        blip.headingChangeRate = rot;   // degrees per second
+        updateStatusBar(`→ ${blip.callsign} Rate of Turn set to ${rot}.`);
+        isValidCommand = true;
+
+        const voiceROT = pronounceAlt(rot);
+        voiceAction = `setting Rate of Turn to, ${voiceROT} degrees per second.`;
+    }
+
+
     // Handle speed command
     else if (speedMatch) {
-        const speed = parseInt(speedMatch[1], 10);
-        blip.setTargetSpeed(speed);
-        updateStatusBar(`→ ${blip.callsign} speed set to ${speed} knots.`);
-        isValidCommand = true;
+    const speed = parseInt(speedMatch[1], 10);
+    blip.setTargetSpeed(speed);
+    updateStatusBar(`→ ${blip.callsign} speed set to ${speed} knots.`);
+    isValidCommand = true;
 
-        const voiceSpeed = pronounceAlt(speed);
-        voiceAction = `setting speed to, ${voiceSpeed} knots.`;
+    const voiceSpeed = pronounceAlt(speed);
+    voiceAction = `setting speed to, ${voiceSpeed} knots.`;
 
+}
+
+
+else if (altitudeMatch) {
+    const altitude = parseInt(altitudeMatch[1], 10) * 100;
+    blip.targetAltitude = altitude;
+    updateStatusBar(`→ Aircraft ${blip.callsign} target altitude set to ${altitude} feet.`);
+    isValidCommand = true;
+
+    const voiceAlt = pronounceAlt(altitude);
+
+    if (blip.altitude < altitude) {
+        voiceAction = `climbing to, ${voiceAlt} feet.`;
+    } else if (blip.altitude > altitude) {
+        voiceAction = `descending to, ${voiceAlt} feet.`;
+    } else {
+        voiceAction = `Maintaining, ${voiceAlt} feet.`;  // Optional case
     }
+}
 
 
-    else if (altitudeMatch) {
-        const altitude = parseInt(altitudeMatch[1], 10) * 100;
-        blip.targetAltitude = altitude;
-        updateStatusBar(`→ Aircraft ${blip.callsign} target altitude set to ${altitude} feet.`);
-        isValidCommand = true;
-    
-        const voiceAlt = pronounceAlt(altitude);
-    
-        if (blip.altitude < altitude) {
-            voiceAction = `climbing to, ${voiceAlt} feet.`;
-        } else if (blip.altitude > altitude) {
-            voiceAction = `descending to, ${voiceAlt} feet.`;
-        } else {
-            voiceAction = `Maintaining, ${voiceAlt} feet.`;  // Optional case
-        }
-    }
-    
+// Handle vertical rate command
+else if (verticalRateMatch) {
+    const rate = parseInt(verticalRateMatch[1], 10);
+    blip.verticalClimbDescendRate = rate;
+    updateStatusBar(`→ Aircraft ${blip.callsign} vertical rate set to ${rate} feet per minute.`);
+    isValidCommand = true;
 
-    // Handle vertical rate command
-    else if (verticalRateMatch) {
-        const rate = parseInt(verticalRateMatch[1], 10);
-        blip.verticalClimbDescendRate = rate;
-        updateStatusBar(`→ Aircraft ${blip.callsign} vertical rate set to ${rate} feet per minute.`);
-        isValidCommand = true;
+    const voiceRate = pronounceAlt(rate);
+    voiceAction = `setting vertical rate to, ${voiceRate} feet per minute.`;
 
-        const voiceRate = pronounceAlt(rate);
-        voiceAction = `setting vertical rate to, ${voiceRate} feet per minute.`;
+}
 
-    }
+// Handle SSR code command
+else if (ssrMatch) {
+    const newSSRCode = ssrMatch[1];
 
-    // Handle SSR code command
-    else if (ssrMatch) {
-        const newSSRCode = ssrMatch[1];
-
-        if (!['7500', '7600', '7700'].includes(newSSRCode)) {
-            const existingSSR = aircraftBlips.find(b => b.ssrCode === newSSRCode);
-            if (existingSSR && newSSRCode !== '0000') {
-                updateStatusBar(`→ Duplicate SSR code. Aircraft ${existingSSR.callsign} already squawking ${existingSSR.ssrCode}`);
-                const voiceSSR = pronounceSSR(newSSRCode);
-                voiceAction = `Duplicate SSR code, ${voiceSSR}.`;
-                return;
-            }
-        }
-
-        blip.setSSRCode(newSSRCode);
-        updateStatusBar(`→ Aircraft ${blip.callsign} SSR code set to 3-${newSSRCode}`);
-        isValidCommand = true;
-
-        if (newSSRCode === '0000') {
-            voiceAction = 'stopping squawk.';
-        } else {
+    if (!['7500', '7600', '7700'].includes(newSSRCode)) {
+        const existingSSR = aircraftBlips.find(b => b.ssrCode === newSSRCode);
+        if (existingSSR && newSSRCode !== '0000') {
+            updateStatusBar(`→ Duplicate SSR code. Aircraft ${existingSSR.callsign} already squawking ${existingSSR.ssrCode}`);
             const voiceSSR = pronounceSSR(newSSRCode);
-            voiceAction = `squawking, ${voiceSSR}.`;
+            voiceAction = `Duplicate SSR code, ${voiceSSR}.`;
+            return;
         }
-        blip.updateLabelInfo(); 
     }
 
-    // Handle report heading command
-    else if (command === "RH") {
-        const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
-        updateStatusBar(`→ Aircraft ${blip.callsign} heading: ${formattedHeading}°`);
-        isValidCommand = true;
+    blip.setSSRCode(newSSRCode);
+    updateStatusBar(`→ Aircraft ${blip.callsign} SSR code set to 3-${newSSRCode}`);
+    isValidCommand = true;
 
-        const voiceHeading = pronounceHeading(formattedHeading);
-        voiceAction = `Heading ${voiceHeading}`;
+    if (newSSRCode === '0000') {
+        voiceAction = 'stopping squawk.';
+    } else {
+        const voiceSSR = pronounceSSR(newSSRCode);
+        voiceAction = `squawking, ${voiceSSR}.`;
     }
+    blip.updateLabelInfo();
+}
 
-    // Handle delete command
-    else if (command === "DEL") {
-        deleteAircraft(blip);
-        updateStatusBar(`→ ${blip.callsign} deleted.`);
-        isValidCommand = true;
+// Handle report heading command
+else if (command === "RH") {
+    const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
+    updateStatusBar(`→ Aircraft ${blip.callsign} heading: ${formattedHeading}°`);
+    isValidCommand = true;
 
-        voiceAction = ` deleted.`;
-    }
+    const voiceHeading = pronounceHeading(formattedHeading);
+    voiceAction = `Heading ${voiceHeading}`;
+}
 
-    // Handle orbit left command
-    else if (command === "OL") {
-        blip.startOrbitLeft();
-        updateStatusBar(`→ ${blip.callsign} orbiting left.`);
-        isValidCommand = true;
+// Handle delete command
+else if (command === "DEL") {
+    deleteAircraft(blip);
+    updateStatusBar(`→ ${blip.callsign} deleted.`);
+    isValidCommand = true;
 
-        voiceAction = `orbiting left.`;
-    }
+    voiceAction = ` deleted.`;
+}
 
-    // Handle orbit right command
-    else if (command === "OR") {
-        blip.startOrbitRight();
-        updateStatusBar(`→ ${blip.callsign} orbiting right.`);
-        isValidCommand = true;
+// Handle orbit left command
+else if (command === "OL") {
+    blip.startOrbitLeft();
+    updateStatusBar(`→ ${blip.callsign} orbiting left.`);
+    isValidCommand = true;
 
-        voiceAction = `orbiting right.`;
+    voiceAction = `orbiting left.`;
+}
 
-    }
+// Handle orbit right command
+else if (command === "OR") {
+    blip.startOrbitRight();
+    updateStatusBar(`→ ${blip.callsign} orbiting right.`);
+    isValidCommand = true;
 
-    // Handle stop turn command
-    else if (command === "ST") {
-        blip.stopTurn();
-        const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
-        updateStatusBar(`→ ${blip.callsign} stopping turn heading: ${formattedHeading}°.`);
-        isValidCommand = true;
+    voiceAction = `orbiting right.`;
 
-        const voiceHeading = pronounceHeading(formattedHeading);
-        voiceAction = `stopping turn, heading ${voiceHeading}`;
+}
 
-    }
+// Handle stop turn command
+else if (command === "ST") {
+    blip.stopTurn();
+    const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
+    updateStatusBar(`→ ${blip.callsign} stopping turn heading: ${formattedHeading}°.`);
+    isValidCommand = true;
 
-    // Handle IDENT command
-    else if (command === "IDENT") {
-        blip.showIdentEffect();  // Call method in AircraftBlip
-        updateStatusBar(`→ Aircraft ${blip.callsign} squawking IDENT.`);
-        isValidCommand = true;
-        voiceAction = 'squawking IDENT';
-    }
-    
+    const voiceHeading = pronounceHeading(formattedHeading);
+    voiceAction = `stopping turn, heading ${voiceHeading}`;
 
-    // Handle invalid command
-    else {
-        updateStatusBar(`→ Invalid command: ${command}.`);
+}
 
-        voiceAction = `Say Again`;
-    }
+// Handle IDENT command
+else if (command === "IDENT") {
+    blip.showIdentEffect();  // Call method in AircraftBlip
+    updateStatusBar(`→ Aircraft ${blip.callsign} squawking IDENT.`);
+    isValidCommand = true;
+    voiceAction = 'squawking IDENT';
+}
 
-    // Update the last command display
-    const lastCommandDisplay = document.getElementById(`lastCommand_${blip.callsign}`);
-    if (lastCommandDisplay) {
-        lastCommandDisplay.textContent = `${command}`;
-        lastCommandDisplay.style.backgroundColor = isValidCommand ? 'lightgreen' : 'lightcoral'; // Green for valid, red for invalid
-    }
+
+// Handle invalid command
+else {
+    updateStatusBar(`→ Invalid command: ${command}.`);
+
+    voiceAction = `Say Again`;
+}
+
+// Update the last command display
+const lastCommandDisplay = document.getElementById(`lastCommand_${blip.callsign}`);
+if (lastCommandDisplay) {
+    lastCommandDisplay.textContent = `${command}`;
+    lastCommandDisplay.style.backgroundColor = isValidCommand ? 'lightgreen' : 'lightcoral'; // Green for valid, red for invalid
+}
 
 }
 

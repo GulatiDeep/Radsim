@@ -33,6 +33,10 @@ function openHelpDialog() {
                     <td style="border: 1px solid #ccc; padding: 8px;">To set the rate of climb/descend to 4000 ft per minute</td>
                 </tr>
                 <tr>
+                    <td style="border: 1px solid #ccc; padding: 8px;">ROT3</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">To set the rate of turn to 3 degrees per second. Acceptable values between 1 to 5.</td>
+                </tr>
+                <tr>
                     <td style="border: 1px solid #ccc; padding: 8px;">S600</td>
                     <td style="border: 1px solid #ccc; padding: 8px;">To set the speed to 600 knots</td>
                 </tr>
