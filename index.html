@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Meta Refresh Fallback (Redirects after 5 seconds) -->
+  <meta http-equiv="refresh" content="5; url=https://gulatideep.github.io/ATS/" />
+  <meta name="description" content="Air Traffic Services training platform has moved to a new address." />
+  <title>Page Moved | ATS Training Platform</title>
+  <link rel="icon" href="assets/atc-tower.svg" type="image/svg+xml" />
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: rgba(15, 23, 42, 0.75);
+      --line: rgba(34, 211, 238, 0.25);
+      --cyan: #22d3ee;
+      --blue: #3b82f6;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --soft: #94a3b8;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.15), transparent 45%),
+        linear-gradient(180deg, #020617 0%, #0f172a 100%);
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      background-image:
+        linear-gradient(rgba(125, 211, 252, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 211, 252, 0.045) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 85%);
+    }
+
+    .container {
+      width: min(680px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .redirect-card {
+      margin-top: 120px;
+      padding: clamp(32px, 5vw, 48px);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      text-align: center;
+    }
+
+    .brand-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      box-shadow: 0 12px 32px rgba(34, 211, 238, 0.3);
+    }
+
+    .brand-icon img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.1);
+      color: #67e8f9;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      line-height: 1.1;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, var(--cyan), #60a5fa, #a5f3fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    p {
+      margin: 12px 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .timer-text {
+      color: var(--soft);
+      font-size: 0.95rem;
+      margin-top: 20px;
+    }
+
+    .timer-text strong {
+      color: var(--cyan);
+    }
+
+    .url-display {
+      margin: 24px 0;
+      padding: 12px 16px;
+      border: 1px dashed rgba(34, 211, 238, 0.3);
+      border-radius: 10px;
+      background: rgba(2, 6, 23, 0.5);
+      color: var(--cyan);
+      font-family: monospace;
+      font-size: 0.95rem;
+      word-break: break-all;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 52px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #06b6d4, #2563eb);
+      color: #ffffff;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 12px 32px rgba(6, 182, 212, 0.3);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px rgba(6, 182, 212, 0.4);
+    }
+
+    footer {
+      padding: 24px 0;
+      text-align: center;
+      color: var(--soft);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+    <div class="redirect-card">
+      <div class="brand-icon">
+        <img src="assets/atc-tower.svg" alt="ATC Tower Icon" />
+      </div>
+
+      <span class="badge">Website Migration Notice</span>
+
+      <h1>We've <span class="gradient-text">Moved!</span></h1>
+
+      <p>
+        The <strong>Air Traffic Services Training Platform</strong> has officially moved to a new home. 
+      </p>
+
+      <div class="url-display">
+        https://gulatideep.github.io/ATS/
+      </div>
+
+      <a class="button" href="https://gulatideep.github.io/ATS/">
+        Go to New Site Now
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+
+      <div class="timer-text">
+        Redirecting automatically in <strong id="countdown">5</strong> seconds...
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>ATS Training Platform • Deep Gulati</p>
+  </footer>
+
+  <script>
+    const targetUrl = "https://gulatideep.github.io/ATS/";
+    let secondsLeft = 5;
+    const countdownEl = document.getElementById("countdown");
+
+    const interval = setInterval(() => {
+      secondsLeft--;
+      if (countdownEl) {
+        countdownEl.textContent = secondsLeft;
+      }
+
+      if (secondsLeft <= 0) {
+        clearInterval(interval);
+        window.location.href = targetUrl;
+      }
+    }, 1000);
+  </script>
+
+</body>
+
+</html>
